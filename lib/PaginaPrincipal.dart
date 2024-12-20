@@ -33,12 +33,14 @@ class _PaginaprincipalEscritorioState extends State<PaginaprincipalEscritorio> {
           height: MediaQuery.of(context).size.height * 0.10,
           color: Color(0xfff6c500),
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(7.0),
             child: Row(
               children: [
                 InkWell(
                   child: Icon(
-                    size: 30.0 * tamanoInicio,
+                    size: MediaQuery.of(context).size.height *
+                        0.07 *
+                        tamanoInicio,
                     Icons.home,
                     color: Colors.red,
                   ),
@@ -62,7 +64,9 @@ class _PaginaprincipalEscritorioState extends State<PaginaprincipalEscritorio> {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.red,
-                        fontSize: 20.0 * tamanoInicio,
+                        fontSize: MediaQuery.of(context).size.height *
+                            0.05 *
+                            tamanoInicio,
                       ),
                     ),
                     onTap: () {
@@ -87,7 +91,9 @@ class _PaginaprincipalEscritorioState extends State<PaginaprincipalEscritorio> {
                   },
                   child: Icon(
                     Icons.login,
-                    size: 30.0 * tamanoIngresar,
+                    size: MediaQuery.of(context).size.height *
+                        0.07 *
+                        tamanoIngresar,
                     color: Colors.red,
                   ),
                 ),
@@ -108,7 +114,9 @@ class _PaginaprincipalEscritorioState extends State<PaginaprincipalEscritorio> {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.red,
-                      fontSize: 20.0 * tamanoIngresar,
+                      fontSize: MediaQuery.of(context).size.height *
+                          0.05 *
+                          tamanoIngresar,
                     ),
                   ),
                 ),
@@ -196,7 +204,7 @@ class _PaginaprincipalMovilState extends State<PaginaprincipalMovil> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Container(
-            padding: EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 0.5),
+            padding: EdgeInsets.fromLTRB(15.0, 0.5, 15.0, 0.5),
             color: Color(0xfff6c500),
             height: MediaQuery.of(context).size.height * 0.10,
             width: double.infinity,
@@ -219,7 +227,7 @@ class _PaginaprincipalMovilState extends State<PaginaprincipalMovil> {
                   },
                   child: Icon(
                     Icons.home,
-                    size: 50.0,
+                    size: MediaQuery.of(context).size.height * 0.07,
                     color: colorHomePresionado,
                   ),
                 ),
@@ -240,7 +248,7 @@ class _PaginaprincipalMovilState extends State<PaginaprincipalMovil> {
                   },
                   child: Icon(
                     Icons.login,
-                    size: 50.0,
+                    size: MediaQuery.of(context).size.height * 0.07,
                     color: colorIngresoPresionado,
                   ),
                 ),
