@@ -20,6 +20,7 @@ class PaginacrudEscritorio extends StatefulWidget {
 
 class _PaginacrudEscritorioState extends State<PaginacrudEscritorio> {
   num tamanoLogout = 1;
+  Color colorTarjeta = Colors.amber;
 
   @override
   Widget build(BuildContext context) {
@@ -53,24 +54,49 @@ class _PaginacrudEscritorioState extends State<PaginacrudEscritorio> {
             ),
           ),
           Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage("lib/assets/menu_wallpaper.jpg"),
+                  fit: BoxFit.fill),
+            ),
             height: MediaQuery.of(context).size.height * 0.90,
             child: Center(
-              child: Card(
-                color: Colors.amber,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.garage,
-                        size: MediaQuery.of(context).size.height * 0.15,
-                      ),
-                      Text(
-                        "Almacén de Taller Automotríz",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      )
-                    ],
+              child: InkWell(
+                onTap: () {
+                  print("taller presionado");
+                },
+                onTapDown: (details) {
+                  setState(() {
+                    colorTarjeta = Colors.amber;
+                  });
+                },
+                onTapUp: (details) {
+                  setState(() {
+                    colorTarjeta = Colors.orange;
+                  });
+                },
+                onHover: (value) {
+                  setState(() {
+                    colorTarjeta = value == true ? Colors.orange : Colors.amber;
+                  });
+                },
+                child: Card(
+                  color: colorTarjeta,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.garage,
+                          size: MediaQuery.of(context).size.height * 0.15,
+                        ),
+                        Text(
+                          "Almacén de Taller Automotríz",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
