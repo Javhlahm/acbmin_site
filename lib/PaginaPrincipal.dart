@@ -123,7 +123,7 @@ class _PaginaprincipalEscritorioState extends State<PaginaprincipalEscritorio> {
             height: MediaQuery.of(context).size.height * 0.90,
             width: double.infinity,
             child: Image.asset(
-              "lib/assets/class_classroom.jpg",
+              "lib/assets/landing.png",
               fit: BoxFit.fill,
             ))
       ],
@@ -251,7 +251,7 @@ class _PaginaprincipalMovilState extends State<PaginaprincipalMovil> {
             height: MediaQuery.of(context).size.height * 0.90,
             width: double.infinity,
             child: Image.asset(
-              "lib/assets/class_classroom.jpg",
+              "lib/assets/landing.png",
               fit: BoxFit.cover,
             ),
           )
