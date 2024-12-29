@@ -1,4 +1,4 @@
-import 'package:acbmin_site/PaginaCRUD.dart';
+import 'package:acbmin_site/PaginaMENU.dart';
 import 'package:flutter/material.dart';
 
 class Paginaprincipal extends StatelessWidget {
@@ -174,7 +174,7 @@ mostrarDialogoIngreso(context) {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => Paginacrud()));
+                                      builder: (context) => Paginamenu()));
                             },
                             child: Text("Ingresar"))
                       ],

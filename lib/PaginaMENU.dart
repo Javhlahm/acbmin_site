@@ -1,7 +1,8 @@
+import 'package:acbmin_site/PaginaInventarioTaller.dart';
 import 'package:flutter/material.dart';
 
-class Paginacrud extends StatelessWidget {
-  const Paginacrud({super.key});
+class Paginamenu extends StatelessWidget {
+  const Paginamenu({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +64,10 @@ class _PaginacrudEscritorioState extends State<PaginacrudEscritorio> {
             child: Center(
               child: InkWell(
                 onTap: () {
-                  print("taller presionado");
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Paginainventariotaller()));
                 },
                 onTapDown: (details) {
                   setState(() {
@@ -164,7 +168,6 @@ void funcionSalir(context) {
               ),
             ),
           ));
-  ;
 }
 
 class PaginacrudMovil extends StatefulWidget {
