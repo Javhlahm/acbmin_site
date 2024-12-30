@@ -25,7 +25,12 @@ class PaginaInventarioTallerEscritorio extends StatefulWidget {
 
 class _PaginState extends State<PaginaInventarioTallerEscritorio> {
   late Future<List<Item>> listaItems;
-  num tamanoLogout = 1;
+  Color colorHoverEntradasSalidas = Colors.black;
+  Color colorHoverHistorial = Colors.black;
+  Color colorHoverRegresar = Colors.black;
+  Color colorHoverActualizar = Colors.black;
+  Color colorHoverExportar = Colors.black;
+  String? serieSeleccionada;
   var scaffoldkey = GlobalKey<ScaffoldState>();
 
   @override
@@ -56,7 +61,9 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
               title: Text("Ingreso"),
             ),
             ListTile(
-              onTap: () {},
+              onTap: () {
+                dialogoConfirmacionSalida(context, serieSeleccionada);
+              },
               title: Text("Salida"),
             )
           ],
@@ -66,7 +73,7 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Container(
-            padding: EdgeInsets.all(7.0),
+            padding: EdgeInsets.fromLTRB(15.0, 7.0, 25.0, 7.0),
             height: MediaQuery.of(context).size.height * 0.10,
             color: Color(0xfff6c500),
             child: Row(
@@ -78,32 +85,90 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
                   },
                   onHover: (value) {
                     setState(() {
-                      tamanoLogout = value == true ? 1.15 : 1;
+                      colorHoverRegresar =
+                          value == true ? Colors.red : Colors.black;
                     });
                   },
                   child: Icon(
                     Icons.arrow_back,
-                    size: MediaQuery.of(context).size.height *
-                        0.07 *
-                        tamanoLogout,
+                    color: colorHoverRegresar,
+                    size: 30.0,
                   ),
                 ),
                 Expanded(child: Container()),
+                Text(
+                  "ACBMIN: TALLER DE AUTOS--ALMACÉN",
+                  style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 25.0),
+                ),
+                Expanded(child: Container()),
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      listaItems = obtenerItems();
+                    });
+                  },
+                  onHover: (value) {
+                    setState(() {
+                      colorHoverActualizar =
+                          value == true ? Colors.red : Colors.black;
+                    });
+                  },
+                  child: Icon(
+                    Icons.refresh_sharp,
+                    color: colorHoverActualizar,
+                    size: 30.0,
+                  ),
+                ),
+                Padding(padding: EdgeInsets.only(left: 15.0)),
                 InkWell(
                     onTap: () {
                       scaffoldkey.currentState!.openEndDrawer();
                     },
                     onHover: (value) {
                       setState(() {
-                        tamanoLogout = value == true ? 1.15 : 1;
+                        colorHoverEntradasSalidas =
+                            value == true ? Colors.red : Colors.black;
                       });
                     },
-                    child: Icon(
-                      Icons.menu,
-                      size: MediaQuery.of(context).size.height *
-                          0.07 *
-                          tamanoLogout,
-                    ))
+                    child: Text(
+                      "Ingreso y Salida de Material",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: colorHoverEntradasSalidas),
+                    )),
+                Padding(padding: EdgeInsets.only(left: 20.0)),
+                InkWell(
+                    onTap: () {},
+                    onHover: (value) {
+                      setState(() {
+                        colorHoverHistorial =
+                            value == true ? Colors.red : Colors.black;
+                      });
+                    },
+                    child: Text(
+                      "Historial",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: colorHoverHistorial),
+                    )),
+                Padding(padding: EdgeInsets.only(left: 20.0)),
+                InkWell(
+                    onTap: () {},
+                    onHover: (value) {
+                      setState(() {
+                        colorHoverExportar =
+                            value == true ? Colors.red : Colors.black;
+                      });
+                    },
+                    child: Text(
+                      "Exportar",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: colorHoverExportar),
+                    )),
               ],
             ),
           ),
@@ -124,18 +189,23 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
                     height: MediaQuery.of(context).size.height * 0.9,
                     width: double.infinity,
                     child: PlutoGrid(
+                        mode: PlutoGridMode.selectWithOneTap,
                         configuration: PlutoGridConfiguration(
                           style: PlutoGridStyleConfig(
                               enableGridBorderShadow: true,
                               enableRowColorAnimation: true),
                         ),
+                        onSelected: (event) {
+                          serieSeleccionada = event.row!.cells['serie']?.value;
+                        },
                         columns: [
                           PlutoColumn(
-                              title: "#",
-                              field: "id_prod",
-                              type: PlutoColumnType.number(),
-                              readOnly: true,
-                              enableColumnDrag: false),
+                            title: "#",
+                            field: "id_prod",
+                            type: PlutoColumnType.number(),
+                            readOnly: true,
+                            enableColumnDrag: false,
+                          ),
                           PlutoColumn(
                               title: "Producto",
                               field: "nombre",
@@ -251,4 +321,41 @@ Future<List<Item>> obtenerItems() async {
   } else {
     throw Exception('Error al obtener productos: ${response.statusCode}');
   }
+}
+
+dialogoConfirmacionSalida(context, [serie]) {
+  showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+            title: Text(
+              "Serie",
+              textAlign: TextAlign.center,
+            ),
+            insetPadding: EdgeInsets.symmetric(horizontal: 100, vertical: 50),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10.0))),
+            content: Container(
+              height: 200,
+              child: Center(
+                child: Column(
+                  children: [
+                    Form(
+                        child: Column(
+                      children: [
+                        TextFormField(
+                          decoration: InputDecoration(hintText: "Serie"),
+                          initialValue: serie,
+                        ),
+                        SizedBox(
+                          height: 20.0,
+                        ),
+                        ElevatedButton(
+                            onPressed: () {}, child: Text("Continuar"))
+                      ],
+                    )),
+                  ],
+                ),
+              ),
+            ),
+          ));
 }

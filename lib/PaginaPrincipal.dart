@@ -21,60 +21,59 @@ class PaginaprincipalEscritorio extends StatefulWidget {
 }
 
 class _PaginaprincipalEscritorioState extends State<PaginaprincipalEscritorio> {
-  num tamanoInicio = 1;
-  num tamanoIngresar = 1;
+  Color colorHoverHome = Colors.black;
+  Color colorHoverIngreso = Colors.black;
 
   @override
   Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.sizeOf(context).height;
+    double screenWidth = MediaQuery.sizeOf(context).width;
+
     return Scaffold(
         body: Column(
       children: [
         Container(
-          height: MediaQuery.of(context).size.height * 0.10,
+          height: screenHeight * 0.10,
+          width: screenWidth,
           color: Color(0xfff6c500),
           child: Padding(
-            padding: const EdgeInsets.all(7.0),
+            padding: EdgeInsets.all(screenHeight * 0.01),
             child: Row(
               children: [
                 InkWell(
                   child: Icon(
-                    size: MediaQuery.of(context).size.height *
-                        0.07 *
-                        tamanoInicio,
+                    size: screenHeight * 0.07,
                     Icons.home,
-                    color: Colors.red,
+                    color: colorHoverHome,
                   ),
                   onTap: () {
                     setState(() {});
                   },
                   onHover: (value) {
                     setState(() {
-                      tamanoInicio = value == true ? 1.15 : 1;
+                      colorHoverHome = value ? Colors.red : Colors.black;
                     });
                   },
                 ),
                 SizedBox(
-                  width: 10.0,
+                  width: screenWidth * 0.02,
                 ),
                 Padding(
-                  padding: EdgeInsets.only(top: 5.0),
+                  padding: EdgeInsets.only(top: screenHeight * 0.005),
                   child: InkWell(
                     child: Text(
                       "Inicio",
                       style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
-                        fontSize: MediaQuery.of(context).size.height *
-                            0.05 *
-                            tamanoInicio,
-                      ),
+                          fontWeight: FontWeight.bold,
+                          color: colorHoverHome,
+                          fontSize: screenHeight * 0.05),
                     ),
                     onTap: () {
                       setState(() {});
                     },
                     onHover: (value) {
                       setState(() {
-                        tamanoInicio = value == true ? 1.15 : 1;
+                        colorHoverHome = value ? Colors.red : Colors.black;
                       });
                     },
                   ),
@@ -86,19 +85,17 @@ class _PaginaprincipalEscritorioState extends State<PaginaprincipalEscritorio> {
                   },
                   onHover: (value) {
                     setState(() {
-                      tamanoIngresar = value == true ? 1.15 : 1;
+                      colorHoverIngreso = value ? Colors.red : Colors.black;
                     });
                   },
                   child: Icon(
                     Icons.login,
-                    size: MediaQuery.of(context).size.height *
-                        0.07 *
-                        tamanoIngresar,
-                    color: Colors.red,
+                    size: screenHeight * 0.07,
+                    color: colorHoverIngreso,
                   ),
                 ),
                 SizedBox(
-                  width: 10.0,
+                  width: screenWidth * 0.02,
                 ),
                 InkWell(
                   onTap: () {
@@ -106,29 +103,27 @@ class _PaginaprincipalEscritorioState extends State<PaginaprincipalEscritorio> {
                   },
                   onHover: (value) {
                     setState(() {
-                      tamanoIngresar = value == true ? 1.15 : 1;
+                      colorHoverIngreso = value ? Colors.red : Colors.black;
                     });
                   },
                   child: Text(
                     "Iniciar Sesión",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.red,
-                      fontSize: MediaQuery.of(context).size.height *
-                          0.05 *
-                          tamanoIngresar,
+                      color: colorHoverIngreso,
+                      fontSize: screenHeight * 0.05,
                     ),
                   ),
                 ),
                 SizedBox(
-                  width: 50.0,
+                  width: screenWidth * 0.05,
                 )
               ],
             ),
           ),
         ),
         Container(
-            height: MediaQuery.of(context).size.height * 0.90,
+            height: screenHeight * 0.90,
             width: double.infinity,
             child: Image.asset(
               "lib/assets/landing.png",

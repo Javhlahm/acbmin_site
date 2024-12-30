@@ -21,7 +21,8 @@ class PaginacrudEscritorio extends StatefulWidget {
 
 class _PaginacrudEscritorioState extends State<PaginacrudEscritorio> {
   num tamanoLogout = 1;
-  Color colorTarjeta = Colors.amber;
+  Color colorCardTaller = Colors.amber;
+  Color colorCardUsuarios = Colors.amber;
 
   @override
   Widget build(BuildContext context) {
@@ -35,21 +36,34 @@ class _PaginacrudEscritorioState extends State<PaginacrudEscritorio> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                InkWell(
-                  child: Icon(
-                    Icons.logout_sharp,
-                    size: MediaQuery.of(context).size.height *
-                        0.07 *
-                        tamanoLogout,
-                  ),
-                  onTap: () {
-                    funcionSalir(context);
-                  },
-                  onHover: (value) {
-                    setState(() {
-                      tamanoLogout = value == true ? 1.15 : 1;
-                    });
-                  },
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    InkWell(
+                      child: Icon(
+                        Icons.logout_sharp,
+                        size: MediaQuery.of(context).size.height *
+                            0.07 *
+                            tamanoLogout,
+                      ),
+                      onTap: () {
+                        funcionSalir(context);
+                      },
+                      onHover: (value) {
+                        setState(() {
+                          tamanoLogout = value == true ? 1.15 : 1;
+                        });
+                      },
+                    ),
+                    Text(
+                      "ACBMIN -- OPCIONES",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 25.0),
+                    )
+                  ],
                 )
               ],
             ),
@@ -62,47 +76,93 @@ class _PaginacrudEscritorioState extends State<PaginacrudEscritorio> {
             ),
             height: MediaQuery.of(context).size.height * 0.90,
             child: Center(
-              child: InkWell(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => Paginainventariotaller()));
-                },
-                onTapDown: (details) {
-                  setState(() {
-                    colorTarjeta = const Color.fromARGB(255, 198, 121, 4);
-                  });
-                },
-                onTapUp: (details) {
-                  setState(() {
-                    colorTarjeta = Colors.orange;
-                  });
-                },
-                onHover: (value) {
-                  setState(() {
-                    colorTarjeta = value == true ? Colors.orange : Colors.amber;
-                  });
-                },
-                child: Card(
-                  color: colorTarjeta,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.garage,
-                          size: MediaQuery.of(context).size.height * 0.15,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Paginainventariotaller()));
+                    },
+                    onTapDown: (details) {
+                      setState(() {
+                        colorCardTaller =
+                            const Color.fromARGB(255, 198, 121, 4);
+                      });
+                    },
+                    onTapUp: (details) {
+                      setState(() {
+                        colorCardTaller = Colors.orange;
+                      });
+                    },
+                    onHover: (value) {
+                      setState(() {
+                        colorCardTaller =
+                            value == true ? Colors.orange : Colors.amber;
+                      });
+                    },
+                    child: Card(
+                      color: colorCardTaller,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.garage,
+                              size: MediaQuery.of(context).size.height * 0.15,
+                            ),
+                            Text(
+                              "Almacén de Taller Automotríz",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            )
+                          ],
                         ),
-                        Text(
-                          "Almacén de Taller Automotríz",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        )
-                      ],
+                      ),
                     ),
                   ),
-                ),
+                  InkWell(
+                    onTap: () {},
+                    onTapDown: (details) {
+                      setState(() {
+                        colorCardUsuarios =
+                            const Color.fromARGB(255, 198, 121, 4);
+                      });
+                    },
+                    onTapUp: (details) {
+                      setState(() {
+                        colorCardUsuarios = Colors.orange;
+                      });
+                    },
+                    onHover: (value) {
+                      setState(() {
+                        colorCardUsuarios =
+                            value == true ? Colors.orange : Colors.amber;
+                      });
+                    },
+                    child: Card(
+                      color: colorCardUsuarios,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.supervised_user_circle,
+                              size: MediaQuery.of(context).size.height * 0.15,
+                            ),
+                            Text(
+                              "Control de Acceso",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           )
