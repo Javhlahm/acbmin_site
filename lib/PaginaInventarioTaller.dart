@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:acbmin_site/entity/Item.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:http/http.dart' as http;
 
@@ -12,7 +13,7 @@ class Paginainventariotaller extends StatelessWidget {
   Widget build(BuildContext context) {
     return MediaQuery.of(context).size.width > 800
         ? PaginaInventarioTallerEscritorio()
-        : PaginaInventarioTallerMovil();
+        : PaginaInventarioTallerEscritorio();
   }
 }
 
@@ -42,6 +43,9 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
 
   @override
   Widget build(BuildContext context) {
+    var landscape =
+        ScreenUtil().orientation == Orientation.landscape ? true : false;
+
     return Scaffold(
       key: scaffoldkey,
       endDrawer: Drawer(
@@ -53,18 +57,19 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
                 child: Center(
                   child: Text(
                     "Transacciones",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 30.0.dg),
                   ),
                 )),
             ListTile(
               onTap: () {},
-              title: Text("Ingreso"),
+              title: Text("Ingreso", style: TextStyle(fontSize: 25.0.dg)),
             ),
             ListTile(
               onTap: () {
                 dialogoConfirmacionSalida(context, serieSeleccionada);
               },
-              title: Text("Salida"),
+              title: Text("Salida", style: TextStyle(fontSize: 25.0.dg)),
             )
           ],
         ),
@@ -73,7 +78,7 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Container(
-            padding: EdgeInsets.fromLTRB(15.0, 7.0, 25.0, 7.0),
+            padding: EdgeInsets.fromLTRB(15.0, 7.0, 25.0, 7.0).w,
             height: MediaQuery.of(context).size.height * 0.10,
             color: Color(0xfff6c500),
             child: Row(
@@ -92,7 +97,7 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
                   child: Icon(
                     Icons.arrow_back,
                     color: colorHoverRegresar,
-                    size: 30.0,
+                    size: landscape ? 0.07.sh : 0.03.sh,
                   ),
                 ),
                 Expanded(child: Container()),
@@ -101,7 +106,7 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
                   style: TextStyle(
                       color: Colors.red,
                       fontWeight: FontWeight.bold,
-                      fontSize: 25.0),
+                      fontSize: 25.0.dg),
                 ),
                 Expanded(child: Container()),
                 InkWell(
@@ -119,10 +124,10 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
                   child: Icon(
                     Icons.refresh_sharp,
                     color: colorHoverActualizar,
-                    size: 30.0,
+                    size: landscape ? 0.07.sh : 0.03.sh,
                   ),
                 ),
-                Padding(padding: EdgeInsets.only(left: 15.0)),
+                Padding(padding: EdgeInsets.only(left: 15.0.w)),
                 InkWell(
                     onTap: () {
                       scaffoldkey.currentState!.openEndDrawer();
@@ -133,13 +138,16 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
                             value == true ? Colors.red : Colors.black;
                       });
                     },
-                    child: Text(
-                      "Ingreso y Salida de Material",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: colorHoverEntradasSalidas),
-                    )),
-                Padding(padding: EdgeInsets.only(left: 20.0)),
+                    child: landscape
+                        ? Text(
+                            "Ingreso y Salida de Material",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: colorHoverEntradasSalidas,
+                                fontSize: 15.0.dg),
+                          )
+                        : Icon(Icons.storage)),
+                Padding(padding: EdgeInsets.only(left: 20.0.w)),
                 InkWell(
                     onTap: () {},
                     onHover: (value) {
@@ -148,13 +156,16 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
                             value == true ? Colors.red : Colors.black;
                       });
                     },
-                    child: Text(
-                      "Historial",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: colorHoverHistorial),
-                    )),
-                Padding(padding: EdgeInsets.only(left: 20.0)),
+                    child: landscape
+                        ? Text(
+                            "Historial",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: colorHoverHistorial,
+                                fontSize: 15.0.dg),
+                          )
+                        : Icon(Icons.history)),
+                Padding(padding: EdgeInsets.only(left: 20.0.w)),
                 InkWell(
                     onTap: () {},
                     onHover: (value) {
@@ -163,12 +174,15 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
                             value == true ? Colors.red : Colors.black;
                       });
                     },
-                    child: Text(
-                      "Exportar",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: colorHoverExportar),
-                    )),
+                    child: landscape
+                        ? Text(
+                            "Exportar",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: colorHoverExportar,
+                                fontSize: 15.0.dg),
+                          )
+                        : Icon(Icons.import_export)),
               ],
             ),
           ),
@@ -186,7 +200,7 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
                     );
                   }
                   return Container(
-                    height: MediaQuery.of(context).size.height * 0.9,
+                    height: 0.9.sh,
                     width: double.infinity,
                     child: PlutoGrid(
                         mode: PlutoGridMode.selectWithOneTap,
@@ -327,34 +341,33 @@ dialogoConfirmacionSalida(context, [serie]) {
   showDialog(
       context: context,
       builder: (context) => AlertDialog(
-            title: Text(
-              "Serie",
-              textAlign: TextAlign.center,
-            ),
-            insetPadding: EdgeInsets.symmetric(horizontal: 100, vertical: 50),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10.0))),
-            content: Container(
-              height: 200,
-              child: Center(
-                child: Column(
-                  children: [
-                    Form(
-                        child: Column(
-                      children: [
-                        TextFormField(
-                          decoration: InputDecoration(hintText: "Serie"),
-                          initialValue: serie,
-                        ),
-                        SizedBox(
-                          height: 20.0,
-                        ),
-                        ElevatedButton(
-                            onPressed: () {}, child: Text("Continuar"))
-                      ],
-                    )),
-                  ],
-                ),
+            title: Text("Serie",
+                textAlign: TextAlign.center,
+                style:
+                    TextStyle(fontSize: 0.03.sh, fontWeight: FontWeight.bold)),
+            insetPadding:
+                EdgeInsets.symmetric(horizontal: 0.1.sw, vertical: 0.20.sh),
+            content: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Form(
+                      child: Column(
+                    children: [
+                      TextFormField(
+                        decoration: InputDecoration(hintText: "Serie"),
+                        initialValue: serie,
+                      ),
+                      Padding(padding: EdgeInsets.only(top: 10.h)),
+                      ElevatedButton(
+                          onPressed: () {},
+                          child: Text("Continuar",
+                              style: TextStyle(
+                                  fontSize: 0.025.sh,
+                                  fontWeight: FontWeight.bold)))
+                    ],
+                  )),
+                ],
               ),
             ),
           ));

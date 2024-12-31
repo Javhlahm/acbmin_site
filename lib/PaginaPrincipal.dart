@@ -1,48 +1,49 @@
 import 'package:acbmin_site/PaginaMENU.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Paginaprincipal extends StatelessWidget {
   const Paginaprincipal({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MediaQuery.of(context).size.width > 800
-        ? PaginaprincipalEscritorio()
-        : PaginaprincipalMovil();
+    return MediaQuery.of(context).orientation == Orientation.landscape
+        ? PaginaPrincipalHorizontal()
+        : PaginaPrincipalHorizontal();
   }
 }
 
-class PaginaprincipalEscritorio extends StatefulWidget {
-  const PaginaprincipalEscritorio({super.key});
+class PaginaPrincipalHorizontal extends StatefulWidget {
+  const PaginaPrincipalHorizontal({super.key});
 
   @override
-  State<PaginaprincipalEscritorio> createState() =>
+  State<PaginaPrincipalHorizontal> createState() =>
       _PaginaprincipalEscritorioState();
 }
 
-class _PaginaprincipalEscritorioState extends State<PaginaprincipalEscritorio> {
+class _PaginaprincipalEscritorioState extends State<PaginaPrincipalHorizontal> {
   Color colorHoverHome = Colors.black;
   Color colorHoverIngreso = Colors.black;
 
   @override
   Widget build(BuildContext context) {
-    double screenHeight = MediaQuery.sizeOf(context).height;
-    double screenWidth = MediaQuery.sizeOf(context).width;
+    var landscape =
+        ScreenUtil().orientation == Orientation.landscape ? true : false;
 
     return Scaffold(
         body: Column(
       children: [
         Container(
-          height: screenHeight * 0.10,
-          width: screenWidth,
+          height: 0.10.sh,
+          width: 1.sw,
           color: Color(0xfff6c500),
           child: Padding(
-            padding: EdgeInsets.all(screenHeight * 0.01),
+            padding: EdgeInsets.all(0.01.sh),
             child: Row(
               children: [
                 InkWell(
                   child: Icon(
-                    size: screenHeight * 0.07,
+                    size: 0.07.sh,
                     Icons.home,
                     color: colorHoverHome,
                   ),
@@ -56,27 +57,30 @@ class _PaginaprincipalEscritorioState extends State<PaginaprincipalEscritorio> {
                   },
                 ),
                 SizedBox(
-                  width: screenWidth * 0.02,
+                  width: 0.02.sw,
                 ),
                 Padding(
-                  padding: EdgeInsets.only(top: screenHeight * 0.005),
-                  child: InkWell(
-                    child: Text(
-                      "Inicio",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: colorHoverHome,
-                          fontSize: screenHeight * 0.05),
-                    ),
-                    onTap: () {
-                      setState(() {});
-                    },
-                    onHover: (value) {
-                      setState(() {
-                        colorHoverHome = value ? Colors.red : Colors.black;
-                      });
-                    },
-                  ),
+                  padding: EdgeInsets.only(top: 0.005.sh),
+                  child: landscape
+                      ? InkWell(
+                          child: Text(
+                            "Inicio",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: colorHoverHome,
+                                fontSize: 30.dg),
+                          ),
+                          onTap: () {
+                            setState(() {});
+                          },
+                          onHover: (value) {
+                            setState(() {
+                              colorHoverHome =
+                                  value ? Colors.red : Colors.black;
+                            });
+                          },
+                        )
+                      : null,
                 ),
                 Expanded(child: Container()),
                 InkWell(
@@ -90,45 +94,48 @@ class _PaginaprincipalEscritorioState extends State<PaginaprincipalEscritorio> {
                   },
                   child: Icon(
                     Icons.login,
-                    size: screenHeight * 0.07,
+                    size: 0.07.sh,
                     color: colorHoverIngreso,
                   ),
                 ),
                 SizedBox(
-                  width: screenWidth * 0.02,
+                  width: 0.02.sw,
                 ),
-                InkWell(
-                  onTap: () {
-                    mostrarDialogoIngreso(context);
-                  },
-                  onHover: (value) {
-                    setState(() {
-                      colorHoverIngreso = value ? Colors.red : Colors.black;
-                    });
-                  },
-                  child: Text(
-                    "Iniciar Sesión",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: colorHoverIngreso,
-                      fontSize: screenHeight * 0.05,
-                    ),
-                  ),
-                ),
+                landscape
+                    ? InkWell(
+                        onTap: () {
+                          mostrarDialogoIngreso(context);
+                        },
+                        onHover: (value) {
+                          setState(() {
+                            colorHoverIngreso =
+                                value ? Colors.red : Colors.black;
+                          });
+                        },
+                        child: Text(
+                          "Iniciar Sesión",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: colorHoverIngreso,
+                            fontSize: 30.dg,
+                          ),
+                        ),
+                      )
+                    : Container(),
                 SizedBox(
-                  width: screenWidth * 0.05,
+                  width: 0.05.sw,
                 )
               ],
             ),
           ),
         ),
         Container(
-            height: screenHeight * 0.90,
-            width: double.infinity,
-            child: Image.asset(
-              "lib/assets/landing.png",
-              fit: BoxFit.fill,
-            ))
+            height: 0.90.sh,
+            width: 1.sw,
+            child: Image.asset("lib/assets/landing.png",
+                fit: ScreenUtil().orientation == Orientation.landscape
+                    ? BoxFit.fill
+                    : BoxFit.fitHeight))
       ],
     ));
   }
@@ -138,128 +145,55 @@ mostrarDialogoIngreso(context) {
   showDialog(
       context: context,
       builder: (context) => AlertDialog(
-            insetPadding: EdgeInsets.symmetric(horizontal: 100, vertical: 50),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10.0))),
-            title: Text(
-              "Ingresar",
-              textAlign: TextAlign.center,
-            ),
-            content: Container(
-              height: 200,
-              child: Center(
+            scrollable: true,
+            insetPadding:
+                EdgeInsets.symmetric(horizontal: 0.1.sw, vertical: 0.1.sh),
+            title: Text("Ingresar",
+                textAlign: TextAlign.center,
+                style:
+                    TextStyle(fontSize: 0.03.sh, fontWeight: FontWeight.bold)),
+            content: Form(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Form(
-                        child: Column(
-                      children: [
-                        TextFormField(
-                          decoration: InputDecoration(hintText: "Usuario"),
-                        ),
-                        TextFormField(
-                          obscureText: true,
-                          decoration: InputDecoration(hintText: "Contraseña"),
-                        ),
-                        SizedBox(
-                          height: 20.0,
-                        ),
-                        ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => Paginamenu()));
-                            },
-                            child: Text("Ingresar"))
-                      ],
-                    ))
-                  ],
-                ),
-              ),
-            ),
-          ));
-}
-
-class PaginaprincipalMovil extends StatefulWidget {
-  const PaginaprincipalMovil({super.key});
-
-  @override
-  State<PaginaprincipalMovil> createState() => _PaginaprincipalMovilState();
-}
-
-class _PaginaprincipalMovilState extends State<PaginaprincipalMovil> {
-  Color? colorHomePresionado;
-  Color? colorIngresoPresionado;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Container(
-            padding: EdgeInsets.fromLTRB(15.0, 0.5, 15.0, 0.5),
-            color: Color(0xfff6c500),
-            height: MediaQuery.of(context).size.height * 0.10,
-            width: double.infinity,
-            child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                InkWell(
-                  onTap: () {
-                    setState(() {});
-                  },
-                  onTapDown: (details) {
-                    setState(() {
-                      colorHomePresionado = Colors.red;
-                    });
-                  },
-                  onTapUp: (details) {
-                    setState(() {
-                      colorHomePresionado = Colors.black;
-                    });
-                  },
-                  child: Icon(
-                    Icons.home,
-                    size: MediaQuery.of(context).size.height * 0.07,
-                    color: colorHomePresionado,
+                Container(
+                  height: 0.09.sh,
+                  width: 0.3.sw,
+                  child: TextFormField(
+                    style: TextStyle(fontSize: 0.04.sh),
+                    decoration: InputDecoration(
+                        contentPadding: EdgeInsets.all(10.h),
+                        hintText: "Usuario",
+                        hintStyle: TextStyle(fontSize: 0.02.sh)),
                   ),
                 ),
-                Expanded(child: Container()),
-                GestureDetector(
-                  onTap: () {
-                    mostrarDialogoIngreso(context);
-                  },
-                  onTapDown: (details) {
-                    setState(() {
-                      colorIngresoPresionado = Colors.red;
-                    });
-                  },
-                  onTapUp: (details) {
-                    setState(() {
-                      colorIngresoPresionado = Colors.black;
-                    });
-                  },
-                  child: Icon(
-                    Icons.login,
-                    size: MediaQuery.of(context).size.height * 0.07,
-                    color: colorIngresoPresionado,
+                Container(
+                  height: 0.09.sh,
+                  width: 0.3.sw,
+                  child: TextFormField(
+                    style: TextStyle(fontSize: 0.04.sh),
+                    obscureText: true,
+                    decoration: InputDecoration(
+                        contentPadding: EdgeInsets.all(10.h),
+                        hintText: "Contraseña",
+                        hintStyle: TextStyle(fontSize: 0.02.sh)),
                   ),
                 ),
+                SizedBox(
+                  height: 0.02.sh,
+                ),
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Paginamenu()));
+                    },
+                    child: Text("Ingresar",
+                        style: TextStyle(
+                            fontSize: 0.025.sh, fontWeight: FontWeight.bold)))
               ],
-            ),
-          ),
-          Container(
-            height: MediaQuery.of(context).size.height * 0.90,
-            width: double.infinity,
-            child: Image.asset(
-              "lib/assets/landing.png",
-              fit: BoxFit.cover,
-            ),
-          )
-        ],
-      ),
-    );
-  }
+            )),
+          ));
 }

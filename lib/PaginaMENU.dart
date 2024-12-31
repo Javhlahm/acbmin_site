@@ -1,25 +1,26 @@
 import 'package:acbmin_site/PaginaInventarioTaller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Paginamenu extends StatelessWidget {
   const Paginamenu({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MediaQuery.of(context).size.width > 800
-        ? PaginacrudEscritorio()
-        : PaginacrudMovil();
+    return MediaQuery.of(context).orientation == Orientation.landscape
+        ? PaginaMenuHorizontal()
+        : PaginaMenuHorizontal();
   }
 }
 
-class PaginacrudEscritorio extends StatefulWidget {
-  const PaginacrudEscritorio({super.key});
+class PaginaMenuHorizontal extends StatefulWidget {
+  const PaginaMenuHorizontal({super.key});
 
   @override
-  State<PaginacrudEscritorio> createState() => _PaginacrudEscritorioState();
+  State<PaginaMenuHorizontal> createState() => _PaginacrudEscritorioState();
 }
 
-class _PaginacrudEscritorioState extends State<PaginacrudEscritorio> {
+class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
   num tamanoLogout = 1;
   Color colorCardTaller = Colors.amber;
   Color colorCardUsuarios = Colors.amber;
@@ -30,8 +31,8 @@ class _PaginacrudEscritorioState extends State<PaginacrudEscritorio> {
       body: Column(
         children: [
           Container(
-            padding: EdgeInsets.all(7.0),
-            height: MediaQuery.of(context).size.height * 0.10,
+            padding: EdgeInsets.all(7.0.w),
+            height: 0.10.sh,
             color: Color(0xfff6c500),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -42,9 +43,7 @@ class _PaginacrudEscritorioState extends State<PaginacrudEscritorio> {
                     InkWell(
                       child: Icon(
                         Icons.logout_sharp,
-                        size: MediaQuery.of(context).size.height *
-                            0.07 *
-                            tamanoLogout,
+                        size: 0.07.sh * tamanoLogout,
                       ),
                       onTap: () {
                         funcionSalir(context);
@@ -55,13 +54,17 @@ class _PaginacrudEscritorioState extends State<PaginacrudEscritorio> {
                         });
                       },
                     ),
-                    Text(
-                      "ACBMIN -- OPCIONES",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 25.0),
+                    Container(
+                      width: .8.sw,
+                      alignment: Alignment.center,
+                      child: Text(
+                        "ACBMIN MÓDULOS",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 35.0.dg),
+                      ),
                     )
                   ],
                 )
@@ -74,7 +77,7 @@ class _PaginacrudEscritorioState extends State<PaginacrudEscritorio> {
                   image: AssetImage("lib/assets/menu_wallpaper.jpg"),
                   fit: BoxFit.fill),
             ),
-            height: MediaQuery.of(context).size.height * 0.90,
+            height: 0.90.sh,
             child: Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -106,17 +109,18 @@ class _PaginacrudEscritorioState extends State<PaginacrudEscritorio> {
                     child: Card(
                       color: colorCardTaller,
                       child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: EdgeInsets.all(8.0.w),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
                               Icons.garage,
-                              size: MediaQuery.of(context).size.height * 0.15,
+                              size: 0.15.sh,
                             ),
                             Text(
                               "Almacén de Taller Automotríz",
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20.dg),
                             )
                           ],
                         ),
@@ -145,17 +149,18 @@ class _PaginacrudEscritorioState extends State<PaginacrudEscritorio> {
                     child: Card(
                       color: colorCardUsuarios,
                       child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: EdgeInsets.all(8.0.w),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
                               Icons.supervised_user_circle,
-                              size: MediaQuery.of(context).size.height * 0.15,
+                              size: 0.15.sh,
                             ),
                             Text(
                               "Control de Acceso",
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20.dg),
                             )
                           ],
                         ),
@@ -176,164 +181,51 @@ void funcionSalir(context) {
   showDialog(
       context: context,
       builder: (context) => AlertDialog(
-            insetPadding: EdgeInsets.symmetric(horizontal: 100, vertical: 100),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10.0))),
+            insetPadding:
+                EdgeInsets.symmetric(horizontal: 0.1.sw, vertical: 0.33.sh),
             title: Text(
               "¿Salir de la Aplicación?",
               textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 0.03.sh, fontWeight: FontWeight.bold),
             ),
-            content: FittedBox(
-              child: Container(
-                height: 50,
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ElevatedButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                                Navigator.pop(context);
-                              },
-                              child: Text(
-                                "OK",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize:
-                                        MediaQuery.of(context).size.height *
-                                            0.05),
-                              )),
-                          SizedBox(
-                            width: 10.0,
-                          ),
-                          ElevatedButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: Text(
-                                "No",
-                                style: TextStyle(
-                                    fontSize:
-                                        MediaQuery.of(context).size.height *
-                                            0.05),
-                              )),
-                        ],
-                      ),
-                    ],
-                  ),
+            content: Container(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              Navigator.pop(context);
+                            },
+                            child: Text(
+                              "OK",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 0.025.sh,
+                                  fontWeight: FontWeight.bold),
+                            )),
+                        SizedBox(
+                          width: 10.w,
+                        ),
+                        ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text(
+                              "NO",
+                              style: TextStyle(
+                                  fontSize: 0.025.sh,
+                                  fontWeight: FontWeight.bold),
+                            )),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
           ));
-}
-
-class PaginacrudMovil extends StatefulWidget {
-  const PaginacrudMovil({super.key});
-
-  @override
-  State<PaginacrudMovil> createState() => _PaginacrudMovilState();
-}
-
-class _PaginacrudMovilState extends State<PaginacrudMovil> {
-  Color colorTarjeta = Colors.amber;
-  Color? colorSalirPresionado;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Container(
-            padding: EdgeInsets.all(8.0),
-            height: MediaQuery.of(context).size.height * 0.10,
-            color: Color(0xfff6c500),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      funcionSalir(context);
-                    });
-                  },
-                  onTapDown: (details) {
-                    setState(() {
-                      colorSalirPresionado = Colors.red;
-                    });
-                  },
-                  onTapUp: (details) {
-                    setState(() {
-                      colorSalirPresionado = Colors.black;
-                    });
-                  },
-                  child: Icon(
-                    Icons.logout_outlined,
-                    size: MediaQuery.of(context).size.height * 0.07,
-                    color: colorSalirPresionado,
-                  ),
-                ),
-                Expanded(child: Container()),
-              ],
-            ),
-          ),
-          Container(
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                      fit: BoxFit.fill,
-                      image: AssetImage("lib/assets/menu_wallpaper.jpg"))),
-              height: MediaQuery.of(context).size.height * 0.90,
-              width: double.infinity,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Flex(
-                    direction: Axis.horizontal,
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          print("taller presionado");
-                        },
-                        onTapDown: (details) {
-                          setState(() {
-                            colorTarjeta = Colors.orange;
-                          });
-                        },
-                        onTapUp: (details) {
-                          setState(() {
-                            colorTarjeta = Colors.amber;
-                          });
-                        },
-                        child: Card(
-                          color: colorTarjeta,
-                          child: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.garage,
-                                  size:
-                                      MediaQuery.of(context).size.height * 0.15,
-                                ),
-                                Text(
-                                  "Almacén de Taller Automotríz",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ],
-              ))
-        ],
-      ),
-    );
-  }
 }

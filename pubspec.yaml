@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   pluto_grid: ^8.0.0
   http: ^1.2.2
+  flutter_screenutil: ^5.9.3
 
 dev_dependencies:
   flutter_test:
