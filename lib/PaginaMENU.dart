@@ -21,7 +21,7 @@ class PaginaMenuHorizontal extends StatefulWidget {
 }
 
 class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
-  num tamanoLogout = 1;
+  Color colorHoverSalir = Colors.black;
   Color colorCardTaller = Colors.amber;
   Color colorCardUsuarios = Colors.amber;
 
@@ -43,14 +43,16 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
                     InkWell(
                       child: Icon(
                         Icons.logout_sharp,
-                        size: 0.07.sh * tamanoLogout,
+                        size: 0.07.sh,
+                        color: colorHoverSalir,
                       ),
                       onTap: () {
                         funcionSalir(context);
                       },
                       onHover: (value) {
                         setState(() {
-                          tamanoLogout = value == true ? 1.15 : 1;
+                          colorHoverSalir =
+                              value == true ? Colors.red : Colors.black;
                         });
                       },
                     ),
@@ -118,7 +120,7 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
                               size: 0.15.sh,
                             ),
                             Text(
-                              "Almacén de Taller Automotríz",
+                              "Almacén del Taller de Vehículos",
                               style: TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 20.dg),
                             )

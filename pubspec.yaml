@@ -37,6 +37,8 @@ dependencies:
   pluto_grid: ^8.0.0
   http: ^1.2.2
   flutter_screenutil: ^5.9.3
+  excel: ^4.0.6
+#  pluto_grid_export: ^1.0.6
 
 dev_dependencies:
   flutter_test:

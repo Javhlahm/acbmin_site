@@ -1,10 +1,15 @@
 import 'dart:convert';
 
+import 'package:acbmin_site/PaginaIngresoItem.dart';
+import 'package:acbmin_site/PaginaSalidaItem.dart';
 import 'package:acbmin_site/entity/Item.dart';
+import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:http/http.dart' as http;
+
+late List<Item> datosExportacion;
 
 class Paginainventariotaller extends StatelessWidget {
   const Paginainventariotaller({super.key});
@@ -56,20 +61,27 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
                 decoration: BoxDecoration(color: Colors.amberAccent),
                 child: Center(
                   child: Text(
-                    "Transacciones",
+                    "Movimientos",
                     style: TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 30.0.dg),
                   ),
                 )),
             ListTile(
-              onTap: () {},
-              title: Text("Ingreso", style: TextStyle(fontSize: 25.0.dg)),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => paginaIngresoItem()));
+              },
+              title: Text("Ingreso de Material",
+                  style: TextStyle(fontSize: 25.0.dg)),
             ),
             ListTile(
               onTap: () {
                 dialogoConfirmacionSalida(context, serieSeleccionada);
               },
-              title: Text("Salida", style: TextStyle(fontSize: 25.0.dg)),
+              title: Text("Salida de Material",
+                  style: TextStyle(fontSize: 25.0.dg)),
             )
           ],
         ),
@@ -79,7 +91,7 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
         children: [
           Container(
             padding: EdgeInsets.fromLTRB(15.0, 7.0, 25.0, 7.0).w,
-            height: MediaQuery.of(context).size.height * 0.10,
+            height: 0.10.sh,
             color: Color(0xfff6c500),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -167,7 +179,9 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
                         : Icon(Icons.history)),
                 Padding(padding: EdgeInsets.only(left: 20.0.w)),
                 InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      exportarExcel();
+                    },
                     onHover: (value) {
                       setState(() {
                         colorHoverExportar =
@@ -199,6 +213,7 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
                       child: Text(snapshot.error.toString()),
                     );
                   }
+                  datosExportacion = snapshot.data!;
                   return Container(
                     height: 0.9.sh,
                     width: double.infinity,
@@ -360,7 +375,14 @@ dialogoConfirmacionSalida(context, [serie]) {
                       ),
                       Padding(padding: EdgeInsets.only(top: 10.h)),
                       ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Paginasalidaitem(
+                                          serie: serie,
+                                        )));
+                          },
                           child: Text("Continuar",
                               style: TextStyle(
                                   fontSize: 0.025.sh,
@@ -371,4 +393,41 @@ dialogoConfirmacionSalida(context, [serie]) {
               ),
             ),
           ));
+}
+
+void exportarExcel() {
+  var reporte = Excel.createExcel(); // Crear un nuevo archivo Excel
+  Sheet sheet = reporte['reporte de inventario'];
+  reporte.delete("Sheet1");
+
+  sheet.appendRow([
+    TextCellValue("id_prod"),
+    TextCellValue("nombre"),
+    TextCellValue("categoria"),
+    TextCellValue("marca"),
+    TextCellValue("modelo"),
+    TextCellValue("serie"),
+    TextCellValue("descripcion"),
+    TextCellValue("cantidad"),
+    TextCellValue("modeloAuto"),
+    TextCellValue("ultMovimiento"),
+    TextCellValue("notas")
+  ]);
+
+  for (var celda in datosExportacion) {
+    sheet.appendRow([
+      TextCellValue(celda.idProd.toString()),
+      TextCellValue(celda.nombre.toString()),
+      TextCellValue(celda.categoria.toString()),
+      TextCellValue(celda.marca.toString()),
+      TextCellValue(celda.modelo.toString()),
+      TextCellValue(celda.serie.toString()),
+      TextCellValue(celda.descripcion.toString()),
+      TextCellValue(celda.cantidad.toString()),
+      TextCellValue(celda.modeloAuto.toString()),
+      TextCellValue(celda.ultMovimiento.toString()),
+      TextCellValue(celda.notas.toString()),
+    ]);
+  }
+  reporte.save(fileName: "Reporte_almacen_automoviles.xlsx");
 }
