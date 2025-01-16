@@ -1,49 +1,34 @@
-import 'package:acbmin_site/PaginaHistorial.dart';
-import 'package:acbmin_site/PaginaIngresoItem.dart';
-import 'package:acbmin_site/PaginaSalidaItem.dart';
-import 'package:acbmin_site/entity/Item.dart';
-import 'package:acbmin_site/services/almacen_autos/obtener_items.dart';
+import 'package:acbmin_site/entity/Transaccion.dart';
+import 'package:acbmin_site/services/almacen_autos/obtener_transacciones.dart';
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
-late List<Item> datosExportacion;
+late List<Transaccion> datosExportacion;
 
-class Paginainventariotaller extends StatelessWidget {
-  const Paginainventariotaller({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MediaQuery.of(context).size.width > 800
-        ? PaginaInventarioTallerEscritorio()
-        : PaginaInventarioTallerEscritorio();
-  }
-}
-
-class PaginaInventarioTallerEscritorio extends StatefulWidget {
-  const PaginaInventarioTallerEscritorio({super.key});
+class Paginahistorial extends StatefulWidget {
+  const Paginahistorial({super.key});
 
   @override
-  State<PaginaInventarioTallerEscritorio> createState() => _PaginState();
+  State<Paginahistorial> createState() => _PaginahistorialState();
 }
 
-class _PaginState extends State<PaginaInventarioTallerEscritorio> {
-  late Future<List<Item>> listaItems;
+class _PaginahistorialState extends State<Paginahistorial> {
+  late Future<List<Transaccion>> listaTransacciones;
   Color colorHoverEntradasSalidas = Colors.black;
   Color colorHoverHistorial = Colors.black;
   Color colorHoverRegresar = Colors.black;
   Color colorHoverActualizar = Colors.black;
   Color colorHoverExportar = Colors.black;
-  String? serieSeleccionada = "";
+  String? serieSeleccionada;
   var scaffoldkey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
-    listaItems = obtenerItems();
+    listaTransacciones = obtenerTransacciones();
   }
 
   @override
@@ -52,45 +37,6 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
         ScreenUtil().orientation == Orientation.landscape ? true : false;
 
     return Scaffold(
-      key: scaffoldkey,
-      endDrawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-                decoration: BoxDecoration(color: Colors.amberAccent),
-                child: Center(
-                  child: Text(
-                    "Movimientos",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 30.0.dg),
-                  ),
-                )),
-            ListTile(
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => paginaIngresoItem()));
-              },
-              title: Text("Ingreso de Material",
-                  style: TextStyle(fontSize: 25.0.dg)),
-            ),
-            ListTile(
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => Paginasalidaitem(
-                              serie: serieSeleccionada,
-                            )));
-              },
-              title: Text("Salida de Material",
-                  style: TextStyle(fontSize: 25.0.dg)),
-            )
-          ],
-        ),
-      ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
@@ -119,7 +65,7 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
                 ),
                 Expanded(child: Container()),
                 Text(
-                  "ACBMIN: TALLER DE AUTOS--ALMACÉN",
+                  "HISTORIAL DE MOVIMIENTOS",
                   style: TextStyle(
                       color: Colors.red,
                       fontWeight: FontWeight.bold,
@@ -129,8 +75,7 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
                 InkWell(
                   onTap: () {
                     setState(() {
-                      serieSeleccionada = "";
-                      listaItems = obtenerItems();
+                      listaTransacciones = obtenerTransacciones();
                     });
                   },
                   onHover: (value) {
@@ -146,49 +91,6 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
                   ),
                 ),
                 Padding(padding: EdgeInsets.only(left: 15.0.w)),
-                InkWell(
-                    onTap: () {
-                      scaffoldkey.currentState!.openEndDrawer();
-                    },
-                    onHover: (value) {
-                      setState(() {
-                        colorHoverEntradasSalidas =
-                            value == true ? Colors.red : Colors.black;
-                      });
-                    },
-                    child: landscape
-                        ? Text(
-                            "Ingreso y Salida de Material",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: colorHoverEntradasSalidas,
-                                fontSize: 15.0.dg),
-                          )
-                        : Icon(Icons.storage)),
-                Padding(padding: EdgeInsets.only(left: 20.0.w)),
-                InkWell(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Paginahistorial()));
-                    },
-                    onHover: (value) {
-                      setState(() {
-                        colorHoverHistorial =
-                            value == true ? Colors.red : Colors.black;
-                      });
-                    },
-                    child: landscape
-                        ? Text(
-                            "Historial",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: colorHoverHistorial,
-                                fontSize: 15.0.dg),
-                          )
-                        : Icon(Icons.history)),
-                Padding(padding: EdgeInsets.only(left: 20.0.w)),
                 InkWell(
                     onTap: () {
                       exportarExcel();
@@ -212,7 +114,7 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
             ),
           ),
           FutureBuilder(
-              future: listaItems,
+              future: listaTransacciones,
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done) {
                   return Center(
@@ -235,26 +137,43 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
                               enableGridBorderShadow: true,
                               enableRowColorAnimation: true),
                         ),
-                        onSelected: (event) {
-                          serieSeleccionada = event.row!.cells['serie']?.value;
-                        },
                         columns: [
                           // PlutoColumn(
                           //   title: "#",
-                          //   field: "id_prod",
+                          //   field: "id_trans",
                           //   type: PlutoColumnType.number(),
                           //   readOnly: true,
                           //   enableColumnDrag: false,
                           // ),
                           PlutoColumn(
-                              title: "Artículo",
-                              field: "nombre",
+                            title: "Tipo",
+                            field: "tipo",
+                            type: PlutoColumnType.text(),
+                            readOnly: true,
+                            enableColumnDrag: false,
+                          ),
+                          PlutoColumn(
+                              title: "Vale de Almacén",
+                              field: "vale",
                               type: PlutoColumnType.text(),
                               readOnly: true,
                               enableColumnDrag: false),
                           PlutoColumn(
-                              title: "Categoria",
-                              field: "categoria",
+                              title: "Requerimiento",
+                              field: "requerimiento",
+                              type: PlutoColumnType.text(),
+                              readOnly: true,
+                              enableColumnDrag: false),
+                          PlutoColumn(
+                            title: "Nombre",
+                            field: "nombre",
+                            type: PlutoColumnType.text(),
+                            readOnly: true,
+                            enableColumnDrag: false,
+                          ),
+                          PlutoColumn(
+                              title: "Descripción",
+                              field: "descripcion",
                               type: PlutoColumnType.text(),
                               readOnly: true,
                               enableColumnDrag: false),
@@ -277,8 +196,8 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
                               readOnly: true,
                               enableColumnDrag: false),
                           PlutoColumn(
-                              title: "Descripcion",
-                              field: "descripcion",
+                              title: "Categoria",
+                              field: "categoria",
                               type: PlutoColumnType.text(),
                               readOnly: true,
                               enableColumnDrag: false),
@@ -295,47 +214,38 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
                               readOnly: true,
                               enableColumnDrag: false),
                           PlutoColumn(
-                              title: "Último Movimiento",
-                              field: "ultMovimiento",
+                              title: "Placa",
+                              field: "placa",
                               type: PlutoColumnType.text(),
                               readOnly: true,
                               enableColumnDrag: false),
+
                           PlutoColumn(
-                              title: "Notas",
-                              field: "notas",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Localidad",
-                              field: "localidad",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Antiguedad",
-                              field: "aging",
+                              title: "Fecha",
+                              field: "fecha",
                               type: PlutoColumnType.text(),
                               readOnly: true,
                               enableColumnDrag: false),
                         ],
-                        rows: snapshot.data!.map((item) {
+                        rows: snapshot.data!.map((trans) {
                           return PlutoRow(
                             cells: {
-                              "id_prod": PlutoCell(value: item.idProd),
-                              "nombre": PlutoCell(value: item.nombre),
-                              "categoria": PlutoCell(value: item.categoria),
-                              "marca": PlutoCell(value: item.marca),
-                              "modelo": PlutoCell(value: item.modelo),
-                              "serie": PlutoCell(value: item.serie),
-                              "descripcion": PlutoCell(value: item.descripcion),
-                              "cantidad": PlutoCell(value: item.cantidad),
-                              "modeloAuto": PlutoCell(value: item.modeloAuto),
-                              "ultMovimiento":
-                                  PlutoCell(value: item.ultMovimiento),
-                              "notas": PlutoCell(value: item.notas),
-                              "localidad": PlutoCell(value: item.localidad),
-                              "aging": PlutoCell(value: item.aging)
+                              "id_trans": PlutoCell(value: trans.idTrans),
+                              "tipo": PlutoCell(value: trans.tipo),
+                              "requerimiento":
+                                  PlutoCell(value: trans.requerimiento),
+                              "vale": PlutoCell(value: trans.valeAlmacen),
+                              "nombre": PlutoCell(value: trans.nombre),
+                              "descripcion":
+                                  PlutoCell(value: trans.descripcion),
+                              "marca": PlutoCell(value: trans.marca),
+                              "modelo": PlutoCell(value: trans.modelo),
+                              "serie": PlutoCell(value: trans.serie),
+                              "categoria": PlutoCell(value: trans.categoria),
+                              "cantidad": PlutoCell(value: trans.cantidad),
+                              "modeloAuto": PlutoCell(value: trans.modeloAuto),
+                              "placa": PlutoCell(value: trans.placa),
+                              "fecha": PlutoCell(value: trans.fecha)
                             },
                           );
                         }).toList()),
@@ -348,60 +258,43 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
   }
 }
 
-class PaginaInventarioTallerMovil extends StatefulWidget {
-  const PaginaInventarioTallerMovil({super.key});
-
-  @override
-  State<PaginaInventarioTallerMovil> createState() =>
-      _PaginaInventarioTallerMovilState();
-}
-
-class _PaginaInventarioTallerMovilState
-    extends State<PaginaInventarioTallerMovil> {
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-}
-
 void exportarExcel() {
   var reporte = Excel.createExcel(); // Crear un nuevo archivo Excel
-  Sheet sheet = reporte['reporte de inventario'];
+  Sheet sheet = reporte['reporte de Movimientos'];
   reporte.delete("Sheet1");
 
   sheet.appendRow([
     TextCellValue("#"),
+    TextCellValue("Tipo"),
+    TextCellValue("Requerimiento"),
+    TextCellValue("Vale de Almacén"),
     TextCellValue("Nombre"),
-    TextCellValue("Categoria"),
+    TextCellValue("Descripción"),
     TextCellValue("Marca"),
     TextCellValue("Modelo"),
     TextCellValue("Serie"),
-    TextCellValue("Descripción"),
-    TextCellValue("Cantidad"),
+    TextCellValue("Categoría"),
     TextCellValue("Vehículo"),
-    TextCellValue("Último Movimiento"),
-    TextCellValue("Localidad"),
-    TextCellValue("Aging"),
-    TextCellValue("Notas"),
+    TextCellValue("Placa"),
+    TextCellValue("Fecha")
   ]);
 
   for (var celda in datosExportacion) {
     sheet.appendRow([
-      TextCellValue(celda.idProd.toString()),
+      TextCellValue(celda.idTrans.toString()),
+      TextCellValue(celda.tipo.toString()),
+      TextCellValue(celda.requerimiento.toString()),
+      TextCellValue(celda.valeAlmacen.toString()),
       TextCellValue(celda.nombre.toString()),
-      TextCellValue(celda.categoria.toString()),
+      TextCellValue(celda.descripcion.toString()),
       TextCellValue(celda.marca.toString()),
       TextCellValue(celda.modelo.toString()),
       TextCellValue(celda.serie.toString()),
-      TextCellValue(celda.descripcion.toString()),
-      TextCellValue(celda.cantidad.toString()),
+      TextCellValue(celda.categoria.toString()),
       TextCellValue(celda.modeloAuto.toString()),
-      TextCellValue(celda.ultMovimiento.toString()),
-      TextCellValue(celda.notas.toString()),
-      TextCellValue(celda.localidad.toString()),
-      TextCellValue(celda.aging.toString()),
-      TextCellValue(celda.notas.toString()),
+      TextCellValue(celda.placa.toString()),
+      TextCellValue(celda.fecha.toString()),
     ]);
   }
-  reporte.save(fileName: "Reporte_almacen_automoviles.xlsx");
+  reporte.save(fileName: "Reporte_almacen_automoviles_Movimientos.xlsx");
 }
