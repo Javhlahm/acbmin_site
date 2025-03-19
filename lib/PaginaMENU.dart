@@ -1,9 +1,11 @@
 import 'package:acbmin_site/PaginaInventarioTaller.dart';
+import 'package:acbmin_site/PaginaUsuarios.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Paginamenu extends StatelessWidget {
-  const Paginamenu({super.key});
+  final String usuarioLogeado;
+  const Paginamenu({super.key, required this.usuarioLogeado});
 
   @override
   Widget build(BuildContext context) {
@@ -130,7 +132,12 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
                     ),
                   ),
                   InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Paginausuarios()));
+                    },
                     onTapDown: (details) {
                       setState(() {
                         colorCardUsuarios =

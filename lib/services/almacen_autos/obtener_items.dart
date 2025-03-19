@@ -3,7 +3,8 @@ import 'package:acbmin_site/entity/Item.dart';
 import 'package:http/http.dart' as http;
 
 Future<List<Item>> obtenerItems() async {
-  var url = Uri.parse("http://89.117.149.126/api/tallerautomotriz/almacen");
+  var url =
+      Uri.parse("http://89.117.149.126/acbmin/api/tallerautomotriz/almacen");
 //  var url = Uri.parse("http://localhost:8050/tallerautomotriz/almacen");
   var response = await http.get(url);
 

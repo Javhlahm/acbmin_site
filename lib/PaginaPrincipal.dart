@@ -1,4 +1,5 @@
 import 'package:acbmin_site/PaginaMENU.dart';
+import 'package:acbmin_site/services/usuarios/Login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -142,6 +143,8 @@ class _PaginaprincipalEscritorioState extends State<PaginaPrincipalHorizontal> {
 }
 
 mostrarDialogoIngreso(context) {
+  TextEditingController correoController = TextEditingController();
+  TextEditingController contrasenaController = TextEditingController();
   showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -161,6 +164,7 @@ mostrarDialogoIngreso(context) {
                   height: 0.09.sh,
                   width: 0.3.sw,
                   child: TextFormField(
+                    controller: correoController,
                     style: TextStyle(fontSize: 0.04.sh),
                     decoration: InputDecoration(
                         contentPadding: EdgeInsets.all(10.h),
@@ -172,6 +176,7 @@ mostrarDialogoIngreso(context) {
                   height: 0.09.sh,
                   width: 0.3.sw,
                   child: TextFormField(
+                    controller: contrasenaController,
                     style: TextStyle(fontSize: 0.04.sh),
                     obscureText: true,
                     decoration: InputDecoration(
@@ -184,11 +189,61 @@ mostrarDialogoIngreso(context) {
                   height: 0.02.sh,
                 ),
                 ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      String respuesta = await Login(
+                          correoController.text, contrasenaController.text);
+
+                      if (respuesta != "OK") {
+                        showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                                  insetPadding: EdgeInsets.symmetric(
+                                      horizontal: 0.1.sw, vertical: 0.33.sh),
+                                  content: Container(
+                                    child: Center(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            "NO AUTORIZADO",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                fontSize: 0.025.sh,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                  vertical: 10.h)),
+                                          ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: Text(
+                                                "OK",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    fontSize: 0.025.sh,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              )),
+                                          SizedBox(
+                                            width: 10.w,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ));
+                        return;
+                      }
+
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => Paginamenu()));
+                              builder: (context) => Paginamenu(
+                                    usuarioLogeado: correoController.text,
+                                  )));
                     },
                     child: Text("Ingresar",
                         style: TextStyle(

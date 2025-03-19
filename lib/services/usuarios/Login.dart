@@ -1,12 +1,13 @@
 import 'dart:convert';
-import 'package:acbmin_site/entity/Transaccion.dart';
 import 'package:http/http.dart' as http;
 
-SalidaTransaccion(Transaccion transaccion) async {
-  var url = Uri.parse(
-      "http://89.117.149.126/acbmin/api/tallerautomotriz/almacen/transact/salida");
-//  var url = Uri.parse("http://localhost:8050/tallerautomotriz/almacen");
-  Map<String, dynamic> transaccionJson = transaccion.toJson();
+Login(String correo, String contrasena) async {
+  var url = Uri.parse("http://89.117.149.126/acbmin/api/users/usuarios/login");
+  // var url = Uri.parse(
+  // "http://localhost:8050/tallerautomotriz/almacen/transact/entrada");
+  Map<String, dynamic> usuarioJSON = new Map();
+  usuarioJSON['email'] = correo;
+  usuarioJSON['contrasena'] = contrasena;
 
   var response = await http.post(
     url,
@@ -14,7 +15,7 @@ SalidaTransaccion(Transaccion transaccion) async {
       'Content-Type':
           'application/json', // Especificamos que estamos enviando JSON
     },
-    body: json.encode(transaccionJson),
+    body: json.encode(usuarioJSON),
   );
 
   if (response.statusCode == 200) {
