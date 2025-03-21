@@ -1,6 +1,7 @@
 import 'package:acbmin_site/PaginaEditarUsuario.dart';
 import 'package:acbmin_site/PaginaNuevoUsuario.dart';
 import 'package:acbmin_site/entity/Usuario.dart';
+import 'package:acbmin_site/entity/UsuarioGlobal.dart';
 import 'package:acbmin_site/services/usuarios/ObtenerUsuarios.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -85,6 +86,10 @@ class _PaginausuariosState extends State<Paginausuarios> {
                         fontSize: 20.0.dg),
                   ),
                   onTap: () {
+                    if (UsuarioSeleccionado!.isEmpty ||
+                        UsuarioSeleccionado == null) {
+                      return;
+                    }
                     Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -95,6 +100,10 @@ class _PaginausuariosState extends State<Paginausuarios> {
                 )
               : IconButton(
                   onPressed: () {
+                    if (UsuarioSeleccionado!.isEmpty ||
+                        UsuarioSeleccionado == null) {
+                      return;
+                    }
                     Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -107,6 +116,14 @@ class _PaginausuariosState extends State<Paginausuarios> {
                     color: Colors.black,
                   )),
           Padding(padding: EdgeInsets.symmetric(horizontal: 10.dg)),
+          Text(
+            usuarioGlobal!.nombre!,
+            style: TextStyle(
+                fontSize: 20.dg,
+                fontWeight: FontWeight.bold,
+                fontStyle: FontStyle.italic),
+          ),
+          Padding(padding: EdgeInsets.only(right: 20.dg)),
         ],
       ),
       body: FutureBuilder(

@@ -1,4 +1,5 @@
 import 'package:acbmin_site/entity/Usuario.dart';
+import 'package:acbmin_site/entity/UsuarioGlobal.dart';
 import 'package:acbmin_site/services/usuarios/EditarUsuario.dart';
 import 'package:acbmin_site/services/usuarios/ObtenerUsuarioEmail.dart';
 import 'package:flutter/material.dart';
@@ -34,6 +35,7 @@ class _PaginaeditarusuarioState extends State<Paginaeditarusuario> {
     usuario = await obtenerUsuarioEmail(widget.usuarioSeleccionado);
 
     setState(() {
+      status = usuario!.status;
       controladorNombre.text = usuario!.nombre!;
       controladorCorreo.text = usuario!.email!;
       usuario!.roles!.contains("admin")
@@ -53,6 +55,7 @@ class _PaginaeditarusuarioState extends State<Paginaeditarusuario> {
 
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: Text(
           "ACBMIN-USUARIOS",
           style: TextStyle(
@@ -61,6 +64,16 @@ class _PaginaeditarusuarioState extends State<Paginaeditarusuario> {
               fontSize: 35.0.dg),
         ),
         backgroundColor: Color(0xfff6c500),
+        actions: [
+          Text(
+            usuarioGlobal!.nombre!,
+            style: TextStyle(
+                fontSize: 20.dg,
+                fontWeight: FontWeight.bold,
+                fontStyle: FontStyle.italic),
+          ),
+          Padding(padding: EdgeInsets.only(right: 20.dg)),
+        ],
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -71,7 +84,7 @@ class _PaginaeditarusuarioState extends State<Paginaeditarusuario> {
                   Padding(
                     padding: EdgeInsets.all(20.0.dg),
                     child: Text(
-                      "Nuevo Usuario",
+                      "Modificar Usuario",
                       style: TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 20.0),
                     ),
@@ -133,7 +146,7 @@ class _PaginaeditarusuarioState extends State<Paginaeditarusuario> {
                   ),
                   Padding(
                     padding:
-                        EdgeInsets.symmetric(horizontal: 50.0, vertical: 20),
+                        EdgeInsets.symmetric(horizontal: 60.0, vertical: 20),
                     child: DropdownButtonFormField(
                         value: usuario!.status,
                         validator: (value) {

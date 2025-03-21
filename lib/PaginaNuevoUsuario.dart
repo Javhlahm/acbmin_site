@@ -1,4 +1,5 @@
 import 'package:acbmin_site/entity/Usuario.dart';
+import 'package:acbmin_site/entity/UsuarioGlobal.dart';
 import 'package:acbmin_site/services/NuevoUsuario.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -23,6 +24,7 @@ class _PaginanuevousuarioState extends State<Paginanuevousuario> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: Text(
           "ACBMIN-USUARIOS",
           style: TextStyle(
@@ -31,6 +33,16 @@ class _PaginanuevousuarioState extends State<Paginanuevousuario> {
               fontSize: 35.0.dg),
         ),
         backgroundColor: Color(0xfff6c500),
+        actions: [
+          Text(
+            usuarioGlobal!.nombre!,
+            style: TextStyle(
+                fontSize: 20.dg,
+                fontWeight: FontWeight.bold,
+                fontStyle: FontStyle.italic),
+          ),
+          Padding(padding: EdgeInsets.only(right: 20.dg)),
+        ],
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -102,7 +114,7 @@ class _PaginanuevousuarioState extends State<Paginanuevousuario> {
                   ),
                   Padding(
                     padding:
-                        EdgeInsets.symmetric(horizontal: 50.0, vertical: 20),
+                        EdgeInsets.symmetric(horizontal: 60.0, vertical: 20),
                     child: DropdownButtonFormField(
                         validator: (value) {
                           return value!.trim().isEmpty ? "Campo Vacío" : null;

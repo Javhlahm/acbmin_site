@@ -1,4 +1,6 @@
 import 'package:acbmin_site/PaginaMENU.dart';
+import 'package:acbmin_site/entity/Usuario.dart';
+import 'package:acbmin_site/entity/UsuarioGlobal.dart';
 import 'package:acbmin_site/services/usuarios/Login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -190,10 +192,10 @@ mostrarDialogoIngreso(context) {
                 ),
                 ElevatedButton(
                     onPressed: () async {
-                      String respuesta = await Login(
+                      usuarioGlobal = await Login(
                           correoController.text, contrasenaController.text);
-
-                      if (respuesta != "OK") {
+                      print(usuarioGlobal.toString());
+                      if (usuarioGlobal == null) {
                         showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
@@ -238,12 +240,10 @@ mostrarDialogoIngreso(context) {
                         return;
                       }
 
-                      Navigator.push(
+                      Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => Paginamenu(
-                                    usuarioLogeado: correoController.text,
-                                  )));
+                              builder: (context) => Paginamenu()));
                     },
                     child: Text("Ingresar",
                         style: TextStyle(
