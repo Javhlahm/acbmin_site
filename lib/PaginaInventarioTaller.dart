@@ -397,7 +397,6 @@ void exportarExcel() {
       TextCellValue(celda.cantidad.toString()),
       TextCellValue(celda.modeloAuto.toString()),
       TextCellValue(celda.ultMovimiento.toString()),
-      TextCellValue(celda.notas.toString()),
       TextCellValue(celda.localidad.toString()),
       TextCellValue(celda.aging.toString()),
       TextCellValue(celda.notas.toString()),

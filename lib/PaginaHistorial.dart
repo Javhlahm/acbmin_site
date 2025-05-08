@@ -274,6 +274,7 @@ void exportarExcel() {
     TextCellValue("Modelo"),
     TextCellValue("Serie"),
     TextCellValue("Categoría"),
+    TextCellValue("Cantidad"),
     TextCellValue("Vehículo"),
     TextCellValue("Placa"),
     TextCellValue("Fecha")
@@ -291,6 +292,7 @@ void exportarExcel() {
       TextCellValue(celda.modelo.toString()),
       TextCellValue(celda.serie.toString()),
       TextCellValue(celda.categoria.toString()),
+      TextCellValue(celda.cantidad.toString()),
       TextCellValue(celda.modeloAuto.toString()),
       TextCellValue(celda.placa.toString()),
       TextCellValue(celda.fecha.toString()),
