@@ -3,8 +3,10 @@ import 'package:acbmin_site/entity/Transaccion.dart';
 import 'package:http/http.dart' as http;
 
 EntradaTransaccion(Transaccion transaccion) async {
+  // var url = Uri.parse(
+  //    "http://89.117.149.126/acbmin/api/tallerautomotriz/almacen/transact/entrada");
   var url = Uri.parse(
-      "http://89.117.149.126/acbmin/api/tallerautomotriz/almacen/transact/entrada");
+      "https://acbmin.lamasoft.org/api/autoalmacen/tallerautomotriz/almacen/transact/entrada");
   // var url = Uri.parse(
   // "http://localhost:8050/tallerautomotriz/almacen/transact/entrada");
   Map<String, dynamic> transaccionJson = transaccion.toJson();

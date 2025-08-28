@@ -3,7 +3,9 @@ import 'package:acbmin_site/entity/Usuario.dart';
 import 'package:http/http.dart' as http;
 
 EditarUsuario(Usuario usuario) async {
-  var url = Uri.parse("http://89.117.149.126/acbmin/api/users/usuarios/" +
+  // var url = Uri.parse("http://89.117.149.126/acbmin/api/users/usuarios/" +
+  //   usuario.email.toString());
+  var url = Uri.parse("https://acbmin.lamasoft.org/api/users/usuarios/" +
       usuario.email.toString());
   // var url = Uri.parse(
   // "http://localhost:8050/tallerautomotriz/almacen/transact/entrada");

@@ -4,8 +4,10 @@ import 'package:acbmin_site/entity/Usuario.dart';
 import 'package:http/http.dart' as http;
 
 Future<Usuario> obtenerUsuarioEmail(String email) async {
+  //var url =
+  //   Uri.parse("http://89.117.149.126/acbmin/api/users/usuarios/" + email);
   var url =
-      Uri.parse("http://89.117.149.126/acbmin/api/users/usuarios/" + email);
+      Uri.parse("https://acbmin.lamasoft.org/api/users/usuarios/" + email);
 //  var url = Uri.parse("http://localhost:8050/tallerautomotriz/almacen");
 
   var response = await http.get(url);
