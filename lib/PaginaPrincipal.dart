@@ -1,9 +1,11 @@
 import 'package:acbmin_site/PaginaMENU.dart';
 import 'package:acbmin_site/entity/Usuario.dart';
 import 'package:acbmin_site/entity/UsuarioGlobal.dart';
+import 'package:acbmin_site/security/auth_service.dart';
 import 'package:acbmin_site/services/usuarios/Login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:acbmin_site/services/usuarios/ObtenerUsuarioEmail.dart';
 
 class Paginaprincipal extends StatelessWidget {
   const Paginaprincipal({super.key});
@@ -192,10 +194,14 @@ mostrarDialogoIngreso(context) {
                 ),
                 ElevatedButton(
                     onPressed: () async {
-                      usuarioGlobal = await Login(
+                      // --- INICIO DE LA LÓGICA MODIFICADA ---
+
+                      // 2. Primero, obtenemos el token.
+                      String? token = await Login(
                           correoController.text, contrasenaController.text);
-                      print(usuarioGlobal.toString());
-                      if (usuarioGlobal == null) {
+
+                      // 3. Verificamos si el token es nulo (login fallido).
+                      if (token == null) {
                         showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
@@ -229,21 +235,33 @@ mostrarDialogoIngreso(context) {
                                                     fontWeight:
                                                         FontWeight.bold),
                                               )),
-                                          SizedBox(
-                                            width: 10.w,
-                                          ),
                                         ],
                                       ),
                                     ),
                                   ),
                                 ));
-                        return;
+                        return; // Detenemos la ejecución si no hay token
                       }
 
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Paginamenu()));
+                      await authService.saveToken(token);
+                      // 4. Si tenemos un token, ahora pedimos los datos del usuario.
+                      try {
+                        Usuario usuario =
+                            await obtenerUsuarioEmail(correoController.text);
+                        usuarioGlobal =
+                            usuario; // Guardamos el usuario globalmente.
+
+                        // 5. Navegamos al menú principal.
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Paginamenu()));
+                      } catch (e) {
+                        // Manejo de error por si falla la obtención de datos del usuario
+                        print("Error al obtener detalles del usuario: $e");
+                      }
+
+                      // --- FIN DE LA LÓGICA MODIFICADA ---
                     },
                     child: Text("Ingresar",
                         style: TextStyle(

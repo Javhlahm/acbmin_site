@@ -1,6 +1,8 @@
 import 'package:acbmin_site/PaginaInventarioTaller.dart';
+import 'package:acbmin_site/PaginaPrincipal.dart';
 import 'package:acbmin_site/PaginaUsuarios.dart';
 import 'package:acbmin_site/entity/UsuarioGlobal.dart';
+import 'package:acbmin_site/security/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -41,11 +43,24 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
             fontSize: 45.0.dg,
           ),
         ),
+        // --- INICIO DE LA CORRECCIÓN ---
         leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
+            onPressed: () async {
+              // 2. MARCA LA FUNCIÓN COMO ASYNC
+              // 3. Borra el token guardado
+              await authService.deleteToken();
+
+              // 4. Limpia el estado global del usuario
+              usuarioGlobal = null;
+
+              // 5. Regresa a la página de inicio de sesión, reemplazando el menú
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => Paginaprincipal()),
+              );
             },
             icon: Icon(Icons.logout, size: 0.07.sh, color: colorHoverSalir)),
+        // --- FIN DE LA CORRECCIÓN ---
         actions: [
           Text(
             usuarioGlobal!.nombre!,
