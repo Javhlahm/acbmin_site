@@ -200,50 +200,7 @@ mostrarDialogoIngreso(context) {
                       String? token = await Login(
                           correoController.text, contrasenaController.text);
 
-                      // 3. Verificamos si el token es nulo (login fallido).
-                      if (token == null) {
-                        showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                                  insetPadding: EdgeInsets.symmetric(
-                                      horizontal: 0.1.sw, vertical: 0.33.sh),
-                                  content: Container(
-                                    child: Center(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            "NO AUTORIZADO",
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                                fontSize: 0.025.sh,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  vertical: 10.h)),
-                                          ElevatedButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: Text(
-                                                "OK",
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                    fontSize: 0.025.sh,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              )),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ));
-                        return; // Detenemos la ejecución si no hay token
-                      }
-
-                      await authService.saveToken(token);
+                      await authService.saveToken(token!);
                       // 4. Si tenemos un token, ahora pedimos los datos del usuario.
                       try {
                         Usuario usuario =
