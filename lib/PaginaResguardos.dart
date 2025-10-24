@@ -1,11 +1,13 @@
 import 'package:acbmin_site/entity/Resguardo.dart';
 import 'package:acbmin_site/entity/UsuarioGlobal.dart';
 import 'package:acbmin_site/PaginaNuevoResguardo.dart';
-import 'package:acbmin_site/PaginaDetalleResguardo.dart'; // <-- IMPORTAR NUEVA PÁGINA
+import 'package:acbmin_site/PaginaDetalleResguardo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:intl/intl.dart';
+import 'package:excel/excel.dart'; // Importar paquete excel
+// NO importamos dart:html ni dart:convert aquí
 
 class PaginaResguardos extends StatefulWidget {
   const PaginaResguardos({super.key});
@@ -26,7 +28,7 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
   @override
   void initState() {
     super.initState();
-    // Lista inicial de ejemplo
+    // Lista inicial de ejemplo (igual que antes)
     _allResguardos = [
       Resguardo(
           folio: 100,
@@ -90,19 +92,18 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
           capturadoPor: 'Ana García'),
     ];
     _filteredResguardos = List.from(_allResguardos);
-    _searchController.addListener(_filterResguardos);
+    _searchController.addListener(_applyFilter);
     _updatePlutoRows();
   }
 
   @override
   void dispose() {
-    _searchController.removeListener(_filterResguardos);
+    _searchController.removeListener(_applyFilter);
     _searchController.dispose();
     super.dispose();
   }
 
-  // Filtra la lista principal basado en el texto de búsqueda
-  void _filterResguardos() {
+  void _applyFilter() {
     final query = _searchController.text;
     List<Resguardo> tempFiltered;
 
@@ -114,43 +115,141 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
           .toList();
     }
 
-    // Solo actualiza si la lista filtrada realmente cambió
     if (!listEquals(_filteredResguardos, tempFiltered)) {
       setState(() {
         _filteredResguardos = tempFiltered;
-        _updatePlutoRows(); // Actualiza las filas para PlutoGrid
-        // Si el stateManager ya está listo, actualiza las filas en la tabla
-        if (mounted && _stateManager != null) {
-          _stateManager!.removeAllRows();
-          _stateManager!.appendRows(_rows);
-        }
+        _updatePlutoRows();
       });
+      _refreshPlutoGrid();
+    } else if (query.isEmpty &&
+        _filteredResguardos.length != _allResguardos.length) {
+      setState(() {
+        _filteredResguardos = List.from(_allResguardos);
+        _updatePlutoRows();
+      });
+      _refreshPlutoGrid();
     }
   }
 
-  // Función helper para comparar listas (Flutter ya tiene listEquals en foundation)
-  // import 'package:flutter/foundation.dart'; // <- Asegúrate de importar esto arriba
+  // Refresca visualmente el PlutoGrid
+  void _refreshPlutoGrid() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _stateManager != null) {
+        _stateManager!.removeAllRows();
+        _stateManager!.appendRows(_rows);
+      }
+    });
+  }
+
+  // Función para simular la recarga de datos
+  void _actualizarDatos() {
+    setState(() {
+      _allResguardos = List.from(_allResguardos);
+      _searchController.clear();
+      _filteredResguardos = List.from(_allResguardos);
+      _updatePlutoRows();
+    });
+    _refreshPlutoGrid();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Tabla actualizada.'), backgroundColor: Colors.blue));
+  }
+
+  // *** FUNCIÓN EXPORTAR CORREGIDA ***
+  void _exportarAExcel() {
+    if (_filteredResguardos.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('No hay datos filtrados para exportar.'),
+            backgroundColor: Colors.orange),
+      );
+      return;
+    }
+
+    try {
+      final folioFormatter = NumberFormat("0000");
+      var excel = Excel.createExcel();
+      Sheet sheet = excel['Resguardos'];
+      excel.delete('Sheet1'); // Eliminar hoja por defecto
+
+      // Encabezados
+      List<CellValue> headers = [
+        TextCellValue('Folio'),
+        TextCellValue('Tipo'),
+        TextCellValue('No. Inventario'),
+        TextCellValue('Descripción'),
+        TextCellValue('Área Entrega'),
+        TextCellValue('Nombre Entrega'),
+        TextCellValue('RFC Entrega'),
+        TextCellValue('Área Recibe'),
+        TextCellValue('Nombre Recibe'),
+        TextCellValue('RFC Recibe'),
+        TextCellValue('Observaciones'),
+        TextCellValue('Capturado Por'),
+        TextCellValue('Fecha Autorizado'),
+        TextCellValue('Estatus')
+      ];
+      sheet.appendRow(headers);
+
+      // Datos
+      for (var resguardo in _filteredResguardos) {
+        sheet.appendRow([
+          TextCellValue('RICB-${folioFormatter.format(resguardo.folio)}'),
+          TextCellValue(resguardo.tipoResguardo),
+          TextCellValue(resguardo.numeroInventario),
+          TextCellValue(resguardo.descripcion),
+          TextCellValue(resguardo.areaEntrega),
+          TextCellValue(resguardo.nombreEntrega),
+          TextCellValue(resguardo.rfcEntrega),
+          TextCellValue(resguardo.areaRecibe),
+          TextCellValue(resguardo.nombreRecibe),
+          TextCellValue(resguardo.rfcRecibe),
+          TextCellValue(resguardo.observaciones ?? ''),
+          TextCellValue(resguardo.capturadoPor ?? ''),
+          TextCellValue(resguardo.fechaAutorizado ?? ''),
+          TextCellValue(resguardo.estatus ?? 'Pendiente'),
+        ]);
+      }
+
+      // Guardar usando el método del paquete excel
+      final String fileName =
+          "Resguardos_Internos_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.xlsx";
+      // El método save() intentará iniciar la descarga en web o guardar en otras plataformas
+      // (puede requerir permisos o configuración adicional fuera de web)
+      excel.save(fileName: fileName);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Exportando a $fileName...'),
+            backgroundColor: Colors.green),
+      );
+    } catch (e) {
+      print("Error al exportar a Excel: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Error al exportar a Excel: $e'),
+            backgroundColor: Colors.red),
+      );
+    }
+  }
+  // *** FIN FUNCIÓN EXPORTAR CORREGIDA ***
+
   bool listEquals<T>(List<T>? a, List<T>? b) {
     if (a == null) return b == null;
     if (b == null || a.length != b.length) return false;
     if (identical(a, b)) return true;
     for (int index = 0; index < a.length; index += 1) {
-      // Comparamos los resguardos usando el == sobreescrito (basado en folio)
       if (a[index] != b[index]) return false;
     }
     return true;
   }
 
-  // Convierte la lista filtrada de Resguardos a filas de PlutoGrid
   void _updatePlutoRows() {
     final folioFormatter = NumberFormat("0000");
-
     _rows = _filteredResguardos.map((resguardo) {
       return PlutoRow(
         cells: {
           'folio': PlutoCell(
-              value:
-                  'RICB-${folioFormatter.format(resguardo.folio)}'), // Folio formateado para mostrar
+              value: 'RICB-${folioFormatter.format(resguardo.folio)}'),
           'tipo_resguardo': PlutoCell(value: resguardo.tipoResguardo),
           'numero_inventario': PlutoCell(value: resguardo.numeroInventario),
           'descripcion': PlutoCell(value: resguardo.descripcion),
@@ -165,14 +264,10 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
           'fecha_autorizado': PlutoCell(value: resguardo.fechaAutorizado ?? ''),
           'estatus': PlutoCell(value: resguardo.estatus ?? 'Pendiente'),
         },
-        // Guardamos el folio original como metadata para poder buscarlo después
-        // PlutoGrid no tiene un campo 'userData' directo en la fila,
-        // así que lo recuperaremos parseando el folio formateado al hacer doble clic.
       );
     }).toList();
   }
 
-  // Define las columnas para PlutoGrid
   final List<PlutoColumn> _columns = [
     PlutoColumn(
       title: 'Folio',
@@ -245,10 +340,12 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
         type: PlutoColumnType.text(),
         readOnly: true),
     PlutoColumn(
-      title: 'Estatus', field: 'estatus', type: PlutoColumnType.text(),
-      width: 120, // Ancho fijo para estatus
-      readOnly: true, textAlign: PlutoColumnTextAlign.center,
-      // Renderizador personalizado para colorear la celda
+      title: 'Estatus',
+      field: 'estatus',
+      type: PlutoColumnType.text(),
+      width: 120,
+      readOnly: true,
+      textAlign: PlutoColumnTextAlign.center,
       renderer: (rendererContext) {
         Color backgroundColor;
         final String status = rendererContext.cell.value.toString();
@@ -265,15 +362,13 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
           default:
             backgroundColor = Colors.white;
         }
-        // Usar un Container dentro del renderer para el color
         return Container(
           color: backgroundColor,
           child: Center(
-            // Centrar el texto dentro del contenedor coloreado
             child: Text(
               status,
               style: TextStyle(
-                color: Colors.black87, // Color de texto
+                color: Colors.black87,
                 fontSize: 14.sp,
               ),
               overflow: TextOverflow.ellipsis,
@@ -284,23 +379,30 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
     ),
   ];
 
-  // Navega a la pantalla de nuevo resguardo y maneja el resultado
   void _navegarANuevoResguardo() async {
-    // Espera a que PaginaNuevoResguardo devuelva un Resguardo o null
     final nuevoResguardo = await Navigator.push<Resguardo>(
-      // Espera un Resguardo directamente
       context,
       MaterialPageRoute(builder: (context) => const PaginaNuevoResguardo()),
     );
 
-    // Si se recibió un nuevo resguardo (no nulo) y el widget sigue montado
     if (nuevoResguardo != null && mounted) {
+      bool changed = false;
       setState(() {
-        _allResguardos.add(nuevoResguardo); // Añadir a la lista principal
-        _filterResguardos(); // Actualizar la lista filtrada y las filas de la tabla
+        _allResguardos.add(nuevoResguardo);
+        changed = true;
+        if (_searchController.text.isNotEmpty) {
+          _filteredResguardos = _allResguardos
+              .where((resguardo) =>
+                  resguardo.matchesSearch(_searchController.text))
+              .toList();
+        } else {
+          _filteredResguardos = List.from(_allResguardos);
+        }
+        _updatePlutoRows();
       });
-
-      // Muestra el AlertDialog de confirmación
+      if (changed) {
+        _refreshPlutoGrid();
+      }
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -311,8 +413,7 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
             actions: <Widget>[
               TextButton(
                 child: Text('OK'),
-                onPressed: () =>
-                    Navigator.of(context).pop(), // Cierra el diálogo
+                onPressed: () => Navigator.of(context).pop(),
               ),
             ],
           );
@@ -321,35 +422,23 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
     }
   }
 
-  // Navega a la pantalla de detalle/edición y maneja el resultado
   void _navegarADetalleResguardo(PlutoRow row) async {
-    // Extraer el folio original del valor formateado en la celda
-    final String folioFormateado = row.cells['folio']!.value; // "RICB-xxxx"
+    final String folioFormateado = row.cells['folio']!.value;
     final int folioOriginal;
     try {
       folioOriginal = int.parse(folioFormateado.split('-')[1]);
     } catch (e) {
       print("Error al parsear folio para detalle: $folioFormateado");
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Error al obtener folio para detalle.'),
-          backgroundColor: Colors.red));
-      return; // No se puede continuar sin el folio original
+      return;
     }
-
-    // Encontrar el índice del Resguardo correspondiente en la lista _allResguardos
-    final int index =
+    final int indexAll =
         _allResguardos.indexWhere((r) => r.folio == folioOriginal);
-    if (index == -1) {
-      print(
-          "Resguardo con folio $folioOriginal no encontrado en _allResguardos para detalle.");
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Error: Resguardo no encontrado para detalle.'),
-          backgroundColor: Colors.red));
-      return; // No encontrado
+    if (indexAll == -1) {
+      print("Resguardo con folio $folioOriginal no encontrado para detalle.");
+      return;
     }
-    final Resguardo resguardoSeleccionado = _allResguardos[index];
+    final Resguardo resguardoSeleccionado = _allResguardos[indexAll];
 
-    // Navega a la pantalla de detalle, pasando el resguardo encontrado
     final resultado = await Navigator.push<DetalleResguardoResult>(
       context,
       MaterialPageRoute(
@@ -357,61 +446,73 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
               PaginaDetalleResguardo(resguardoInicial: resguardoSeleccionado)),
     );
 
-    // Procesar el resultado al regresar de la pantalla de detalle
     if (resultado != null && mounted) {
-      if (resultado.action == DetalleResguardoResultAction.updated &&
-          resultado.resguardo != null) {
-        // Actualizar el resguardo en la lista principal
-        setState(() {
-          _allResguardos[index] =
-              resultado.resguardo!; // Reemplaza en el índice correcto
-          _filterResguardos(); // Refrescar la lista filtrada y la tabla
-        });
-        // Opcional: Mostrar SnackBar de éxito de actualización aquí si se desea
-        // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Resguardo ${resultado.resguardo!.folioFormateado} actualizado.'), backgroundColor: Colors.green));
-      } else if (resultado.action == DetalleResguardoResultAction.deleted &&
-          resultado.resguardo != null) {
-        // Eliminar el resguardo de la lista principal
-        setState(() {
-          // Asegurarse de que el índice sigue siendo válido (aunque debería serlo)
-          if (index < _allResguardos.length &&
-              _allResguardos[index].folio == resultado.resguardo!.folio) {
-            _allResguardos.removeAt(index);
-          } else {
-            // Si el índice ya no coincide (raro), buscar y eliminar por folio
-            _allResguardos
-                .removeWhere((r) => r.folio == resultado.resguardo!.folio);
+      bool changed = false;
+      setState(() {
+        if (resultado.action == DetalleResguardoResultAction.updated &&
+            resultado.resguardo != null) {
+          final int currentIndex = _allResguardos
+              .indexWhere((r) => r.folio == resultado.resguardo!.folio);
+          if (currentIndex != -1) {
+            _allResguardos[currentIndex] = resultado.resguardo!;
+            changed = true;
           }
-          _filterResguardos(); // Refrescar la lista filtrada y la tabla
-        });
-        // Opcional: Mostrar SnackBar de éxito de eliminación aquí si se desea
-        // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Resguardo ${resultado.resguardo!.folioFormateado} eliminado.'), backgroundColor: Colors.orange));
+        } else if (resultado.action == DetalleResguardoResultAction.deleted &&
+            resultado.resguardo != null) {
+          int initialLength = _allResguardos.length;
+          _allResguardos
+              .removeWhere((r) => r.folio == resultado.resguardo!.folio);
+          if (_allResguardos.length < initialLength) changed = true;
+        }
+        if (changed) {
+          if (_searchController.text.isNotEmpty) {
+            _filteredResguardos = _allResguardos
+                .where((resguardo) =>
+                    resguardo.matchesSearch(_searchController.text))
+                .toList();
+          } else {
+            _filteredResguardos = List.from(_allResguardos);
+          }
+          _updatePlutoRows();
+        }
+      });
+      if (changed) {
+        _refreshPlutoGrid();
       }
-      // Si action es 'none', no hacemos nada
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // El build queda exactamente igual que en la versión anterior
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xfff6c500),
         centerTitle: true,
-        // Título actualizado
         title: Text(
           "ACBMIN: RESGUARDOS INTERNOS",
           style: TextStyle(
             color: Colors.red,
             fontWeight: FontWeight.bold,
-            fontSize: 25.0.dg, // Ajustar tamaño si es necesario
+            fontSize: 25.0.dg,
           ),
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(), // Botón para regresar
+          onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          // Mostrar nombre de usuario si existe
+          IconButton(
+            icon: Icon(Icons.refresh, color: Colors.black),
+            tooltip: 'Actualizar Tabla',
+            onPressed: _actualizarDatos,
+          ),
+          IconButton(
+            icon: Icon(Icons.download, color: Colors.black),
+            tooltip: 'Exportar a Excel',
+            onPressed: _exportarAExcel,
+          ),
+          SizedBox(width: 10.w),
           if (_nombreUsuarioActual != null)
             Center(
               child: Padding(
@@ -422,25 +523,22 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
                       fontSize: 20.dg,
                       fontWeight: FontWeight.bold,
                       fontStyle: FontStyle.italic,
-                      color: Colors.black // Asegurar contraste
-                      ),
+                      color: Colors.black),
                 ),
               ),
             ),
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.w), // Padding general
+        padding: EdgeInsets.all(16.w),
         child: Column(
           children: [
-            // Fila con campo de búsqueda y botón
             Padding(
               padding: EdgeInsets.only(bottom: 16.h),
               child: Row(
                 children: [
-                  // Campo de búsqueda expandido
                   Expanded(
-                    flex: 3, // Ocupa más espacio
+                    flex: 3,
                     child: TextField(
                       controller: _searchController,
                       decoration: InputDecoration(
@@ -451,56 +549,45 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
                             borderRadius: BorderRadius.circular(8.r),
                           ),
                           contentPadding: EdgeInsets.symmetric(
-                              vertical: 10.h,
-                              horizontal: 10.w) // Ajustar padding interno
-                          ),
+                              vertical: 10.h, horizontal: 10.w)),
                     ),
                   ),
-                  SizedBox(width: 16.w), // Espacio entre búsqueda y botón
-                  // Botón Nuevo Resguardo
+                  SizedBox(width: 16.w),
                   ElevatedButton.icon(
                     icon: Icon(Icons.add),
                     label: Text('Nuevo Resguardo'),
                     onPressed: _navegarANuevoResguardo,
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(
-                          vertical: 15.h,
-                          horizontal: 20.w), // Padding del botón
-                      backgroundColor: Colors.amber, // Color de fondo
-                      foregroundColor: Colors.black, // Color del texto/icono
+                          vertical: 15.h, horizontal: 20.w),
+                      backgroundColor: Colors.amber,
+                      foregroundColor: Colors.black,
                     ),
                   ),
                 ],
               ),
             ),
-            // Tabla expandida
             Expanded(
               child: PlutoGrid(
                 columns: _columns,
-                rows: _rows, // Usar las filas actualizadas
-                // Callback cuando la tabla está lista
+                rows: _rows,
                 onLoaded: (PlutoGridOnLoadedEvent event) {
                   _stateManager = event.stateManager;
-                  // Opcional: Ocultar filtros de columna si no se usan
                   _stateManager!.setShowColumnFilter(false);
                 },
-                // Callback para doble clic en una fila
                 onRowDoubleTap: (PlutoGridOnRowDoubleTapEvent event) {
                   if (event.row != null) {
                     _navegarADetalleResguardo(event.row!);
                   }
                 },
-                // Configuración general de la tabla
                 configuration: PlutoGridConfiguration(
                   style: PlutoGridStyleConfig(
-                    enableGridBorderShadow: true, // Sombra alrededor
-                    enableRowColorAnimation: true, // Animación al seleccionar
-                    rowHeight: 45.h, // Altura de fila ajustada con screenutil
-                    cellTextStyle:
-                        TextStyle(fontSize: 14.sp), // Tamaño texto celda
-                    columnTextStyle: TextStyle(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.bold), // Tamaño texto encabezado
+                    enableGridBorderShadow: true,
+                    enableRowColorAnimation: true,
+                    rowHeight: 45.h,
+                    cellTextStyle: TextStyle(fontSize: 14.sp),
+                    columnTextStyle:
+                        TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
