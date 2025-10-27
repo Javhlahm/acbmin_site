@@ -1,6 +1,7 @@
 import 'package:acbmin_site/PaginaInventarioTaller.dart';
 import 'package:acbmin_site/PaginaPrincipal.dart';
-import 'package:acbmin_site/PaginaResguardos.dart'; // Importar la nueva página
+import 'package:acbmin_site/PaginaResguardos.dart'; // Importar la página de Resguardos
+import 'package:acbmin_site/PaginaBajas.dart'; // Importar la nueva página de Bajas
 import 'package:acbmin_site/PaginaUsuarios.dart';
 import 'package:acbmin_site/entity/UsuarioGlobal.dart';
 import 'package:acbmin_site/security/auth_service.dart';
@@ -28,7 +29,8 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
   Color colorHoverSalir = Colors.black;
   Color colorCardTaller = Colors.amber;
   Color colorCardUsuarios = Colors.amber;
-  Color colorCardResguardos = Colors.amber; // Color para la nueva tarjeta
+  Color colorCardResguardos = Colors.amber;
+  Color colorCardBajas = Colors.amber; // Color para la nueva tarjeta de Bajas
 
   @override
   Widget build(BuildContext context) {
@@ -55,20 +57,27 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
           },
           icon: Icon(Icons.logout, size: 0.07.sh, color: colorHoverSalir),
           tooltip: 'Cerrar Sesión', // Tooltip para el botón de salir
+          // Agregamos onHover para cambiar el color del icono de salir
+          hoverColor: Colors.transparent, // Evitar el highlight default
+          onLongPress:
+              () {}, // Necesario para que onHover funcione en web/desktop a veces
         ),
         actions: [
           if (usuarioGlobal?.nombre != null)
             Center(
               // Centrar verticalmente el nombre
-              child: Text(
-                usuarioGlobal!.nombre!,
-                style: TextStyle(
-                    fontSize: 25.dg,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black), // Color legible
+              child: Padding(
+                padding: EdgeInsets.only(
+                    right: 20.dg), // Añadir padding a la derecha
+                child: Text(
+                  usuarioGlobal!.nombre!,
+                  style: TextStyle(
+                      fontSize: 25.dg,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black), // Color legible
+                ),
               ),
             ),
-          Padding(padding: EdgeInsets.only(right: 20.dg)),
         ],
       ),
       body: Container(
@@ -125,6 +134,30 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
                         setState(() => colorCardResguardos = Colors.orange),
                   ),
                 ],
+
+                // *** NUEVA TARJETA PARA BAJAS DE BIENES ***
+                // Asumiendo que solo los admins pueden verla
+                if (usuarioGlobal?.roles?.contains("admin") ?? false) ...[
+                  SizedBox(width: 20.w), // Espacio entre tarjetas
+                  _buildMenuCard(
+                    context: context,
+                    icon: Icons.archive, // Icono sugerido para bajas
+                    title: "Bajas de Bienes", // Título del módulo
+                    color: colorCardBajas, // Usa el nuevo color
+                    onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                PaginaBajas())), // Navega a PaginaBajas
+                    onHover: (hovering) => setState(() => colorCardBajas =
+                        hovering ? Colors.orange : Colors.amber),
+                    onTapDown: () => setState(() => colorCardBajas =
+                        const Color.fromARGB(255, 198, 121, 4)),
+                    onTapUp: () =>
+                        setState(() => colorCardBajas = Colors.orange),
+                  ),
+                ],
+                // *** FIN NUEVA TARJETA ***
 
                 // Tarjeta Control de Acceso (si tiene rol 'admin')
                 if (usuarioGlobal?.roles?.contains("admin") ?? false) ...[
