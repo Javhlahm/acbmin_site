@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-import '../entity/Resguardo.dart';
-import '../entity/UsuarioGlobal.dart';
 
+// Importa entidades y servicios necesarios
+import 'entity/Resguardo.dart';
+import 'entity/UsuarioGlobal.dart';
+import 'services/resguardos/actualizar_resguardo.dart';
+import 'services/resguardos/eliminar_resguardo.dart';
+import 'services/resguardos/generar_reporte_resguardo.dart'; // Importa el servicio del reporte
+
+// Importa 'package:web' y 'dart:js_interop' para la lógica web (se usan dentro de generar_reporte_resguardo.dart)
+// No es necesario importarlos directamente aquí si ya están en el servicio.
+import 'package:flutter/foundation.dart' show kIsWeb; // Para saber si es web
+
+// Enum y clase Result para comunicar el resultado a la página anterior
 enum DetalleResguardoResultAction { updated, deleted, none }
 
 class DetalleResguardoResult {
@@ -24,9 +34,10 @@ class _PaginaDetalleResguardoState extends State<PaginaDetalleResguardo> {
   final _formKey = GlobalKey<FormState>();
   bool _isEditing = false;
   bool _isAdmin = false;
-  bool _puedeAccionarPorEstatus = true; // Para editar/eliminar
+  bool _puedeAccionarPorEstatus = true;
+  bool _isSaving = false; // Para deshabilitar botones durante operaciones async
 
-  // Controladores (sin cambios)...
+  // Controladores
   late TextEditingController _folioController;
   late TextEditingController _numeroInventarioController;
   late TextEditingController _descripcionController;
@@ -53,9 +64,10 @@ class _PaginaDetalleResguardoState extends State<PaginaDetalleResguardo> {
     _puedeAccionarPorEstatus =
         (_resguardoActual.estatus?.toLowerCase() != 'aprobado');
 
+    // Inicializar controladores
     final folioFormatter = NumberFormat("0000");
-    _folioController = TextEditingController(
-        text: 'RICB-${folioFormatter.format(_resguardoActual.folio)}');
+    _folioController =
+        TextEditingController(text: _resguardoActual.folioFormateado);
     _numeroInventarioController =
         TextEditingController(text: _resguardoActual.numeroInventario);
     _descripcionController =
@@ -80,7 +92,6 @@ class _PaginaDetalleResguardoState extends State<PaginaDetalleResguardo> {
         TextEditingController(text: _resguardoActual.estatus ?? 'Pendiente');
     _observacionesController =
         TextEditingController(text: _resguardoActual.observaciones ?? '');
-
     _tipoResguardoSeleccionado = _resguardoActual.tipoResguardo;
     _camposEntregaHabilitados =
         (_tipoResguardoSeleccionado == 'Traspaso de resguardo');
@@ -88,7 +99,7 @@ class _PaginaDetalleResguardoState extends State<PaginaDetalleResguardo> {
 
   @override
   void dispose() {
-    // Disponer todos los controladores (sin cambios)...
+    // Liberar controladores
     _folioController.dispose();
     _numeroInventarioController.dispose();
     _descripcionController.dispose();
@@ -105,9 +116,6 @@ class _PaginaDetalleResguardoState extends State<PaginaDetalleResguardo> {
     super.dispose();
   }
 
-  // Funciones _toggleEdit, _actualizarControladoresVisuales, _cambiarTipoResguardo,
-  // _guardarCambios, _confirmarEliminar, _eliminarResguardo, _cambiarEstatus,
-  // _buildSectionTitle, _buildInfoField (sin cambios)...
   void _toggleEdit() {
     if (!_puedeAccionarPorEstatus && !_isEditing) return;
     setState(() {
@@ -125,9 +133,7 @@ class _PaginaDetalleResguardoState extends State<PaginaDetalleResguardo> {
   }
 
   void _actualizarControladoresVisuales() {
-    final folioFormatter = NumberFormat("0000");
-    _folioController.text =
-        'RICB-${folioFormatter.format(_resguardoActual.folio)}';
+    _folioController.text = _resguardoActual.folioFormateado;
     _numeroInventarioController.text = _resguardoActual.numeroInventario;
     _descripcionController.text = _resguardoActual.descripcion;
     _areaEntregaController.text = _resguardoActual.areaEntrega;
@@ -156,49 +162,73 @@ class _PaginaDetalleResguardoState extends State<PaginaDetalleResguardo> {
     }
   }
 
-  void _guardarCambios() {
-    if (_formKey.currentState!.validate()) {
+  void _guardarCambios() async {
+    if (_formKey.currentState!.validate() && !_isSaving) {
+      if (!mounted) return;
+      setState(() {
+        _isSaving = true;
+      });
+
       final String? nombreEditor = usuarioGlobal?.nombre;
       bool limpiarObservaciones = _observacionesController.text.trim().isEmpty;
+
       _resguardoActual = _resguardoActual.copyWith(
         tipoResguardo: _tipoResguardoSeleccionado,
-        numeroInventario: _numeroInventarioController.text,
-        descripcion: _descripcionController.text,
-        areaEntrega:
-            _camposEntregaHabilitados ? _areaEntregaController.text : 'N/A',
-        nombreEntrega:
-            _camposEntregaHabilitados ? _nombreEntregaController.text : 'N/A',
-        rfcEntrega:
-            _camposEntregaHabilitados ? _rfcEntregaController.text : 'N/A',
-        areaRecibe: _areaRecibeController.text,
-        nombreRecibe: _nombreRecibeController.text,
-        rfcRecibe: _rfcRecibeController.text,
+        numeroInventario: _numeroInventarioController.text.trim(),
+        descripcion: _descripcionController.text.trim(),
+        areaEntrega: _camposEntregaHabilitados
+            ? _areaEntregaController.text.trim()
+            : 'N/A',
+        nombreEntrega: _camposEntregaHabilitados
+            ? _nombreEntregaController.text.trim()
+            : 'N/A',
+        rfcEntrega: _camposEntregaHabilitados
+            ? _rfcEntregaController.text.trim()
+            : 'N/A',
+        areaRecibe: _areaRecibeController.text.trim(),
+        nombreRecibe: _nombreRecibeController.text.trim(),
+        rfcRecibe: _rfcRecibeController.text.trim(),
         observaciones:
-            limpiarObservaciones ? null : _observacionesController.text,
+            limpiarObservaciones ? null : _observacionesController.text.trim(),
         clearObservaciones: limpiarObservaciones,
         capturadoPor: nombreEditor ?? 'Desconocido',
       );
-      Navigator.pop(
-          context,
-          DetalleResguardoResult(DetalleResguardoResultAction.updated,
-              resguardo: _resguardoActual));
+
+      bool success =
+          await actualizarResguardo(_resguardoActual.folio, _resguardoActual);
+
+      if (!mounted) return;
+      setState(() {
+        _isSaving = false;
+      });
+
+      if (success) {
+        Navigator.pop(
+            context,
+            DetalleResguardoResult(DetalleResguardoResultAction.updated,
+                resguardo: _resguardoActual));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error al guardar los cambios. Intente de nuevo.'),
+          backgroundColor: Colors.red,
+        ));
+      }
     }
   }
 
   void _confirmarEliminar() {
-    if (!_puedeAccionarPorEstatus) return;
+    if (!_puedeAccionarPorEstatus || _isSaving) return;
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Confirmar Eliminación'),
           content: Text(
-              '¿Está seguro que desea eliminar el resguardo ${_resguardoActual.folioFormateado}? Esta acción no se puede deshacer.'),
+              '¿Está seguro que desea eliminar el resguardo ${_resguardoActual.folioFormateado}?'),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancelar'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
+                child: Text('Cancelar'),
+                onPressed: () => Navigator.of(context).pop()),
             TextButton(
               child: Text('Eliminar', style: TextStyle(color: Colors.red)),
               onPressed: () {
@@ -212,47 +242,129 @@ class _PaginaDetalleResguardoState extends State<PaginaDetalleResguardo> {
     );
   }
 
-  void _eliminarResguardo() {
-    Navigator.pop(
-        context,
-        DetalleResguardoResult(DetalleResguardoResultAction.deleted,
-            resguardo: _resguardoActual));
+  void _eliminarResguardo() async {
+    if (_isSaving) return;
+    if (!mounted) return;
+    setState(() {
+      _isSaving = true;
+    });
+
+    bool success = await eliminarResguardo(_resguardoActual.folio);
+
+    if (!mounted) return;
+    setState(() {
+      _isSaving = false;
+    });
+
+    if (success) {
+      Navigator.pop(
+          context,
+          DetalleResguardoResult(DetalleResguardoResultAction.deleted,
+              resguardo: _resguardoActual));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Error al eliminar el resguardo. Intente de nuevo.'),
+        backgroundColor: Colors.red,
+      ));
+    }
   }
 
-  void _cambiarEstatus(String nuevoEstatus) {
+  void _cambiarEstatus(String nuevoEstatus) async {
+    if (!_isAdmin || _isSaving) return;
+    if (!mounted) return;
+    setState(() {
+      _isSaving = true;
+    });
+
     final now = DateTime.now();
-    final formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
-    bool limpiarFecha = nuevoEstatus != 'Aprobado';
+    // ----- FORMATO DE FECHA CORREGIDO -----
+    final formatter = DateFormat("yyyy-MM-dd'T'HH:mm:ss"); // Usar 'T'
+    // ------------------------------------
+    bool limpiarFecha = nuevoEstatus.toLowerCase() != 'aprobado';
+
     final Resguardo resguardoActualizado = _resguardoActual.copyWith(
         estatus: nuevoEstatus,
         fechaAutorizado: !limpiarFecha ? formatter.format(now) : null,
         clearFechaAutorizado: limpiarFecha,
         capturadoPor: usuarioGlobal?.nombre ?? 'Desconocido');
+
+    bool success = await actualizarResguardo(
+        resguardoActualizado.folio, resguardoActualizado);
+
+    if (!mounted) return;
     setState(() {
-      _resguardoActual = resguardoActualizado;
-      _puedeAccionarPorEstatus = (nuevoEstatus.toLowerCase() != 'aprobado');
-      _actualizarControladoresVisuales();
+      _isSaving = false;
     });
-    Future.delayed(Duration(milliseconds: 100), () {
-      if (mounted) {
-        Navigator.pop(
-            context,
-            DetalleResguardoResult(DetalleResguardoResultAction.updated,
-                resguardo: resguardoActualizado));
-      }
-    });
+
+    if (success) {
+      setState(() {
+        _resguardoActual = resguardoActualizado;
+        _puedeAccionarPorEstatus = (nuevoEstatus.toLowerCase() != 'aprobado');
+        _actualizarControladoresVisuales();
+      });
+      Future.delayed(Duration(milliseconds: 150), () {
+        if (mounted) {
+          Navigator.pop(
+              context,
+              DetalleResguardoResult(DetalleResguardoResultAction.updated,
+                  resguardo: resguardoActualizado));
+        }
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Error al cambiar el estatus. Intente de nuevo.'),
+        backgroundColor: Colors.red,
+      ));
+    }
   }
 
+  // Llama al servicio para generar el PDF y manejar la descarga
+  void _generarResguardoPDF() async {
+    if (_isSaving) return;
+    if (!mounted) return;
+    setState(() {
+      _isSaving = true;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('Generando reporte PDF...'),
+      backgroundColor: Colors.blue,
+      duration: Duration(seconds: 2),
+    ));
+
+    bool success =
+        await generarYMostrarReporteResguardo(_resguardoActual.folio);
+
+    if (!mounted) return;
+    setState(() {
+      _isSaving = false;
+    });
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+    if (success) {
+      if (kIsWeb) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('La descarga del PDF ha comenzado.'),
+            backgroundColor: Colors.green));
+      }
+      // else { Mensaje específico si implementas guardado/apertura no-web }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error al generar o mostrar el reporte PDF.'),
+          backgroundColor: Colors.red));
+    }
+  }
+
+  // --- Widgets Helper ---
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h),
-      child: Text(
-        title,
-        style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
-            color: Colors.black54),
-      ),
+      child: Text(title,
+          style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.black54)),
     );
   }
 
@@ -290,22 +402,11 @@ class _PaginaDetalleResguardoState extends State<PaginaDetalleResguardo> {
     );
   }
 
-  // *** NUEVA FUNCIÓN PARA EL BOTÓN GENERAR ***
-  void _generarResguardoPDF() {
-    // Por ahora, solo muestra un mensaje
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(
-            'Funcionalidad "Generar Resguardo PDF" pendiente de implementación.'),
-        backgroundColor: Colors.cyan));
-    // TODO: Aquí irá la llamada al backend para obtener el PDF
-  }
-
   @override
   Widget build(BuildContext context) {
     final String folioMostrado = _folioController.text;
     bool puedeEditarEntrega =
         _isEditing && _camposEntregaHabilitados && _puedeAccionarPorEstatus;
-    // Variable para saber si el folio está aprobado
     final bool estaAprobado =
         _resguardoActual.estatus?.toLowerCase() == 'aprobado';
 
@@ -321,8 +422,10 @@ class _PaginaDetalleResguardoState extends State<PaginaDetalleResguardo> {
         backgroundColor: Color(0xfff6c500),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context,
-              DetalleResguardoResult(DetalleResguardoResultAction.none)),
+          onPressed: _isSaving
+              ? null
+              : () => Navigator.pop(context,
+                  DetalleResguardoResult(DetalleResguardoResultAction.none)),
         ),
       ),
       body: Center(
@@ -342,7 +445,7 @@ class _PaginaDetalleResguardoState extends State<PaginaDetalleResguardo> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // --- Campos del formulario (sin cambios) ---
+                        // --- Campos del Formulario ---
                         _buildInfoField(
                             label: 'Folio',
                             controller: _folioController,
@@ -477,66 +580,67 @@ class _PaginaDetalleResguardoState extends State<PaginaDetalleResguardo> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            if (_isEditing)
+                            if (_isEditing) // Guardar
                               ElevatedButton.icon(
                                 icon: Icon(Icons.save),
                                 label: Text('Guardar Cambios'),
-                                onPressed: _guardarCambios,
+                                onPressed: _isSaving ? null : _guardarCambios,
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.blue,
-                                    foregroundColor: Colors.white),
-                              )
-                            else if (_puedeAccionarPorEstatus) // Modificar
+                                    foregroundColor: Colors.white,
+                                    disabledBackgroundColor: Colors.grey),
+                              ),
+                            if (_puedeAccionarPorEstatus) // Modificar
                               ElevatedButton.icon(
                                 icon: Icon(Icons.edit),
                                 label: Text('Modificar Folio'),
-                                onPressed: _toggleEdit,
+                                onPressed: _isSaving ? null : _toggleEdit,
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.amber,
-                                    foregroundColor: Colors.black),
+                                    foregroundColor: Colors.black,
+                                    disabledBackgroundColor: Colors.grey),
                               ),
                             if (!_isEditing &&
                                 _puedeAccionarPorEstatus) // Eliminar
                               ElevatedButton.icon(
                                 icon: Icon(Icons.delete_forever),
                                 label: Text('Eliminar Folio'),
-                                onPressed: _confirmarEliminar,
+                                onPressed:
+                                    _isSaving ? null : _confirmarEliminar,
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.red,
-                                    foregroundColor: Colors.white),
+                                    foregroundColor: Colors.white,
+                                    disabledBackgroundColor:
+                                        Colors.grey.shade400),
                               ),
                             if (_isEditing) // Cancelar
                               TextButton(
-                                  onPressed: _toggleEdit,
+                                  onPressed: _isSaving ? null : _toggleEdit,
                                   child: Text('Cancelar')),
                           ],
                         ),
-                        SizedBox(
-                            height: 15.h), // Espacio antes del botón Generar
+                        SizedBox(height: 15.h),
 
-                        // *** BOTÓN GENERAR RESGUARDO ***
-                        // Visible solo si NO se está editando Y el estatus es Aprobado
+                        // Botón Generar Resguardo PDF
                         if (!_isEditing && estaAprobado)
                           Center(
-                            // Centrar el botón
                             child: ElevatedButton.icon(
                               icon: Icon(Icons.picture_as_pdf),
                               label: Text('Generar Resguardo'),
-                              onPressed:
-                                  _generarResguardoPDF, // Llama a la nueva función
+                              onPressed: _isSaving
+                                  ? null
+                                  : _generarResguardoPDF, // Llama a la función actualizada
                               style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Colors.teal, // Un color diferente
+                                  backgroundColor: Colors.teal,
                                   foregroundColor: Colors.white,
+                                  disabledBackgroundColor: Colors.grey,
                                   padding: EdgeInsets.symmetric(
                                       horizontal: 20.w, vertical: 12.h)),
                             ),
                           ),
-                        // *** FIN BOTÓN GENERAR RESGUARDO ***
 
-                        // --- Botones de Admin ---
-                        if (_isAdmin &&
-                            !_isEditing) // Solo para admin Y no en modo edición
+                        // Botones de Admin
+                        if (_isAdmin && !_isEditing)
                           Padding(
                             padding: EdgeInsets.only(top: 20.h),
                             child: Row(
@@ -545,43 +649,50 @@ class _PaginaDetalleResguardoState extends State<PaginaDetalleResguardo> {
                                 ElevatedButton.icon(
                                   icon: Icon(Icons.check_circle),
                                   label: Text('Aprobar'),
-                                  onPressed: !estaAprobado
+                                  onPressed: !estaAprobado && !_isSaving
                                       ? () => _cambiarEstatus('Aprobado')
                                       : null,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                    foregroundColor: Colors.white,
-                                    disabledBackgroundColor: Colors.grey,
-                                  ),
+                                      backgroundColor: Colors.green,
+                                      foregroundColor: Colors.white,
+                                      disabledBackgroundColor: Colors.grey),
                                 ),
                                 ElevatedButton.icon(
                                   icon: Icon(Icons.cancel),
                                   label: Text('Rechazar'),
                                   onPressed: (_resguardoActual.estatus
-                                              ?.toLowerCase() !=
-                                          'rechazado')
+                                                  ?.toLowerCase() !=
+                                              'rechazado' &&
+                                          !_isSaving)
                                       ? () => _cambiarEstatus('Rechazado')
                                       : null,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red,
-                                    foregroundColor: Colors.white,
-                                    disabledBackgroundColor: Colors.grey,
-                                  ),
+                                      backgroundColor: Colors.red,
+                                      foregroundColor: Colors.white,
+                                      disabledBackgroundColor: Colors.grey),
                                 ),
                                 if (_resguardoActual.estatus?.toLowerCase() ==
                                     'rechazado')
                                   ElevatedButton.icon(
                                     icon: Icon(Icons.hourglass_empty),
                                     label: Text('Poner Pendiente'),
-                                    onPressed: () =>
-                                        _cambiarEstatus('Pendiente'),
+                                    onPressed: _isSaving
+                                        ? null
+                                        : () => _cambiarEstatus('Pendiente'),
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.orange,
-                                      foregroundColor: Colors.white,
-                                    ),
+                                        backgroundColor: Colors.orange,
+                                        foregroundColor: Colors.white,
+                                        disabledBackgroundColor: Colors.grey),
                                   ),
                               ],
                             ),
+                          ),
+
+                        // Indicador de progreso
+                        if (_isSaving)
+                          Padding(
+                            padding: EdgeInsets.only(top: 15.h),
+                            child: Center(child: CircularProgressIndicator()),
                           ),
                       ],
                     ),

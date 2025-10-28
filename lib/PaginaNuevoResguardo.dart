@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import '../entity/Resguardo.dart'; // Asegúrate que la ruta sea correcta
-import '../entity/UsuarioGlobal.dart'; // <-- IMPORTAR USUARIO GLOBAL
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart'; // Para diseño adaptable
+import 'package:intl/intl.dart'; // Para formatear fecha si es necesario
+
+// Importar entidad Resguardo y UsuarioGlobal
+import 'entity/Resguardo.dart'; // Asegúrate que la ruta sea correcta
+import 'entity/UsuarioGlobal.dart'; // Para obtener el nombre del capturista
+// Importar el servicio para crear resguardos en la API
+import 'services/resguardos/crear_resguardo.dart'; // Asegúrate que la ruta sea correcta
 
 class PaginaNuevoResguardo extends StatefulWidget {
   const PaginaNuevoResguardo({super.key});
@@ -27,6 +32,7 @@ class _PaginaNuevoResguardoState extends State<PaginaNuevoResguardo> {
   // Variable de estado para el tipo de resguardo seleccionado
   String _tipoResguardoSeleccionado = 'Traspaso de resguardo';
   bool _camposEntregaHabilitados = true;
+  bool _isSaving = false; // Para deshabilitar botón mientras guarda
 
   @override
   void dispose() {
@@ -43,6 +49,7 @@ class _PaginaNuevoResguardoState extends State<PaginaNuevoResguardo> {
     super.dispose();
   }
 
+  // Cambia el tipo de resguardo y habilita/deshabilita campos de entrega
   void _cambiarTipoResguardo(String? valor) {
     if (valor != null) {
       setState(() {
@@ -58,42 +65,66 @@ class _PaginaNuevoResguardoState extends State<PaginaNuevoResguardo> {
     }
   }
 
-  void _crearResguardo() {
-    if (_formKey.currentState!.validate()) {
-      // Simulación de generación de folio
-      final int nuevoFolio =
-          DateTime.now().millisecondsSinceEpoch % 10000 + 1000;
+  // Función modificada para llamar a la API
+  void _crearResguardo() async {
+    // Validar el formulario y asegurarse que no se esté guardando ya
+    if (_formKey.currentState!.validate() && !_isSaving) {
+      setState(() {
+        _isSaving = true;
+      }); // Deshabilita botón y muestra indicador
 
-      // *** OBTENER NOMBRE DEL USUARIO GLOBAL ***
       final String? nombreCapturista = usuarioGlobal?.nombre;
 
+      // Crear el objeto Resguardo localmente (sin folio asignado aún)
       final nuevoResguardo = Resguardo(
-        folio: nuevoFolio,
+        folio: 0, // El folio lo asignará el backend, ponemos 0 temporalmente
         fechaAutorizado: null,
-        estatus: 'Pendiente',
+        estatus: 'Pendiente', // Estatus inicial por defecto
         tipoResguardo: _tipoResguardoSeleccionado,
-        numeroInventario: _numeroInventarioController.text,
-        descripcion: _descripcionController.text,
-        areaEntrega:
-            _camposEntregaHabilitados ? _areaEntregaController.text : 'N/A',
-        nombreEntrega:
-            _camposEntregaHabilitados ? _nombreEntregaController.text : 'N/A',
-        rfcEntrega:
-            _camposEntregaHabilitados ? _rfcEntregaController.text : 'N/A',
-        areaRecibe: _areaRecibeController.text,
-        nombreRecibe: _nombreRecibeController.text,
-        rfcRecibe: _rfcRecibeController.text,
+        numeroInventario: _numeroInventarioController.text.trim(),
+        descripcion: _descripcionController.text.trim(),
+        areaEntrega: _camposEntregaHabilitados
+            ? _areaEntregaController.text.trim()
+            : 'N/A',
+        nombreEntrega: _camposEntregaHabilitados
+            ? _nombreEntregaController.text.trim()
+            : 'N/A',
+        rfcEntrega: _camposEntregaHabilitados
+            ? _rfcEntregaController.text.trim()
+            : 'N/A',
+        areaRecibe: _areaRecibeController.text.trim(),
+        nombreRecibe: _nombreRecibeController.text.trim(),
+        rfcRecibe: _rfcRecibeController.text.trim(),
         observaciones: _observacionesController.text.trim().isEmpty
-            ? null
-            : _observacionesController.text,
-        capturadoPor:
-            nombreCapturista ?? 'Desconocido', // <-- ASIGNAR NOMBRE CAPTURISTA
+            ? null // Si está vacío, manda null
+            : _observacionesController.text.trim(),
+        capturadoPor: nombreCapturista ?? 'Desconocido', // Asigna el capturista
       );
 
-      Navigator.pop(context, nuevoResguardo);
+      // Llamar al servicio para crear el resguardo en la API
+      Resguardo? resguardoCreado = await crearResguardo(nuevoResguardo);
+
+      // Verificar si el widget sigue montado antes de actualizar estado o navegar
+      if (!mounted) return;
+
+      setState(() {
+        _isSaving = false;
+      }); // Rehabilita botón
+
+      if (resguardoCreado != null) {
+        // Si la API devuelve el resguardo creado (con folio), lo pasamos de vuelta a PaginaResguardos
+        Navigator.pop(context, resguardoCreado);
+      } else {
+        // Si hubo un error en la API, mostrar mensaje
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error al crear el resguardo. Intente de nuevo.'),
+          backgroundColor: Colors.red,
+        ));
+      }
     }
   }
 
+  // Widget helper para crear títulos de sección
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h),
@@ -121,7 +152,8 @@ class _PaginaNuevoResguardoState extends State<PaginaNuevoResguardo> {
         backgroundColor: Color(0xfff6c500),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
+          // Si está guardando, no permitir salir fácilmente
+          onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
         ),
       ),
       body: Center(
@@ -144,108 +176,135 @@ class _PaginaNuevoResguardoState extends State<PaginaNuevoResguardo> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildSectionTitle('Tipo de Resguardo'),
+                        // Radio buttons para seleccionar el tipo
                         RadioListTile<String>(
                           title: const Text('Traspaso de resguardo'),
                           value: 'Traspaso de resguardo',
                           groupValue: _tipoResguardoSeleccionado,
-                          onChanged: _cambiarTipoResguardo,
+                          onChanged: _isSaving
+                              ? null
+                              : _cambiarTipoResguardo, // Deshabilitar si está guardando
+                          visualDensity: VisualDensity.compact,
+                          contentPadding: EdgeInsets.zero,
                         ),
                         RadioListTile<String>(
                           title: const Text('Nueva adquisición'),
                           value: 'Nueva adquisición',
                           groupValue: _tipoResguardoSeleccionado,
-                          onChanged: _cambiarTipoResguardo,
+                          onChanged: _isSaving ? null : _cambiarTipoResguardo,
+                          visualDensity: VisualDensity.compact,
+                          contentPadding: EdgeInsets.zero,
                         ),
                         Divider(height: 20.h, thickness: 1),
+
                         _buildSectionTitle('Datos del Bien'),
+                        // Campo Número de Inventario
                         TextFormField(
                           controller: _numeroInventarioController,
                           decoration: const InputDecoration(
                               labelText: 'Número de Inventario'),
+                          enabled: !_isSaving, // Deshabilitar si está guardando
                           validator: (value) => (value?.trim().isEmpty ?? true)
                               ? 'Campo requerido'
                               : null,
                         ),
                         SizedBox(height: 12.h),
+                        // Campo Descripción
                         TextFormField(
                           controller: _descripcionController,
                           decoration:
                               const InputDecoration(labelText: 'Descripción'),
                           maxLines: 2,
+                          enabled: !_isSaving,
                           validator: (value) => (value?.trim().isEmpty ?? true)
                               ? 'Campo requerido'
                               : null,
                         ),
                         Divider(height: 20.h, thickness: 1),
+
                         _buildSectionTitle('Datos de Quien Entrega'),
+                        // Campo Área Entrega
                         TextFormField(
                           controller: _areaEntregaController,
                           decoration: InputDecoration(
                               labelText: 'Área que Entrega',
-                              filled: !_camposEntregaHabilitados,
+                              filled:
+                                  !_camposEntregaHabilitados, // Fondo gris si está deshabilitado por tipo
                               fillColor: Colors.grey[200]),
-                          enabled: _camposEntregaHabilitados,
+                          enabled: _camposEntregaHabilitados &&
+                              !_isSaving, // Habilitado solo si es traspaso y no guardando
                           validator: (value) => (_camposEntregaHabilitados &&
                                   (value?.trim().isEmpty ?? true))
                               ? 'Campo requerido'
                               : null,
                         ),
                         SizedBox(height: 12.h),
+                        // Campo Nombre Entrega
                         TextFormField(
                           controller: _nombreEntregaController,
                           decoration: InputDecoration(
                               labelText: 'Nombre de quien Entrega',
                               filled: !_camposEntregaHabilitados,
                               fillColor: Colors.grey[200]),
-                          enabled: _camposEntregaHabilitados,
+                          enabled: _camposEntregaHabilitados && !_isSaving,
                           validator: (value) => (_camposEntregaHabilitados &&
                                   (value?.trim().isEmpty ?? true))
                               ? 'Campo requerido'
                               : null,
                         ),
                         SizedBox(height: 12.h),
+                        // Campo RFC Entrega
                         TextFormField(
                           controller: _rfcEntregaController,
                           decoration: InputDecoration(
                               labelText: 'RFC de quien Entrega',
                               filled: !_camposEntregaHabilitados,
                               fillColor: Colors.grey[200]),
-                          enabled: _camposEntregaHabilitados,
+                          enabled: _camposEntregaHabilitados && !_isSaving,
                           validator: (value) => (_camposEntregaHabilitados &&
                                   (value?.trim().isEmpty ?? true))
                               ? 'Campo requerido'
                               : null,
                         ),
                         Divider(height: 20.h, thickness: 1),
+
                         _buildSectionTitle('Datos de Quien Recibe'),
+                        // Campo Área Recibe
                         TextFormField(
                           controller: _areaRecibeController,
                           decoration: const InputDecoration(
                               labelText: 'Área que Recibe'),
+                          enabled: !_isSaving,
                           validator: (value) => (value?.trim().isEmpty ?? true)
                               ? 'Campo requerido'
                               : null,
                         ),
                         SizedBox(height: 12.h),
+                        // Campo Nombre Recibe
                         TextFormField(
                           controller: _nombreRecibeController,
                           decoration: const InputDecoration(
                               labelText: 'Nombre de quien Recibe'),
+                          enabled: !_isSaving,
                           validator: (value) => (value?.trim().isEmpty ?? true)
                               ? 'Campo requerido'
                               : null,
                         ),
                         SizedBox(height: 12.h),
+                        // Campo RFC Recibe
                         TextFormField(
                           controller: _rfcRecibeController,
                           decoration: const InputDecoration(
                               labelText: 'RFC de quien Recibe'),
+                          enabled: !_isSaving,
                           validator: (value) => (value?.trim().isEmpty ?? true)
                               ? 'Campo requerido'
                               : null,
                         ),
                         Divider(height: 20.h, thickness: 1),
+
                         _buildSectionTitle('Observaciones (Opcional)'),
+                        // Campo Observaciones
                         TextFormField(
                           controller: _observacionesController,
                           decoration: const InputDecoration(
@@ -253,21 +312,41 @@ class _PaginaNuevoResguardoState extends State<PaginaNuevoResguardo> {
                             hintText: 'Detalles adicionales...',
                           ),
                           maxLines: 3,
+                          enabled: !_isSaving,
+                          // No necesita validador porque es opcional
                         ),
                         SizedBox(height: 30.h),
+
+                        // Botón de Crear y posible indicador de progreso
                         Center(
-                          child: ElevatedButton.icon(
-                            icon: Icon(Icons.save),
-                            label: const Text('Crear Resguardo'),
-                            onPressed: _crearResguardo,
-                            style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 15.h, horizontal: 30.w),
-                                backgroundColor: Colors.amber,
-                                foregroundColor: Colors.black,
-                                textStyle: TextStyle(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.bold)),
+                          child: Column(
+                            // Usar Column para poner el indicador debajo
+                            children: [
+                              ElevatedButton.icon(
+                                icon: Icon(Icons.save),
+                                label: const Text('Crear Resguardo'),
+                                // Deshabilita el botón si _isSaving es true
+                                onPressed: _isSaving ? null : _crearResguardo,
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 15.h, horizontal: 30.w),
+                                  backgroundColor: Colors.amber,
+                                  foregroundColor: Colors.black,
+                                  textStyle: TextStyle(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.bold),
+                                  // Cambiar apariencia si está deshabilitado
+                                  disabledBackgroundColor: Colors.grey.shade300,
+                                  disabledForegroundColor: Colors.grey.shade500,
+                                ),
+                              ),
+                              // Muestra un indicador de progreso si _isSaving es true
+                              if (_isSaving)
+                                Padding(
+                                  padding: EdgeInsets.only(top: 15.h),
+                                  child: CircularProgressIndicator(),
+                                ),
+                            ],
                           ),
                         ),
                       ],

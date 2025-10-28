@@ -62,7 +62,7 @@ class Resguardo {
         (fechaAutorizado?.toLowerCase().contains(queryLower) ?? false);
   }
 
-  // *** MÉTODO copyWith CORREGIDO ***
+  // Método copyWith CORREGIDO
   Resguardo copyWith({
     int? folio,
     String? fechaAutorizado, // Acepta String? directamente
@@ -107,7 +107,53 @@ class Resguardo {
     );
   }
 
-  // *** Overrides para == y hashCode (importante para comparar objetos) ***
+  // --- Métodos fromJson y toJson ---
+
+  // Convierte un objeto JSON (Map) a una instancia de Resguardo
+  factory Resguardo.fromJson(Map<String, dynamic> json) {
+    return Resguardo(
+      // Asegúrate que los nombres coincidan con los de tu API Java
+      folio: json['folio'] ?? 0, // Proporciona un valor por defecto si es nulo
+      fechaAutorizado: json['fechaAutorizado'], // Puede ser nulo
+      tipoResguardo: json['tipoResguardo'] ?? '',
+      numeroInventario: json['numeroInventario'] ?? '',
+      descripcion: json['descripcion'] ?? '',
+      areaEntrega: json['areaEntrega'] ?? 'N/A', // O '' según prefieras
+      nombreEntrega: json['nombreEntrega'] ?? 'N/A',
+      rfcEntrega: json['rfcEntrega'] ?? 'N/A',
+      areaRecibe: json['areaRecibe'] ?? '',
+      nombreRecibe: json['nombreRecibe'] ?? '',
+      rfcRecibe: json['rfcRecibe'] ?? '',
+      observaciones: json['observaciones'], // Puede ser nulo
+      estatus: json['estatus'] ?? 'Pendiente', // Valor por defecto si es nulo
+      capturadoPor: json['capturadoPor'], // Puede ser nulo
+    );
+  }
+
+  // Convierte una instancia de Resguardo a un objeto JSON (Map)
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    // No incluimos el folio al enviar si la API lo genera automáticamente al crear
+    // Si necesitas enviarlo para actualizar, asegúrate que el endpoint lo maneje
+    // data['folio'] = this.folio; // Descomentar si necesitas enviar el folio
+
+    data['fechaAutorizado'] = this.fechaAutorizado;
+    data['tipoResguardo'] = this.tipoResguardo;
+    data['numeroInventario'] = this.numeroInventario;
+    data['descripcion'] = this.descripcion;
+    data['areaEntrega'] = this.areaEntrega;
+    data['nombreEntrega'] = this.nombreEntrega;
+    data['rfcEntrega'] = this.rfcEntrega;
+    data['areaRecibe'] = this.areaRecibe;
+    data['nombreRecibe'] = this.nombreRecibe;
+    data['rfcRecibe'] = this.rfcRecibe;
+    data['observaciones'] = this.observaciones;
+    data['estatus'] = this.estatus;
+    data['capturadoPor'] = this.capturadoPor;
+    return data;
+  }
+
+  // Overrides para == y hashCode (importante para comparar objetos)
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -118,6 +164,3 @@ class Resguardo {
   @override
   int get hashCode => folio.hashCode; // Usar el folio para el hash
 }
-
-// // Ya no se necesita ValueGetter para este enfoque simplificado
-// typedef ValueGetter<T> = T Function();
