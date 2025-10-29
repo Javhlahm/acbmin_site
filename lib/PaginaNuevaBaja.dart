@@ -112,7 +112,6 @@ class _PaginaNuevaBajaState extends State<PaginaNuevaBaja> {
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
-      locale: const Locale('es', 'MX'),
     );
     if (picked != null) {
       setState(() {

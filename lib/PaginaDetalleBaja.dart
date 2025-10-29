@@ -390,7 +390,6 @@ class _PaginaDetalleBajaState extends State<PaginaDetalleBaja> {
       initialDate: initial,
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
-      locale: const Locale('es', 'MX'),
     );
     if (picked != null) {
       setState(() {
