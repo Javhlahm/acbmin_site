@@ -1,10 +1,13 @@
+// ... (imports) ...
+import 'package:acbmin_site/entity/BajaBien.dart';
+import 'package:acbmin_site/entity/UsuarioGlobal.dart';
+import 'package:acbmin_site/services/bajas/actualizar_baja.dart';
+import 'package:acbmin_site/services/bajas/eliminar_baja.dart';
+import 'package:acbmin_site/services/bajas/generar_reporte_baja.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-
-// Importar entidad BajaBien y UsuarioGlobal
-import 'entity/BajaBien.dart';
-import 'entity/UsuarioGlobal.dart';
 
 // Enum y clase Result adaptados para Bajas
 enum DetalleBajaResultAction { updated, deleted, none }
@@ -16,7 +19,7 @@ class DetalleBajaResult {
 }
 
 class PaginaDetalleBaja extends StatefulWidget {
-  final BajaBien bajaInicial; // Recibe BajaBien
+  final BajaBien bajaInicial;
   const PaginaDetalleBaja({super.key, required this.bajaInicial});
 
   @override
@@ -24,164 +27,199 @@ class PaginaDetalleBaja extends StatefulWidget {
 }
 
 class _PaginaDetalleBajaState extends State<PaginaDetalleBaja> {
+  // ... (Variables _formKey, _isEditing, _isAdmin, _puedeAccionar, _isSaving sin cambios) ...
   final _formKey = GlobalKey<FormState>();
   bool _isEditing = false;
   bool _isAdmin = false;
-  bool _puedeAccionarPorEstatus = true; // Para editar/eliminar/aprobar/rechazar
+  bool _puedeAccionarPorEstatus = true;
+  bool _isSaving = false;
 
-  // Controladores adaptados para BajaBien
+  // Controladores existentes...
   late TextEditingController _folioController;
   late TextEditingController _numeroInventarioController;
   late TextEditingController _descripcionController;
   late TextEditingController _areaBajaController;
-  late TextEditingController _claveCentroTrabajoController;
   late TextEditingController _personaBajaController;
   late TextEditingController _rfcBajaController;
   late TextEditingController _fechaEntregaActivosController;
   late TextEditingController _capturadoPorController;
   late TextEditingController _fechaAutorizadoController;
   late TextEditingController _estatusController;
+  // --- Nuevo Controlador ---
+  late TextEditingController _observacionesController;
+  // -------------------------
 
-  late BajaBien _bajaActual; // Usa BajaBien
+  late BajaBien _bajaActual;
 
   @override
   void initState() {
     super.initState();
-    _bajaActual = widget.bajaInicial.copyWith(); // Copia inicial
-    _isAdmin =
-        usuarioGlobal?.roles?.contains('admin') ?? false; // Verifica rol admin
-    _puedeAccionarPorEstatus = (_bajaActual.estatus?.toLowerCase() !=
-        'aprobado'); // No se puede accionar si está aprobado
+    _bajaActual = widget.bajaInicial.copyWith();
+    _isAdmin = usuarioGlobal?.roles?.contains('admin') ?? false;
+    _puedeAccionarPorEstatus =
+        (_bajaActual.estatus?.toLowerCase() != 'aprobado');
 
-    // Inicializar controladores con datos de _bajaActual
-    final folioFormatter = NumberFormat("0000");
-    _folioController = TextEditingController(
-        text:
-            'BICB-${folioFormatter.format(_bajaActual.folio)}'); // Formato BICB-XXXX
+    // Inicializar controladores...
+    _folioController = TextEditingController(text: _bajaActual.folioFormateado);
     _numeroInventarioController =
         TextEditingController(text: _bajaActual.numeroInventario);
     _descripcionController =
         TextEditingController(text: _bajaActual.descripcion);
     _areaBajaController = TextEditingController(text: _bajaActual.areaBaja);
-    _claveCentroTrabajoController =
-        TextEditingController(text: _bajaActual.claveCentroTrabajo);
     _personaBajaController =
         TextEditingController(text: _bajaActual.personaBaja);
     _rfcBajaController = TextEditingController(text: _bajaActual.rfcBaja);
-    _fechaEntregaActivosController =
-        TextEditingController(text: _bajaActual.fechaEntregaActivos ?? '');
+    _fechaEntregaActivosController = TextEditingController(
+        text: _bajaActual.fechaEntregaActivos != null
+            ? DateFormat('yyyy-MM-dd')
+                .format(DateTime.parse(_bajaActual.fechaEntregaActivos!))
+            : '');
     _capturadoPorController =
         TextEditingController(text: _bajaActual.capturadoPor ?? '');
-    _fechaAutorizadoController =
-        TextEditingController(text: _bajaActual.fechaAutorizado ?? '');
+    _fechaAutorizadoController = TextEditingController(
+        text: _bajaActual.fechaAutorizado != null
+            ? DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(
+                _bajaActual.fechaAutorizado!.replaceFirst('T', ' ')))
+            : '');
     _estatusController =
         TextEditingController(text: _bajaActual.estatus ?? 'Pendiente');
+    // --- Inicializar Nuevo Controlador ---
+    _observacionesController =
+        TextEditingController(text: _bajaActual.observaciones ?? '');
+    // -----------------------------------
   }
 
   @override
   void dispose() {
-    // Disponer todos los controladores
+    // ... (dispose existentes) ...
     _folioController.dispose();
     _numeroInventarioController.dispose();
     _descripcionController.dispose();
     _areaBajaController.dispose();
-    _claveCentroTrabajoController.dispose();
     _personaBajaController.dispose();
     _rfcBajaController.dispose();
     _fechaEntregaActivosController.dispose();
     _capturadoPorController.dispose();
     _fechaAutorizadoController.dispose();
     _estatusController.dispose();
+    // --- Dispose Nuevo ---
+    _observacionesController.dispose();
+    // ---------------------
     super.dispose();
   }
 
-  // Activa/desactiva el modo edición
+  // Modificar _toggleEdit para resetear observaciones al cancelar
   void _toggleEdit() {
-    // No permitir editar si ya está aprobado
     if (!_puedeAccionarPorEstatus && !_isEditing) return;
-
     setState(() {
       _isEditing = !_isEditing;
-      // Si se cancela la edición, restaurar datos originales
       if (!_isEditing) {
-        _bajaActual = widget.bajaInicial.copyWith();
-        _actualizarControladoresVisuales();
-        // Re-evaluar si se puede accionar basado en el estatus restaurado
+        _bajaActual =
+            widget.bajaInicial.copyWith(); // Restaura desde el original
+        _actualizarControladoresVisuales(); // Actualiza TODOS los campos
         _puedeAccionarPorEstatus =
             (_bajaActual.estatus?.toLowerCase() != 'aprobado');
       }
     });
   }
 
-  // Actualiza los controladores con los datos de _bajaActual
+  // Modificar _actualizarControladoresVisuales para incluir observaciones
   void _actualizarControladoresVisuales() {
-    final folioFormatter = NumberFormat("0000");
-    _folioController.text = 'BICB-${folioFormatter.format(_bajaActual.folio)}';
+    _folioController.text = _bajaActual.folioFormateado;
     _numeroInventarioController.text = _bajaActual.numeroInventario;
     _descripcionController.text = _bajaActual.descripcion;
     _areaBajaController.text = _bajaActual.areaBaja;
-    _claveCentroTrabajoController.text = _bajaActual.claveCentroTrabajo;
     _personaBajaController.text = _bajaActual.personaBaja;
     _rfcBajaController.text = _bajaActual.rfcBaja;
-    _fechaEntregaActivosController.text = _bajaActual.fechaEntregaActivos ?? '';
+    _fechaEntregaActivosController.text =
+        _bajaActual.fechaEntregaActivos != null
+            ? DateFormat('yyyy-MM-dd')
+                .format(DateTime.parse(_bajaActual.fechaEntregaActivos!))
+            : '';
     _capturadoPorController.text = _bajaActual.capturadoPor ?? '';
-    _fechaAutorizadoController.text = _bajaActual.fechaAutorizado ?? '';
+    _fechaAutorizadoController.text = _bajaActual.fechaAutorizado != null
+        ? DateFormat('yyyy-MM-dd HH:mm').format(
+            DateTime.parse(_bajaActual.fechaAutorizado!.replaceFirst('T', ' ')))
+        : '';
     _estatusController.text = _bajaActual.estatus ?? 'Pendiente';
+    // --- Actualizar Observaciones ---
+    _observacionesController.text = _bajaActual.observaciones ?? '';
+    // ------------------------------
   }
 
-  // Guarda los cambios realizados en modo edición
-  void _guardarCambios() {
-    if (_formKey.currentState!.validate()) {
-      final String? nombreEditor = usuarioGlobal?.nombre; // Quién está editando
+  // Modificar _guardarCambios para incluir observaciones
+  void _guardarCambios() async {
+    if (_formKey.currentState!.validate() && !_isSaving) {
+      if (!mounted) return;
+      setState(() {
+        _isSaving = true;
+      });
+
+      final String? nombreEditor = usuarioGlobal?.nombre;
       bool limpiarFechaEntrega =
           _fechaEntregaActivosController.text.trim().isEmpty;
+      // --- Flag para Observaciones ---
+      bool limpiarObservaciones = _observacionesController.text.trim().isEmpty;
+      // -----------------------------
 
-      // Crear una copia actualizada de la baja
       _bajaActual = _bajaActual.copyWith(
-        numeroInventario: _numeroInventarioController.text,
-        descripcion: _descripcionController.text,
-        areaBaja: _areaBajaController.text,
-        claveCentroTrabajo: _claveCentroTrabajoController.text,
-        personaBaja: _personaBajaController.text,
-        rfcBaja: _rfcBajaController.text,
-        fechaEntregaActivos:
-            limpiarFechaEntrega ? null : _fechaEntregaActivosController.text,
-        clearFechaEntregaActivos:
-            limpiarFechaEntrega, // Flag para limpiar si estaba vacío
-        capturadoPor:
-            nombreEditor ?? 'Desconocido', // Actualizar quién modificó
+        numeroInventario: _numeroInventarioController.text.trim(),
+        descripcion: _descripcionController.text.trim(),
+        areaBaja: _areaBajaController.text.trim(),
+        personaBaja: _personaBajaController.text.trim(),
+        rfcBaja: _rfcBajaController.text.trim(),
+        fechaEntregaActivos: limpiarFechaEntrega
+            ? null
+            : _fechaEntregaActivosController.text.trim(),
+        clearFechaEntregaActivos: limpiarFechaEntrega,
+        capturadoPor: nombreEditor ?? 'Desconocido',
+        // --- Añadir Observaciones al copyWith ---
+        observaciones:
+            limpiarObservaciones ? null : _observacionesController.text.trim(),
+        clearObservaciones: limpiarObservaciones, // Pasar flag
+        // ----------------------------------------
       );
 
-      // Regresar a la página anterior con la baja actualizada
-      Navigator.pop(
-          context,
-          DetalleBajaResult(DetalleBajaResultAction.updated,
-              baja: _bajaActual));
+      bool success = await actualizarBaja(_bajaActual.folio, _bajaActual);
+
+      if (!mounted) return;
+      setState(() {
+        _isSaving = false;
+      });
+
+      if (success) {
+        Navigator.pop(
+            context,
+            DetalleBajaResult(DetalleBajaResultAction.updated,
+                baja: _bajaActual));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error al guardar los cambios.'),
+          backgroundColor: Colors.red,
+        ));
+      }
     }
   }
 
-  // Muestra diálogo de confirmación para eliminar
+  // ... (_confirmarEliminar, _eliminarBaja, _cambiarEstatus, _generarActaPDF, _buildSectionTitle, _buildInfoField, _selectDate sin cambios estructurales) ...
   void _confirmarEliminar() {
-    // No permitir eliminar si ya está aprobado
-    if (!_puedeAccionarPorEstatus) return;
-
+    if (!_puedeAccionarPorEstatus || _isSaving) return;
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Confirmar Eliminación'),
           content: Text(
-              '¿Está seguro que desea eliminar la baja ${_bajaActual.folioFormateado}? Esta acción no se puede deshacer.'),
+              '¿Está seguro de eliminar la baja ${_bajaActual.folioFormateado}?'),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancelar'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
+                child: Text('Cancelar'),
+                onPressed: () => Navigator.of(context).pop()),
             TextButton(
               child: Text('Eliminar', style: TextStyle(color: Colors.red)),
               onPressed: () {
-                Navigator.of(context).pop(); // Cierra confirmación
-                _eliminarBaja(); // Procede a eliminar
+                Navigator.of(context).pop();
+                _eliminarBaja();
               },
             ),
           ],
@@ -190,84 +228,135 @@ class _PaginaDetalleBajaState extends State<PaginaDetalleBaja> {
     );
   }
 
-  // Lógica para eliminar (en este caso, solo notifica a la página anterior)
-  void _eliminarBaja() {
-    Navigator.pop(context,
-        DetalleBajaResult(DetalleBajaResultAction.deleted, baja: _bajaActual));
+  void _eliminarBaja() async {
+    if (_isSaving) return;
+    if (!mounted) return;
+    setState(() {
+      _isSaving = true;
+    });
+    bool success = await eliminarBaja(_bajaActual.folio);
+    if (!mounted) return;
+    setState(() {
+      _isSaving = false;
+    });
+    if (success) {
+      Navigator.pop(
+          context,
+          DetalleBajaResult(DetalleBajaResultAction.deleted,
+              baja: _bajaActual));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Error al eliminar la baja.'),
+        backgroundColor: Colors.red,
+      ));
+    }
   }
 
-  // Cambia el estatus (Aprobado/Rechazado/Pendiente) - Solo Admin
-  void _cambiarEstatus(String nuevoEstatus) {
-    if (!_isAdmin) return; // Solo admin puede cambiar estatus
+  void _cambiarEstatus(String nuevoEstatus) async {
+    if (!_isAdmin || _isSaving) return;
+    if (!mounted) return;
+    setState(() {
+      _isSaving = true;
+    });
 
     final now = DateTime.now();
-    final formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
-    // Limpiar fecha autorizado si no es 'Aprobado'
+    final formatter = DateFormat("yyyy-MM-dd'T'HH:mm:ss");
     bool limpiarFecha = nuevoEstatus.toLowerCase() != 'aprobado';
 
     final BajaBien bajaActualizada = _bajaActual.copyWith(
         estatus: nuevoEstatus,
-        // Establecer fecha autorizado solo si se aprueba
         fechaAutorizado: !limpiarFecha ? formatter.format(now) : null,
-        clearFechaAutorizado:
-            limpiarFecha, // Flag para limpiar si no es aprobado
-        capturadoPor:
-            usuarioGlobal?.nombre ?? 'Desconocido' // Quién hizo el cambio
-        );
+        clearFechaAutorizado: limpiarFecha,
+        capturadoPor: usuarioGlobal?.nombre ?? 'Desconocido');
 
-    // Actualizar estado local y salir
+    bool success = await actualizarBaja(bajaActualizada.folio, bajaActualizada);
+
+    if (!mounted) return;
     setState(() {
-      _bajaActual = bajaActualizada;
-      // Una vez aprobado, ya no se puede accionar más
-      _puedeAccionarPorEstatus = (nuevoEstatus.toLowerCase() != 'aprobado');
-      _actualizarControladoresVisuales(); // Refrescar campos en UI
+      _isSaving = false;
     });
 
-    // Esperar un momento y luego cerrar la página devolviendo el resultado
-    Future.delayed(Duration(milliseconds: 100), () {
-      if (mounted) {
-        Navigator.pop(
-            context,
-            DetalleBajaResult(DetalleBajaResultAction.updated,
-                baja: bajaActualizada));
-      }
-    });
+    if (success) {
+      setState(() {
+        _bajaActual = bajaActualizada;
+        _puedeAccionarPorEstatus = (nuevoEstatus.toLowerCase() != 'aprobado');
+        _actualizarControladoresVisuales();
+      });
+      Future.delayed(Duration(milliseconds: 150), () {
+        if (mounted) {
+          Navigator.pop(
+              context,
+              DetalleBajaResult(DetalleBajaResultAction.updated,
+                  baja: bajaActualizada));
+        }
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Error al cambiar el estatus.'),
+        backgroundColor: Colors.red,
+      ));
+    }
   }
 
-  // Helper para títulos de sección
+  void _generarActaPDF() async {
+    if (_isSaving) return;
+    if (!mounted) return;
+    setState(() {
+      _isSaving = true;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('Generando Acta de Baja PDF...'),
+      backgroundColor: Colors.blue,
+      duration: Duration(seconds: 2),
+    ));
+    bool success = await generarYMostrarReporteBaja(_bajaActual.folio);
+    if (!mounted) return;
+    setState(() {
+      _isSaving = false;
+    });
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    if (success) {
+      if (kIsWeb) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('La descarga del PDF ha comenzado.'),
+            backgroundColor: Colors.green));
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error al generar o mostrar el Acta PDF.'),
+          backgroundColor: Colors.red));
+    }
+  }
+
   Widget _buildSectionTitle(String title) {
+    /* ... sin cambios ... */
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h),
-      child: Text(
-        title,
-        style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
-            color: Colors.black54),
-      ),
+      child: Text(title,
+          style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.black54)),
     );
   }
 
-  // Helper para crear campos de texto (igual que en Resguardos)
   Widget _buildInfoField({
     required String label,
     required TextEditingController controller,
-    bool editable = false, // Si el campo puede ser editado en modo edición
+    bool editable = false,
     int maxLines = 1,
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
-    VoidCallback? onTap, // Para DatePicker
-    bool readOnlyOverride = false, // Para forzar readOnly (DatePicker)
+    VoidCallback? onTap,
+    bool readOnlyOverride = false,
   }) {
-    // El campo es editable si estamos en modo edición Y el campo está marcado como editable Y se puede accionar por estatus
+    /* ... sin cambios ... */
     bool fieldEnabledForEditing =
         _isEditing && editable && _puedeAccionarPorEstatus;
-
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 6.h),
       child: TextFormField(
         controller: controller,
-        // Solo lectura si NO está habilitado para edición O si se fuerza con override
         readOnly: !fieldEnabledForEditing || readOnlyOverride,
         maxLines: maxLines,
         keyboardType: keyboardType,
@@ -276,10 +365,8 @@ class _PaginaDetalleBajaState extends State<PaginaDetalleBaja> {
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
           contentPadding:
               EdgeInsets.symmetric(vertical: 12.h, horizontal: 10.w),
-          // Fondo gris si no es editable
           filled: !fieldEnabledForEditing,
           fillColor: !fieldEnabledForEditing ? Colors.grey[200] : Colors.white,
-          // Añadir icono si hay onTap (para DatePicker)
           suffixIcon: onTap != null
               ? IconButton(
                   icon: Icon(Icons.calendar_today),
@@ -287,23 +374,23 @@ class _PaginaDetalleBajaState extends State<PaginaDetalleBaja> {
                 )
               : null,
         ),
-        validator: fieldEnabledForEditing
-            ? validator
-            : null, // Validador solo si es editable
-        onTap:
-            fieldEnabledForEditing ? onTap : null, // onTap solo si es editable
+        validator: fieldEnabledForEditing ? validator : null,
+        onTap: fieldEnabledForEditing ? onTap : null,
+        enabled: !_isSaving,
       ),
     );
   }
 
-  // Función para mostrar DatePicker (igual que en Nueva Baja)
   Future<void> _selectDate(BuildContext context) async {
+    /* ... sin cambios ... */
+    DateTime initial = DateTime.tryParse(_fechaEntregaActivosController.text) ??
+        DateTime.now();
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.tryParse(_fechaEntregaActivosController.text) ??
-          DateTime.now(), // Usa fecha actual o la existente
+      initialDate: initial,
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
+      locale: const Locale('es', 'MX'),
     );
     if (picked != null) {
       setState(() {
@@ -313,24 +400,17 @@ class _PaginaDetalleBajaState extends State<PaginaDetalleBaja> {
     }
   }
 
-  // Función para el botón "Generar Acta PDF" (pendiente)
-  void _generarActaPDF() {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Funcionalidad "Generar Acta de Baja PDF" pendiente.'),
-        backgroundColor: Colors.cyan));
-    // TODO: Implementar llamada a backend para generar PDF
-  }
-
   @override
   Widget build(BuildContext context) {
+    // ... (folioMostrado, estaAprobado sin cambios) ...
     final String folioMostrado = _folioController.text;
-    // Variable para saber si la baja está aprobada
     final bool estaAprobado = _bajaActual.estatus?.toLowerCase() == 'aprobado';
 
     return Scaffold(
       appBar: AppBar(
+        /* ... AppBar sin cambios ... */
         title: Text(
-          "Detalle Baja: $folioMostrado", // Título adaptado
+          "Detalle Baja: $folioMostrado",
           style: TextStyle(
               color: Colors.red,
               fontWeight: FontWeight.bold,
@@ -339,9 +419,10 @@ class _PaginaDetalleBajaState extends State<PaginaDetalleBaja> {
         backgroundColor: Color(0xfff6c500),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
-          // Devolver 'none' si no hubo cambios
-          onPressed: () => Navigator.pop(
-              context, DetalleBajaResult(DetalleBajaResultAction.none)),
+          onPressed: _isSaving
+              ? null
+              : () => Navigator.pop(
+                  context, DetalleBajaResult(DetalleBajaResultAction.none)),
         ),
       ),
       body: Center(
@@ -361,18 +442,19 @@ class _PaginaDetalleBajaState extends State<PaginaDetalleBaja> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // --- Campos del formulario ---
+                        // --- Campos del Formulario ---
                         _buildInfoField(
                             label: 'Folio',
                             controller: _folioController,
-                            editable: false), // No editable
+                            editable: false),
                         SizedBox(height: 12.h),
 
                         _buildSectionTitle('Datos del Bien'),
+                        // ... (Campos Inventario, Descripcion) ...
                         _buildInfoField(
                             label: 'No. Inventario',
                             controller: _numeroInventarioController,
-                            editable: true, // Editable en modo edición
+                            editable: true,
                             validator: (v) => (v?.trim().isEmpty ?? true)
                                 ? 'Requerido'
                                 : null),
@@ -387,20 +469,15 @@ class _PaginaDetalleBajaState extends State<PaginaDetalleBaja> {
 
                         Divider(height: 20.h, thickness: 1),
                         _buildSectionTitle('Datos del Área que da de Baja'),
+                        // ... (Campos Area, Clave CT, Persona, RFC) ...
                         _buildInfoField(
-                            label: 'Área Baja',
+                            label: 'Área o C.T. Baja',
                             controller: _areaBajaController,
                             editable: true,
                             validator: (v) => (v?.trim().isEmpty ?? true)
                                 ? 'Requerido'
                                 : null),
-                        _buildInfoField(
-                            label: 'Clave CT',
-                            controller: _claveCentroTrabajoController,
-                            editable: true,
-                            validator: (v) => (v?.trim().isEmpty ?? true)
-                                ? 'Requerido'
-                                : null),
+
                         _buildInfoField(
                             label: 'Persona Baja',
                             controller: _personaBajaController,
@@ -418,15 +495,15 @@ class _PaginaDetalleBajaState extends State<PaginaDetalleBaja> {
 
                         Divider(height: 20.h, thickness: 1),
                         _buildSectionTitle('Historial y Estatus'),
+                        // ... (Campo Fecha Entrega con DatePicker) ...
                         _buildInfoField(
                           label: 'Fecha Entrega Activos',
                           controller: _fechaEntregaActivosController,
-                          editable: true, // Editable
-                          readOnlyOverride:
-                              true, // Forzar solo lectura para usar DatePicker
-                          onTap: () => _selectDate(context), // Abrir DatePicker
-                          // Sin validador porque es opcional
+                          editable: true,
+                          readOnlyOverride: true,
+                          onTap: () => _selectDate(context),
                         ),
+                        // ... (Campos Capturado Por, Fecha Autorizado, Estatus) ...
                         _buildInfoField(
                             label: 'Capturado Por',
                             controller: _capturadoPorController,
@@ -440,119 +517,137 @@ class _PaginaDetalleBajaState extends State<PaginaDetalleBaja> {
                             controller: _estatusController,
                             editable: false),
 
+                        // --- Añadir Sección Observaciones ---
+                        Divider(height: 20.h, thickness: 1),
+                        _buildSectionTitle('Observaciones'),
+                        _buildInfoField(
+                          label: 'Observaciones',
+                          controller: _observacionesController,
+                          editable: true, // Hacerlo editable en modo edición
+                          maxLines: 3,
+                          // Sin validador, ya que suele ser opcional
+                        ),
+                        // ------------------------------------
+
                         SizedBox(height: 30.h),
 
-                        // --- Botones de Acción ---
+                        // --- Botones de Acción (Guardar/Modificar/Eliminar/Cancelar) ---
+                        // (Sin cambios, ya manejan _isSaving)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            if (_isEditing) // Guardar Cambios (si está editando)
+                            if (_isEditing)
                               ElevatedButton.icon(
                                 icon: Icon(Icons.save),
                                 label: Text('Guardar Cambios'),
-                                onPressed: _guardarCambios,
+                                onPressed: _isSaving ? null : _guardarCambios,
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.blue,
-                                    foregroundColor: Colors.white),
-                              )
-                            else if (_puedeAccionarPorEstatus) // Modificar (si no edita y puede accionar)
+                                    foregroundColor: Colors.white,
+                                    disabledBackgroundColor: Colors.grey),
+                              ),
+                            if (_puedeAccionarPorEstatus)
                               ElevatedButton.icon(
                                 icon: Icon(Icons.edit),
-                                label: Text('Modificar Baja'), // Texto cambiado
-                                onPressed: _toggleEdit,
+                                label: Text('Modificar Baja'),
+                                onPressed: _isSaving ? null : _toggleEdit,
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.amber,
-                                    foregroundColor: Colors.black),
+                                    foregroundColor: Colors.black,
+                                    disabledBackgroundColor: Colors.grey),
                               ),
-
-                            // Eliminar (si no edita y puede accionar)
                             if (!_isEditing && _puedeAccionarPorEstatus)
                               ElevatedButton.icon(
                                 icon: Icon(Icons.delete_forever),
-                                label: Text('Eliminar Baja'), // Texto cambiado
-                                onPressed: _confirmarEliminar,
+                                label: Text('Eliminar Baja'),
+                                onPressed:
+                                    _isSaving ? null : _confirmarEliminar,
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.red,
-                                    foregroundColor: Colors.white),
+                                    foregroundColor: Colors.white,
+                                    disabledBackgroundColor:
+                                        Colors.grey.shade400),
                               ),
-
-                            // Cancelar (si está editando)
                             if (_isEditing)
                               TextButton(
-                                  onPressed: _toggleEdit,
+                                  onPressed: _isSaving ? null : _toggleEdit,
                                   child: Text('Cancelar')),
                           ],
                         ),
-                        SizedBox(height: 15.h), // Espacio
+                        SizedBox(height: 15.h),
 
-                        // Botón Generar Acta PDF (Visible si está APROBADO y NO editando)
+                        // --- Botón Generar Acta PDF ---
+                        // (Sin cambios, ya maneja _isSaving)
                         if (!_isEditing && estaAprobado)
                           Center(
-                            // Centrar el botón
                             child: ElevatedButton.icon(
                               icon: Icon(Icons.picture_as_pdf),
-                              label: Text(
-                                  'Generar Acta de Baja'), // Texto cambiado
-                              onPressed:
-                                  _generarActaPDF, // Llama a la función (pendiente)
+                              label: Text('Generar Acta de Baja'),
+                              onPressed: _isSaving ? null : _generarActaPDF,
                               style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Colors.teal, // Color distintivo
+                                  backgroundColor: Colors.teal,
                                   foregroundColor: Colors.white,
+                                  disabledBackgroundColor: Colors.grey,
                                   padding: EdgeInsets.symmetric(
                                       horizontal: 20.w, vertical: 12.h)),
                             ),
                           ),
 
-                        // --- Botones de Admin (si es admin y NO está editando) ---
+                        // --- Botones de Admin ---
+                        // (Sin cambios, ya manejan _isSaving)
                         if (_isAdmin && !_isEditing)
                           Padding(
                             padding: EdgeInsets.only(top: 20.h),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                // Aprobar (habilitado si NO está aprobado)
                                 ElevatedButton.icon(
                                   icon: Icon(Icons.check_circle),
                                   label: Text('Aprobar Baja'),
-                                  onPressed: !estaAprobado
+                                  onPressed: !estaAprobado && !_isSaving
                                       ? () => _cambiarEstatus('Aprobado')
-                                      : null, // Deshabilitado si ya está aprobado
+                                      : null,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                    foregroundColor: Colors.white,
-                                    disabledBackgroundColor: Colors.grey,
-                                  ),
+                                      backgroundColor: Colors.green,
+                                      foregroundColor: Colors.white,
+                                      disabledBackgroundColor: Colors.grey),
                                 ),
-                                // Rechazar (habilitado si NO está rechazado)
                                 ElevatedButton.icon(
                                   icon: Icon(Icons.cancel),
                                   label: Text('Rechazar Baja'),
                                   onPressed:
                                       (_bajaActual.estatus?.toLowerCase() !=
-                                              'rechazado')
+                                                  'rechazado' &&
+                                              !_isSaving)
                                           ? () => _cambiarEstatus('Rechazado')
                                           : null,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red,
-                                    foregroundColor: Colors.white,
-                                    disabledBackgroundColor: Colors.grey,
-                                  ),
+                                      backgroundColor: Colors.red,
+                                      foregroundColor: Colors.white,
+                                      disabledBackgroundColor: Colors.grey),
                                 ),
-                                // Poner Pendiente (Visible solo si está RECHAZADO)
                                 if (_bajaActual.estatus?.toLowerCase() ==
                                     'rechazado')
                                   ElevatedButton.icon(
                                     icon: Icon(Icons.hourglass_empty),
                                     label: Text('Poner Pendiente'),
-                                    onPressed: () =>
-                                        _cambiarEstatus('Pendiente'),
+                                    onPressed: _isSaving
+                                        ? null
+                                        : () => _cambiarEstatus('Pendiente'),
                                     style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.orange,
-                                        foregroundColor: Colors.white),
+                                        foregroundColor: Colors.white,
+                                        disabledBackgroundColor: Colors.grey),
                                   ),
                               ],
                             ),
+                          ),
+
+                        // Indicador de progreso
+                        if (_isSaving)
+                          Padding(
+                            padding: EdgeInsets.only(top: 15.h),
+                            child: Center(child: CircularProgressIndicator()),
                           ),
                       ],
                     ),

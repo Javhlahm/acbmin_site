@@ -1,10 +1,10 @@
+// ... (imports) ...
+import 'package:acbmin_site/entity/BajaBien.dart';
+import 'package:acbmin_site/entity/UsuarioGlobal.dart';
+import 'package:acbmin_site/services/bajas/crear_baja.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart'; // Para formatear fecha si es necesario
-
-// Importar entidad BajaBien y UsuarioGlobal
-import 'entity/BajaBien.dart';
-import 'entity/UsuarioGlobal.dart';
+import 'package:intl/intl.dart';
 
 class PaginaNuevaBaja extends StatefulWidget {
   const PaginaNuevaBaja({super.key});
@@ -16,63 +16,83 @@ class PaginaNuevaBaja extends StatefulWidget {
 class _PaginaNuevaBajaState extends State<PaginaNuevaBaja> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controladores para los campos de BajaBien
+  // Controladores existentes...
   final _areaBajaController = TextEditingController();
-  final _claveCentroTrabajoController = TextEditingController();
   final _personaBajaController = TextEditingController();
   final _rfcBajaController = TextEditingController();
   final _descripcionController = TextEditingController();
   final _numeroInventarioController = TextEditingController();
-  final _fechaEntregaActivosController =
-      TextEditingController(); // Puede ser opcional
+  final _fechaEntregaActivosController = TextEditingController();
+  // --- Nuevo Controlador ---
+  final _observacionesController = TextEditingController();
+  // -------------------------
+
+  bool _isSaving = false;
 
   @override
   void dispose() {
-    // Limpiar todos los controladores
+    // ... (dispose existentes) ...
     _areaBajaController.dispose();
-    _claveCentroTrabajoController.dispose();
     _personaBajaController.dispose();
     _rfcBajaController.dispose();
     _descripcionController.dispose();
     _numeroInventarioController.dispose();
     _fechaEntregaActivosController.dispose();
+    // --- Dispose Nuevo ---
+    _observacionesController.dispose();
+    // ---------------------
     super.dispose();
   }
 
-  void _crearBaja() {
-    if (_formKey.currentState!.validate()) {
-      // Simulación de generación de folio (igual que en resguardos)
-      final int nuevoFolio =
-          DateTime.now().millisecondsSinceEpoch % 10000 + 1000;
+  // Modificar _crearBaja para incluir observaciones
+  void _crearBaja() async {
+    if (_formKey.currentState!.validate() && !_isSaving) {
+      if (!mounted) return;
+      setState(() {
+        _isSaving = true;
+      });
 
-      // Obtener nombre del usuario global
       final String? nombreCapturista = usuarioGlobal?.nombre;
 
-      // Crear instancia de BajaBien con los datos del formulario
       final nuevaBaja = BajaBien(
-        folio: nuevoFolio,
-        estatus: 'Pendiente', // Estatus inicial
-        capturadoPor: nombreCapturista ?? 'Desconocido', // Asignar capturista
-        areaBaja: _areaBajaController.text,
-        claveCentroTrabajo: _claveCentroTrabajoController.text,
-        personaBaja: _personaBajaController.text,
-        rfcBaja: _rfcBajaController.text,
-        descripcion: _descripcionController.text,
-        numeroInventario: _numeroInventarioController.text,
-        // Fecha entrega es opcional, guardar solo si no está vacío
+        folio: 0,
+        estatus: 'Pendiente',
+        capturadoPor: nombreCapturista ?? 'Desconocido',
+        areaBaja: _areaBajaController.text.trim(),
+        personaBaja: _personaBajaController.text.trim(),
+        rfcBaja: _rfcBajaController.text.trim(),
+        descripcion: _descripcionController.text.trim(),
+        numeroInventario: _numeroInventarioController.text.trim(),
         fechaEntregaActivos: _fechaEntregaActivosController.text.trim().isEmpty
             ? null
-            : _fechaEntregaActivosController.text,
-        // fechaAutorizado se establecerá al aprobar/rechazar
+            : _fechaEntregaActivosController.text.trim(),
         fechaAutorizado: null,
+        // --- Añadir Observaciones ---
+        observaciones: _observacionesController.text.trim().isEmpty
+            ? null // Enviar null si está vacío
+            : _observacionesController.text.trim(),
+        // --------------------------
       );
 
-      // Devolver la nueva baja a la página anterior
-      Navigator.pop(context, nuevaBaja);
+      BajaBien? bajaCreada = await crearBaja(nuevaBaja);
+
+      if (!mounted) return;
+      setState(() {
+        _isSaving = false;
+      });
+
+      if (bajaCreada != null) {
+        Navigator.pop(context, bajaCreada);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error al crear la baja. Intente de nuevo.'),
+          backgroundColor: Colors.red,
+        ));
+      }
     }
   }
 
-  // Helper para títulos de sección (igual que antes)
+  // ... (_buildSectionTitle, _selectDate sin cambios) ...
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h),
@@ -86,17 +106,16 @@ class _PaginaNuevaBajaState extends State<PaginaNuevaBaja> {
     );
   }
 
-  // Función para mostrar DatePicker (opcional, para fecha entrega)
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2000), // Rango de fechas seleccionables
+      firstDate: DateTime(2000),
       lastDate: DateTime(2101),
+      locale: const Locale('es', 'MX'),
     );
     if (picked != null) {
       setState(() {
-        // Formatear la fecha como YYYY-MM-DD
         _fechaEntregaActivosController.text =
             DateFormat('yyyy-MM-dd').format(picked);
       });
@@ -107,8 +126,9 @@ class _PaginaNuevaBajaState extends State<PaginaNuevaBaja> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        /* ... AppBar sin cambios ... */
         title: Text(
-          "Nueva Baja de Bien", // Título cambiado
+          "Nueva Baja de Bien",
           style: TextStyle(
               color: Colors.red,
               fontWeight: FontWeight.bold,
@@ -117,7 +137,7 @@ class _PaginaNuevaBajaState extends State<PaginaNuevaBaja> {
         backgroundColor: Color(0xfff6c500),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
         ),
       ),
       body: Center(
@@ -139,11 +159,13 @@ class _PaginaNuevaBajaState extends State<PaginaNuevaBaja> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildSectionTitle('Datos del Bien a dar de Baja'),
+                        // ... (Campos Inventario, Descripcion) ...
                         TextFormField(
                           controller: _numeroInventarioController,
                           decoration: const InputDecoration(
                               labelText: 'Número de Inventario'),
-                          validator: (value) => (value?.trim().isEmpty ?? true)
+                          enabled: !_isSaving,
+                          validator: (v) => (v?.trim().isEmpty ?? true)
                               ? 'Campo requerido'
                               : null,
                         ),
@@ -153,35 +175,33 @@ class _PaginaNuevaBajaState extends State<PaginaNuevaBaja> {
                           decoration: const InputDecoration(
                               labelText: 'Descripción del Bien'),
                           maxLines: 2,
-                          validator: (value) => (value?.trim().isEmpty ?? true)
+                          enabled: !_isSaving,
+                          validator: (v) => (v?.trim().isEmpty ?? true)
                               ? 'Campo requerido'
                               : null,
                         ),
+
                         Divider(height: 20.h, thickness: 1),
-                        _buildSectionTitle('Datos del Área que da de Baja'),
+                        _buildSectionTitle(
+                            'Datos del Área o C.T. que da de Baja'),
+                        // ... (Campos Area, Clave CT, Persona, RFC) ...
                         TextFormField(
                           controller: _areaBajaController,
                           decoration: const InputDecoration(
-                              labelText: 'Área que da de Baja'),
-                          validator: (value) => (value?.trim().isEmpty ?? true)
+                              labelText: 'Área o C.T. que da de Baja'),
+                          enabled: !_isSaving,
+                          validator: (v) => (v?.trim().isEmpty ?? true)
                               ? 'Campo requerido'
                               : null,
                         ),
-                        SizedBox(height: 12.h),
-                        TextFormField(
-                          controller: _claveCentroTrabajoController,
-                          decoration: const InputDecoration(
-                              labelText: 'Clave de Centro de Trabajo'),
-                          validator: (value) => (value?.trim().isEmpty ?? true)
-                              ? 'Campo requerido'
-                              : null,
-                        ),
+
                         SizedBox(height: 12.h),
                         TextFormField(
                           controller: _personaBajaController,
                           decoration: const InputDecoration(
                               labelText: 'Nombre de quien da de Baja'),
-                          validator: (value) => (value?.trim().isEmpty ?? true)
+                          enabled: !_isSaving,
+                          validator: (v) => (v?.trim().isEmpty ?? true)
                               ? 'Campo requerido'
                               : null,
                         ),
@@ -190,44 +210,77 @@ class _PaginaNuevaBajaState extends State<PaginaNuevaBaja> {
                           controller: _rfcBajaController,
                           decoration: const InputDecoration(
                               labelText: 'RFC de quien da de Baja'),
-                          validator: (value) => (value?.trim().isEmpty ?? true)
+                          enabled: !_isSaving,
+                          validator: (v) => (v?.trim().isEmpty ?? true)
                               ? 'Campo requerido'
                               : null,
                         ),
+
                         Divider(height: 20.h, thickness: 1),
                         _buildSectionTitle(
                             'Entrega a Activos Fijos (Opcional)'),
+                        // ... (Campo Fecha Entrega con DatePicker) ...
                         TextFormField(
                           controller: _fechaEntregaActivosController,
                           decoration: InputDecoration(
                               labelText: 'Fecha de Entrega a Activos Fijos',
                               hintText: 'YYYY-MM-DD',
                               suffixIcon: IconButton(
-                                // Icono para abrir DatePicker
                                 icon: Icon(Icons.calendar_today),
-                                onPressed: () => _selectDate(context),
+                                onPressed: _isSaving
+                                    ? null
+                                    : () => _selectDate(context),
                               )),
-                          readOnly: true, // Para forzar el uso del DatePicker
-                          onTap: () =>
-                              _selectDate(context), // Abrir DatePicker al tocar
-                          // Sin validador, ya que es opcional
+                          readOnly: true,
+                          onTap: _isSaving ? null : () => _selectDate(context),
+                          enabled: !_isSaving,
                         ),
+
+                        // --- Añadir Sección Observaciones ---
+                        Divider(height: 20.h, thickness: 1),
+                        _buildSectionTitle('Observaciones (Opcional)'),
+                        TextFormField(
+                          controller: _observacionesController,
+                          decoration: const InputDecoration(
+                            labelText: 'Observaciones',
+                            hintText:
+                                'Motivo de la baja, detalles adicionales...',
+                            alignLabelWithHint:
+                                true, // Para que el label se alinee arriba en multiline
+                          ),
+                          maxLines: 3, // Permitir varias líneas
+                          enabled: !_isSaving,
+                          // No necesita validador
+                        ),
+                        // ------------------------------------
+
                         SizedBox(height: 30.h),
+                        // ... (Botón Crear y progreso) ...
                         Center(
-                          child: ElevatedButton.icon(
-                            icon: Icon(Icons.save),
-                            label: const Text(
-                                'Crear Solicitud de Baja'), // Texto botón
-                            onPressed:
-                                _crearBaja, // Llama a la función adaptada
-                            style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 15.h, horizontal: 30.w),
-                                backgroundColor: Colors.amber, // Mismo color
-                                foregroundColor: Colors.black,
-                                textStyle: TextStyle(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.bold)),
+                          child: Column(
+                            children: [
+                              ElevatedButton.icon(
+                                icon: Icon(Icons.save),
+                                label: const Text('Crear Solicitud de Baja'),
+                                onPressed: _isSaving ? null : _crearBaja,
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 15.h, horizontal: 30.w),
+                                  backgroundColor: Colors.amber,
+                                  foregroundColor: Colors.black,
+                                  textStyle: TextStyle(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.bold),
+                                  disabledBackgroundColor: Colors.grey.shade300,
+                                  disabledForegroundColor: Colors.grey.shade500,
+                                ),
+                              ),
+                              if (_isSaving)
+                                Padding(
+                                  padding: EdgeInsets.only(top: 15.h),
+                                  child: CircularProgressIndicator(),
+                                ),
+                            ],
                           ),
                         ),
                       ],

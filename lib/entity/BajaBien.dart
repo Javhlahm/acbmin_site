@@ -4,7 +4,6 @@ class BajaBien {
   final int folio;
   String? fechaAutorizado; // Fecha en que se aprueba/rechaza
   String areaBaja;
-  String claveCentroTrabajo;
   String personaBaja;
   String rfcBaja;
   String descripcion;
@@ -12,12 +11,12 @@ class BajaBien {
   String? fechaEntregaActivos; // Fecha entrega a Activos Fijos
   String? estatus; // Pendiente, Aprobado, Rechazado
   String? capturadoPor; // Nombre de usuario que lo creó o modificó
+  String? observaciones; // Observaciones adicionales
 
   BajaBien({
     required this.folio,
     this.fechaAutorizado,
     required this.areaBaja,
-    required this.claveCentroTrabajo,
     required this.personaBaja,
     required this.rfcBaja,
     required this.descripcion,
@@ -25,6 +24,7 @@ class BajaBien {
     this.fechaEntregaActivos,
     this.estatus = 'Pendiente', // Valor por defecto
     this.capturadoPor,
+    this.observaciones,
   });
 
   // Getter para el folio formateado (ej. BICB-0101)
@@ -43,7 +43,6 @@ class BajaBien {
 
     return folioStr.contains(queryLower) ||
         areaBaja.toLowerCase().contains(queryLower) ||
-        claveCentroTrabajo.toLowerCase().contains(queryLower) ||
         personaBaja.toLowerCase().contains(queryLower) ||
         rfcBaja.toLowerCase().contains(queryLower) ||
         descripcion.toLowerCase().contains(queryLower) ||
@@ -51,7 +50,8 @@ class BajaBien {
         (fechaEntregaActivos?.toLowerCase().contains(queryLower) ?? false) ||
         (estatus?.toLowerCase().contains(queryLower) ?? false) ||
         (capturadoPor?.toLowerCase().contains(queryLower) ?? false) ||
-        (fechaAutorizado?.toLowerCase().contains(queryLower) ?? false);
+        (fechaAutorizado?.toLowerCase().contains(queryLower) ?? false) ||
+        (observaciones?.toLowerCase().contains(queryLower) ?? false);
   }
 
   // Método copyWith adaptado para BajaBien
@@ -67,11 +67,13 @@ class BajaBien {
     String? fechaEntregaActivos,
     String? estatus,
     String? capturadoPor,
+    String? observaciones,
     // Flags para limpiar campos nullable
     bool clearFechaAutorizado = false,
     bool clearFechaEntregaActivos = false,
     bool clearEstatus = false,
     bool clearCapturadoPor = false,
+    bool clearObservaciones = false,
   }) {
     return BajaBien(
       folio: folio ?? this.folio,
@@ -79,7 +81,6 @@ class BajaBien {
           ? null
           : (fechaAutorizado ?? this.fechaAutorizado),
       areaBaja: areaBaja ?? this.areaBaja,
-      claveCentroTrabajo: claveCentroTrabajo ?? this.claveCentroTrabajo,
       personaBaja: personaBaja ?? this.personaBaja,
       rfcBaja: rfcBaja ?? this.rfcBaja,
       descripcion: descripcion ?? this.descripcion,
@@ -90,6 +91,7 @@ class BajaBien {
       estatus: clearEstatus ? null : (estatus ?? this.estatus),
       capturadoPor:
           clearCapturadoPor ? null : (capturadoPor ?? this.capturadoPor),
+      observaciones: observaciones ?? this.observaciones,
     );
   }
 
@@ -112,7 +114,6 @@ class BajaBien {
     data['folio'] = folio; // O como se llame en tu API
     data['fechaAutorizado'] = fechaAutorizado;
     data['areaBaja'] = areaBaja;
-    data['claveCentroTrabajo'] = claveCentroTrabajo;
     data['personaBaja'] = personaBaja;
     data['rfcBaja'] = rfcBaja;
     data['descripcion'] = descripcion;
@@ -120,6 +121,7 @@ class BajaBien {
     data['fechaEntregaActivos'] = fechaEntregaActivos;
     data['estatus'] = estatus;
     data['capturadoPor'] = capturadoPor;
+    data['observaciones'] = observaciones;
     return data;
   }
 
@@ -128,7 +130,6 @@ class BajaBien {
       folio: json['folio'] ?? 0, // Asegura un valor por defecto
       fechaAutorizado: json['fechaAutorizado'],
       areaBaja: json['areaBaja'] ?? '',
-      claveCentroTrabajo: json['claveCentroTrabajo'] ?? '',
       personaBaja: json['personaBaja'] ?? '',
       rfcBaja: json['rfcBaja'] ?? '',
       descripcion: json['descripcion'] ?? '',
@@ -136,6 +137,7 @@ class BajaBien {
       fechaEntregaActivos: json['fechaEntregaActivos'],
       estatus: json['estatus'] ?? 'Pendiente',
       capturadoPor: json['capturadoPor'],
+      observaciones: json['observaciones'],
     );
   }
 }
