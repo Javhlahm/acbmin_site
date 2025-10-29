@@ -17,11 +17,18 @@ class Paginausuarios extends StatefulWidget {
 }
 
 class _PaginausuariosState extends State<Paginausuarios> {
-  PaginaUsuarios() {}
+  // --- INICIO DE CÓDIGO MODIFICADO ---
+  @override
+  void initState() {
+    super.initState();
+    // Se llama a la API aquí en lugar de en el 'build'
+    listaUsuarios = obtenerUsuarios();
+  }
+  // --- FIN DE CÓDIGO MODIFICADO ---
 
   @override
   Widget build(BuildContext context) {
-    listaUsuarios = obtenerUsuarios();
+    // La llamada a obtenerUsuarios() fue movida a initState
     var landscape =
         ScreenUtil().orientation == Orientation.landscape ? true : false;
 
@@ -39,6 +46,7 @@ class _PaginausuariosState extends State<Paginausuarios> {
           IconButton(
               padding: EdgeInsets.only(right: 20.0.dg),
               onPressed: () {
+                // Se refresca la lista llamando a setState
                 setState(() {
                   listaUsuarios = obtenerUsuarios();
                 });
@@ -127,7 +135,7 @@ class _PaginausuariosState extends State<Paginausuarios> {
         ],
       ),
       body: FutureBuilder(
-          future: listaUsuarios,
+          future: listaUsuarios, // Ahora usa la variable de estado
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
               return Center(

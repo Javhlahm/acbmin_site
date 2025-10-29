@@ -90,6 +90,7 @@ class _PaginaprincipalEscritorioState extends State<PaginaPrincipalHorizontal> {
                 Expanded(child: Container()),
                 InkWell(
                   onTap: () {
+                    // Pasamos el context del Scaffold
                     mostrarDialogoIngreso(context);
                   },
                   onHover: (value) {
@@ -109,6 +110,7 @@ class _PaginaprincipalEscritorioState extends State<PaginaPrincipalHorizontal> {
                 landscape
                     ? InkWell(
                         onTap: () {
+                          // Pasamos el context del Scaffold
                           mostrarDialogoIngreso(context);
                         },
                         onHover: (value) {
@@ -146,12 +148,14 @@ class _PaginaprincipalEscritorioState extends State<PaginaPrincipalHorizontal> {
   }
 }
 
+// --- LÓGICA DE INGRESO MODIFICADA ---
 mostrarDialogoIngreso(context) {
   TextEditingController correoController = TextEditingController();
   TextEditingController contrasenaController = TextEditingController();
   showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
+            // Usamos dialogContext para el diálogo
             scrollable: true,
             insetPadding:
                 EdgeInsets.symmetric(horizontal: 0.1.sw, vertical: 0.1.sh),
@@ -194,31 +198,49 @@ mostrarDialogoIngreso(context) {
                 ),
                 ElevatedButton(
                     onPressed: () async {
-                      // --- INICIO DE LA LÓGICA MODIFICADA ---
-
-                      // 2. Primero, obtenemos el token.
+                      // 1. Obtenemos el token.
                       String? token = await Login(
                           correoController.text, contrasenaController.text);
 
-                      await authService.saveToken(token!);
-                      // 4. Si tenemos un token, ahora pedimos los datos del usuario.
+                      // 2. Verificamos si el token es nulo (credenciales incorrectas)
+                      if (token == null) {
+                        // Usamos el 'context' del build principal para mostrar el SnackBar
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Usuario o contraseña incorrectos.'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return; // Detenemos la ejecución
+                      }
+
+                      // 3. Si el token SÍ existe, continuamos
+                      await authService
+                          .saveToken(token); // Ya no se necesita '!'
+
                       try {
+                        // 4. Obtenemos datos del usuario
                         Usuario usuario =
                             await obtenerUsuarioEmail(correoController.text);
                         usuarioGlobal =
                             usuario; // Guardamos el usuario globalmente.
 
-                        // 5. Navegamos al menú principal.
+                        // 5. Navegamos al menú principal
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => Paginamenu()));
                       } catch (e) {
-                        // Manejo de error por si falla la obtención de datos del usuario
+                        // Manejo de error si falla la obtención de datos del usuario
                         print("Error al obtener detalles del usuario: $e");
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content:
+                                Text('Error al obtener datos del usuario.'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
                       }
-
-                      // --- FIN DE LA LÓGICA MODIFICADA ---
                     },
                     child: Text("Ingresar",
                         style: TextStyle(

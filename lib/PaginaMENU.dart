@@ -115,7 +115,8 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
                   ),
 
                 // Tarjeta Resguardos (si tiene rol 'admin', ajustar si es otro rol)
-                if (usuarioGlobal?.roles?.contains("admin") ?? false) ...[
+                if (usuarioGlobal?.roles?.contains("resguardos_internos") ??
+                    false) ...[
                   SizedBox(width: 20.w), // Espacio entre tarjetas
                   _buildMenuCard(
                     context: context,
@@ -137,7 +138,8 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
 
                 // *** NUEVA TARJETA PARA BAJAS DE BIENES ***
                 // Asumiendo que solo los admins pueden verla
-                if (usuarioGlobal?.roles?.contains("admin") ?? false) ...[
+                if (usuarioGlobal?.roles?.contains("bajas_bienes") ??
+                    false) ...[
                   SizedBox(width: 20.w), // Espacio entre tarjetas
                   _buildMenuCard(
                     context: context,
