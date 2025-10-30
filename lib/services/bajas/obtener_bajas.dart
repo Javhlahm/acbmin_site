@@ -11,8 +11,8 @@ Future<List<BajaBien>> obtenerBajas() async {
     'Authorization': 'Bearer $token',
   };
   // URL base + endpoint de bajas
-  //var url = Uri.parse("https://acbmin.lamasoft.org/api/bajas");
-  var url = Uri.parse("http://localhost:8050/api/bajas"); // Local
+  var url = Uri.parse("https://acbmin.lamasoft.org/api/bajas");
+  //var url = Uri.parse("http://localhost:8050/api/bajas"); // Local
 
   var response = await http.get(url, headers: headers);
 
@@ -36,9 +36,8 @@ Future<BajaBien> obtenerBajaPorFolio(int folio) async {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer $token',
   };
-  //var url =
-  //   Uri.parse("https://acbmin.lamasoft.org/api/bajas/$folio");
-  var url = Uri.parse("http://localhost:8050/api/bajas/$folio"); // Local
+  var url = Uri.parse("https://acbmin.lamasoft.org/api/bajas/$folio");
+  //var url = Uri.parse("http://localhost:8050/api/bajas/$folio"); // Local
 
   var response = await http.get(url, headers: headers);
 

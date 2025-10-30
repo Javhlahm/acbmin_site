@@ -11,9 +11,8 @@ Future<bool> eliminarBaja(int folio) async {
   final headers = {
     'Authorization': 'Bearer $token',
   };
-  // var url =
-  //   Uri.parse("https://acbmin.lamasoft.org/api/autoalmacen/bajas/$folio");
-  var url = Uri.parse("http://localhost:8050/api/bajas/$folio"); // Local
+  var url = Uri.parse("https://acbmin.lamasoft.org/api/bajas/$folio");
+  // var url = Uri.parse("http://localhost:8050/api/bajas/$folio"); // Local
 
   try {
     var response = await http.delete(

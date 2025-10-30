@@ -11,7 +11,7 @@ Future<List<Usuario>> obtenerUsuarios() async {
     'Authorization': 'Bearer $token', // El backend espera este formato.
   };
   // var url = Uri.parse("http://89.117.149.126/acbmin/api/users/usuarios");
-  var url = Uri.parse("https://acbmin.lamasoft.org/api/autoalmacen/usuarios");
+  var url = Uri.parse("https://acbmin.lamasoft.org/api/usuarios");
 //  var url = Uri.parse("http://localhost:8050/tallerautomotriz/almacen");
 
   var response = await http.get(url, headers: headers);

@@ -11,8 +11,8 @@ Future<List<Item>> obtenerItems() async {
   };
   // var url =
   //    Uri.parse("http://89.117.149.126/acbmin/api/tallerautomotriz/almacen");
-  var url = Uri.parse(
-      "https://acbmin.lamasoft.org/api/autoalmacen/tallerautomotriz/almacen");
+  var url =
+      Uri.parse("https://acbmin.lamasoft.org/api/tallerautomotriz/almacen");
   //var url = Uri.parse("http://localhost:8050/tallerautomotriz/almacen");
   var response = await http.get(url, headers: headers);
 

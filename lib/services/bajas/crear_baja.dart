@@ -9,8 +9,8 @@ Future<BajaBien?> crearBaja(BajaBien baja) async {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer $token',
   };
-  //var url = Uri.parse("https://acbmin.lamasoft.org/api/bajas");
-  var url = Uri.parse("http://localhost:8050/api/bajas"); // Local
+  var url = Uri.parse("https://acbmin.lamasoft.org/api/bajas");
+  //var url = Uri.parse("http://localhost:8050/api/bajas"); // Local
 
   // Asegúrate que tu clase BajaBien tenga el método toJson()
   Map<String, dynamic> bajaJson = baja.toJson();

@@ -11,8 +11,8 @@ EditarUsuario(Usuario usuario) async {
   };
   // var url = Uri.parse("http://89.117.149.126/acbmin/api/users/usuarios/" +
   //   usuario.email.toString());
-  var url = Uri.parse("https://acbmin.lamasoft.org/api/autoalmacen/usuarios/" +
-      usuario.email.toString());
+  var url = Uri.parse(
+      "https://acbmin.lamasoft.org/api/usuarios/" + usuario.email.toString());
   // var url = Uri.parse(
   // "http://localhost:8050/tallerautomotriz/almacen/transact/entrada");
   Map<String, dynamic> usuarioJSON = usuario.toJson();

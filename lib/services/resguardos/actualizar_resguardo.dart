@@ -9,8 +9,8 @@ Future<bool> actualizarResguardo(int folio, Resguardo resguardo) async {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer $token',
   };
-  //var url = Uri.parse("https://acbmin.lamasoft.org/api/resguardos/$folio");
-  var url = Uri.parse("http://localhost:8050/api/resguardos/$folio"); // Local
+  var url = Uri.parse("https://acbmin.lamasoft.org/api/resguardos/$folio");
+  //var url = Uri.parse("http://localhost:8050/api/resguardos/$folio"); // Local
 
   Map<String, dynamic> resguardoJson = resguardo.toJson();
 

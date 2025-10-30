@@ -9,8 +9,8 @@ Future<Resguardo?> crearResguardo(Resguardo resguardo) async {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer $token',
   };
-  //var url = Uri.parse("https://acbmin.lamasoft.org/api/resguardos");
-  var url = Uri.parse("http://localhost:8050/api/resguardos"); // Local
+  var url = Uri.parse("https://acbmin.lamasoft.org/api/resguardos");
+  //var url = Uri.parse("http://localhost:8050/api/resguardos"); // Local
 
   // Convertir el objeto Resguardo a JSON
   // Asegúrate que tu clase Resguardo tenga el método toJson()

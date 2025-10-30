@@ -12,8 +12,7 @@ Future<Usuario> obtenerUsuarioEmail(String email) async {
   };
   //var url =
   //   Uri.parse("http://89.117.149.126/acbmin/api/users/usuarios/" + email);
-  var url = Uri.parse(
-      "https://acbmin.lamasoft.org/api/autoalmacen/usuarios/" + email);
+  var url = Uri.parse("https://acbmin.lamasoft.org/api/usuarios/" + email);
   //var url = Uri.parse("http://localhost:8050/usuarios/" + email);
 
   var response = await http.get(url, headers: headers);

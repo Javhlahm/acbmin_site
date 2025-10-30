@@ -12,8 +12,7 @@ buscarItem(String serie) async {
   // var url = Uri.parse(
   //  "http://89.117.149.126/acbmin/api/tallerautomotriz/almacen/" + serie);
   var url = Uri.parse(
-      "https://acbmin.lamasoft.org/api/autoalmacen/tallerautomotriz/almacen/" +
-          serie);
+      "https://acbmin.lamasoft.org/api/tallerautomotriz/almacen/" + serie);
 //  var url = Uri.parse("http://localhost:8050/tallerautomotriz/almacen");
   var response = await http.get(url, headers: headers);
 

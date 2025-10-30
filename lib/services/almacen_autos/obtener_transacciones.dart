@@ -12,7 +12,7 @@ Future<List<Transaccion>> obtenerTransacciones() async {
   // var url = Uri.parse(
   //   "http://89.117.149.126/acbmin/api/tallerautomotriz/almacen/transact");
   var url = Uri.parse(
-      "https://acbmin.lamasoft.org/api/autoalmacen/tallerautomotriz/almacen/transact");
+      "https://acbmin.lamasoft.org/api/tallerautomotriz/almacen/transact");
 //  var url = Uri.parse("http://localhost:8050/tallerautomotriz/almacen");
 
   var response = await http.get(url, headers: headers);

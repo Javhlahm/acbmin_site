@@ -26,12 +26,12 @@ Future<bool> generarYMostrarReporteResguardo(int folio) async {
     'Authorization': 'Bearer $token',
   };
 
-  // final url = Uri.parse("https://acbmin.lamasoft.org/api/resguardos/" +
-  //    folio.toString() +
-  //   "/pdf");
-  final url = Uri.parse("http://localhost:8050/api/resguardos/" +
+  final url = Uri.parse("https://acbmin.lamasoft.org/api/resguardos/" +
       folio.toString() +
-      "/pdf"); // Para pruebas locales
+      "/pdf");
+  //final url = Uri.parse("http://localhost:8050/api/resguardos/" +
+  //  folio.toString() +
+  // "/pdf"); // Para pruebas locales
 
   try {
     var response = await http.get(url, headers: headers);

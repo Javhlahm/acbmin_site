@@ -19,10 +19,10 @@ Future<bool> generarYMostrarReporteBaja(int folio) async {
   }
 
   final headers = {'Authorization': 'Bearer $token'};
-  //final url = Uri.parse(
-  //  "https://acbmin.lamasoft.org/api/bajas/" + folio.toString() +"/pdf");
   final url = Uri.parse(
-      "http://localhost:8050/api/bajas/" + folio.toString() + "/pdf"); // Local
+      "https://acbmin.lamasoft.org/api/bajas/" + folio.toString() + "/pdf");
+  //final url = Uri.parse(
+  //  "http://localhost:8050/bajas/" + folio.toString() + "/pdf"); // Local
 
   try {
     var response = await http.get(url, headers: headers);

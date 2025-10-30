@@ -6,8 +6,8 @@ Future<bool> eliminarResguardo(int folio) async {
   final headers = {
     'Authorization': 'Bearer $token', // Solo necesita autorización
   };
-  // var url = Uri.parse("https://acbmin.lamasoft.org/api/resguardos/$folio");
-  var url = Uri.parse("http://localhost:8050/api/resguardos/$folio"); // Local
+  var url = Uri.parse("https://acbmin.lamasoft.org/api/resguardos/$folio");
+  //var url = Uri.parse("http://localhost:8050/api/resguardos/$folio"); // Local
 
   try {
     var response = await http.delete(

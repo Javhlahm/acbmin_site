@@ -9,9 +9,8 @@ Future<bool> actualizarBaja(int folio, BajaBien baja) async {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer $token',
   };
-  // var url =
-  //   Uri.parse("https://acbmin.lamasoft.org/api/bajas/$folio");
-  var url = Uri.parse("http://localhost:8050/api/bajas/$folio"); // Local
+  var url = Uri.parse("https://acbmin.lamasoft.org/api/bajas/$folio");
+  //var url = Uri.parse("http://localhost:8050/api/bajas/$folio"); // Local
 
   Map<String, dynamic> bajaJson = baja.toJson();
 

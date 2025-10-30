@@ -12,7 +12,7 @@ SalidaTransaccion(Transaccion transaccion) async {
   // var url = Uri.parse(
   //   "http://89.117.149.126/acbmin/api/tallerautomotriz/almacen/transact/salida");
   var url = Uri.parse(
-      "https://acbmin.lamasoft.org/api/autoalmacen/tallerautomotriz/almacen/transact/salida");
+      "https://acbmin.lamasoft.org/api/tallerautomotriz/almacen/transact/salida");
 //  var url = Uri.parse("http://localhost:8050/tallerautomotriz/almacen");
   Map<String, dynamic> transaccionJson = transaccion.toJson();
 

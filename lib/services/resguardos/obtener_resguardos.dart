@@ -11,9 +11,9 @@ Future<List<Resguardo>> obtenerResguardos() async {
     'Authorization': 'Bearer $token',
   };
   // URL base de tu API + endpoint de resguardos
-  // var url = Uri.parse("https://acbmin.lamasoft.org/api/resguardos");
-  var url = Uri.parse(
-      "http://localhost:8050/api/resguardos"); // Para pruebas locales si aplica
+  var url = Uri.parse("https://acbmin.lamasoft.org/api/resguardos");
+  //var url = Uri.parse(
+  //   "http://localhost:8050/api/resguardos"); // Para pruebas locales si aplica
 
   var response = await http.get(url, headers: headers);
 
@@ -45,8 +45,8 @@ Future<Resguardo> obtenerResguardoPorFolio(int folio) async {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer $token',
   };
-  //var url = Uri.parse("https://acbmin.lamasoft.org/api/resguardos/$folio");
-  var url = Uri.parse("http://localhost:8050/api/resguardos/$folio"); // Local
+  var url = Uri.parse("https://acbmin.lamasoft.org/api/resguardos/$folio");
+  //var url = Uri.parse("http://localhost:8050/api/resguardos/$folio"); // Local
 
   var response = await http.get(url, headers: headers);
 
