@@ -23,8 +23,50 @@ class MyApp extends StatelessWidget {
           title: 'ACBMIN',
           // You can use the library anywhere in the app even in theme
           theme: ThemeData(
-            primarySwatch: Colors.blue,
-            textTheme: Typography.englishLike2018.apply(fontSizeFactor: 1.sp),
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xfff6c500),
+              primary: const Color(0xff705900),
+              secondary: const Color(0xffff8a00),
+            ),
+            scaffoldBackgroundColor: const Color(0xfffff9ff),
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Color(0xfff6c500),
+              foregroundColor: Colors.black,
+              elevation: 1,
+              centerTitle: true,
+              toolbarHeight: 64,
+            ),
+            inputDecorationTheme: InputDecorationTheme(
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xffc9c4cc)),
+              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            ),
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(48, 48),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            cardTheme: CardThemeData(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            visualDensity: VisualDensity.standard,
           ),
           home: child,
         );

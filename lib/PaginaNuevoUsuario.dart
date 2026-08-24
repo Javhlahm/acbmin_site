@@ -1,7 +1,7 @@
 import 'package:acbmin_site/entity/Usuario.dart';
 import 'package:acbmin_site/services/NuevoUsuario.dart';
+import 'package:acbmin_site/ui/responsive.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Paginanuevousuario extends StatefulWidget {
   const Paginanuevousuario({super.key});
@@ -11,132 +11,135 @@ class Paginanuevousuario extends StatefulWidget {
 }
 
 class _PaginanuevousuarioState extends State<Paginanuevousuario> {
-  TextEditingController nombreController = TextEditingController();
-  TextEditingController correoController = TextEditingController();
-  TextEditingController contrasenaController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final nombreController = TextEditingController();
+  final correoController = TextEditingController();
+  final contrasenaController = TextEditingController();
   bool admin = false;
-  bool taller_autos = false;
-  bool resguardos_internos = false; // <-- AÑADIDO
-  bool bajas_bienes = false; // <-- AÑADIDO
+  bool tallerAutos = false;
+  bool resguardosInternos = false;
+  bool bajasBienes = false;
+  bool _guardando = false;
+
+  @override
+  void dispose() {
+    nombreController.dispose();
+    correoController.dispose();
+    contrasenaController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _guardar() async {
+    if (!_formKey.currentState!.validate() || _guardando) return;
+    final roles = <String>[
+      if (admin) 'admin',
+      if (tallerAutos) 'taller_autos',
+      if (resguardosInternos) 'resguardos_internos',
+      if (bajasBienes) 'bajas_bienes',
+    ];
+    if (roles.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Selecciona al menos un rol.')),
+      );
+      return;
+    }
+    setState(() => _guardando = true);
+    final usuario = Usuario()
+      ..nombre = nombreController.text.trim()
+      ..email = correoController.text.trim()
+      ..contrasena = contrasenaController.text
+      ..roles = roles
+      ..status = 'ACTIVO';
+    await NuevoUsuario(usuario);
+    if (!mounted) return;
+    Navigator.pop(context, true);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "ACBMIN-NUEVO USUARIO",
+          context.isMobile ? 'Nuevo usuario' : 'ACBMIN: NUEVO USUARIO',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
-              color: Colors.red,
-              fontWeight: FontWeight.bold,
-              fontSize: 35.0.dg),
-        ),
-        backgroundColor: Color(0xfff6c500),
-      ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Container(
-            width: 0.5.sw,
-            height: 0.8.sh,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                TextFormField(
-                  controller: nombreController,
-                  decoration: InputDecoration(
-                      contentPadding: EdgeInsets.all(10.h),
-                      hintText: "Nombre Completo",
-                      hintStyle: TextStyle(fontSize: 0.02.sh)),
-                ),
-                TextFormField(
-                  controller: correoController,
-                  decoration: InputDecoration(
-                      contentPadding: EdgeInsets.all(10.h),
-                      hintText: "Correo",
-                      hintStyle: TextStyle(fontSize: 0.02.sh)),
-                ),
-                TextFormField(
-                  controller: contrasenaController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                      contentPadding: EdgeInsets.all(10.h),
-                      hintText: "Contraseña",
-                      hintStyle: TextStyle(fontSize: 0.02.sh)),
-                ),
-                Padding(padding: EdgeInsets.only(top: 20.dg)),
-                Text("ROLES:"),
-                CheckboxListTile(
-                  title: Text("Administrador"),
-                  value: admin,
-                  onChanged: (newValue) {
-                    setState(() {
-                      admin = newValue!;
-                    });
-                  },
-                ),
-                CheckboxListTile(
-                  title: Text("Taller de Autos"),
-                  value: taller_autos,
-                  onChanged: (newValue) {
-                    setState(() {
-                      taller_autos = newValue!;
-                    });
-                  },
-                ),
-                // --- INICIO DE CÓDIGO AÑADIDO ---
-                CheckboxListTile(
-                  title: Text("Resguardos Internos"),
-                  value: resguardos_internos,
-                  onChanged: (newValue) {
-                    setState(() {
-                      resguardos_internos = newValue!;
-                    });
-                  },
-                ),
-                CheckboxListTile(
-                  title: Text("Bajas de Bienes"),
-                  value: bajas_bienes,
-                  onChanged: (newValue) {
-                    setState(() {
-                      bajas_bienes = newValue!;
-                    });
-                  },
-                ),
-                // --- FIN DE CÓDIGO AÑADIDO ---
-                ElevatedButton(
-                    onPressed: () async {
-                      List<String> roles = [];
-                      if (admin) {
-                        roles.add("admin");
-                      }
-                      if (taller_autos) {
-                        roles.add("taller_autos");
-                      }
-                      // --- INICIO DE CÓDIGO AÑADIDO ---
-                      if (resguardos_internos) {
-                        roles.add("resguardos_internos");
-                      }
-                      if (bajas_bienes) {
-                        roles.add("bajas_bienes");
-                      }
-                      // --- FIN DE CÓDIGO AÑADIDO ---
-
-                      Usuario usuario = new Usuario();
-                      usuario.nombre = nombreController.text;
-                      usuario.email = correoController.text;
-                      usuario.contrasena = contrasenaController.text;
-                      usuario.roles = roles;
-                      usuario.status = "ACTIVO";
-
-                      await NuevoUsuario(usuario);
-                      Navigator.pop(context);
-                    },
-                    child: Text("Guardar"))
-              ],
-            ),
+            color: Colors.red,
+            fontWeight: FontWeight.bold,
+            fontSize: context.isMobile ? 20 : 28,
           ),
         ),
       ),
+      body: ResponsiveFormCard(
+        maxWidth: 720,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                controller: nombreController,
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(labelText: 'Nombre completo'),
+                validator: (value) =>
+                    (value?.trim().isEmpty ?? true) ? 'Campo requerido' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: correoController,
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(labelText: 'Correo'),
+                validator: (value) {
+                  final email = value?.trim() ?? '';
+                  if (email.isEmpty) return 'Campo requerido';
+                  if (!email.contains('@')) return 'Correo no válido';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: contrasenaController,
+                obscureText: true,
+                decoration: const InputDecoration(labelText: 'Contraseña'),
+                validator: (value) =>
+                    (value?.isEmpty ?? true) ? 'Campo requerido' : null,
+              ),
+              const SizedBox(height: 24),
+              Text('Roles', style: Theme.of(context).textTheme.titleMedium),
+              _roleTile('Administrador', admin,
+                  (value) => setState(() => admin = value)),
+              _roleTile('Taller de autos', tallerAutos,
+                  (value) => setState(() => tallerAutos = value)),
+              _roleTile('Resguardos internos', resguardosInternos,
+                  (value) => setState(() => resguardosInternos = value)),
+              _roleTile('Bajas de bienes', bajasBienes,
+                  (value) => setState(() => bajasBienes = value)),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: _guardando ? null : _guardar,
+                icon: _guardando
+                    ? const SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.save),
+                label: Text(_guardando ? 'Guardando…' : 'Guardar usuario'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _roleTile(String label, bool value, ValueChanged<bool> onChanged) {
+    return CheckboxListTile(
+      contentPadding: EdgeInsets.zero,
+      controlAffinity: ListTileControlAffinity.leading,
+      title: Text(label),
+      value: value,
+      onChanged: _guardando ? null : (value) => onChanged(value ?? false),
     );
   }
 }

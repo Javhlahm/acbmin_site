@@ -5,6 +5,7 @@ import 'package:acbmin_site/services/bajas/crear_baja.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:acbmin_site/ui/responsive.dart';
 
 class PaginaNuevaBaja extends StatefulWidget {
   const PaginaNuevaBaja({super.key});
@@ -99,9 +100,7 @@ class _PaginaNuevaBajaState extends State<PaginaNuevaBaja> {
       child: Text(
         title,
         style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
-            color: Colors.black54),
+            fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black54),
       ),
     );
   }
@@ -131,7 +130,7 @@ class _PaginaNuevaBajaState extends State<PaginaNuevaBaja> {
           style: TextStyle(
               color: Colors.red,
               fontWeight: FontWeight.bold,
-              fontSize: 25.0.dg),
+              fontSize: context.isMobile ? 20 : 25),
         ),
         backgroundColor: Color(0xfff6c500),
         leading: IconButton(
@@ -142,15 +141,15 @@ class _PaginaNuevaBajaState extends State<PaginaNuevaBaja> {
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 10.w),
+            padding: EdgeInsets.all(context.pagePadding),
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 800.w),
+              constraints: const BoxConstraints(maxWidth: 800),
               child: Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15.r)),
                 child: Padding(
-                  padding: EdgeInsets.all(25.w),
+                  padding: EdgeInsets.all(context.isMobile ? 16 : 25),
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -268,7 +267,7 @@ class _PaginaNuevaBajaState extends State<PaginaNuevaBaja> {
                                   backgroundColor: Colors.amber,
                                   foregroundColor: Colors.black,
                                   textStyle: TextStyle(
-                                      fontSize: 16.sp,
+                                      fontSize: 16,
                                       fontWeight: FontWeight.bold),
                                   disabledBackgroundColor: Colors.grey.shade300,
                                   disabledForegroundColor: Colors.grey.shade500,

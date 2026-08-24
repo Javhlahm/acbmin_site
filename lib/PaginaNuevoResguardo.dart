@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // Para diseño adaptable
-import 'package:intl/intl.dart'; // Para formatear fecha si es necesario
+import 'package:acbmin_site/ui/responsive.dart';
 
 // Importar entidad Resguardo y UsuarioGlobal
 import 'entity/Resguardo.dart'; // Asegúrate que la ruta sea correcta
@@ -131,9 +131,7 @@ class _PaginaNuevoResguardoState extends State<PaginaNuevoResguardo> {
       child: Text(
         title,
         style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
-            color: Colors.black54),
+            fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black54),
       ),
     );
   }
@@ -147,7 +145,7 @@ class _PaginaNuevoResguardoState extends State<PaginaNuevoResguardo> {
           style: TextStyle(
               color: Colors.red,
               fontWeight: FontWeight.bold,
-              fontSize: 25.0.dg),
+              fontSize: context.isMobile ? 20 : 25),
         ),
         backgroundColor: Color(0xfff6c500),
         leading: IconButton(
@@ -159,16 +157,15 @@ class _PaginaNuevoResguardoState extends State<PaginaNuevoResguardo> {
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.symmetric(
-                vertical: 20.h, horizontal: 10.w), // Margen exterior
+            padding: EdgeInsets.all(context.pagePadding),
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 800.w), // Ancho máximo
+              constraints: const BoxConstraints(maxWidth: 800),
               child: Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15.r)),
                 child: Padding(
-                  padding: EdgeInsets.all(25.w), // Padding interno
+                  padding: EdgeInsets.all(context.isMobile ? 16 : 25),
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -333,7 +330,7 @@ class _PaginaNuevoResguardoState extends State<PaginaNuevoResguardo> {
                                   backgroundColor: Colors.amber,
                                   foregroundColor: Colors.black,
                                   textStyle: TextStyle(
-                                      fontSize: 16.sp,
+                                      fontSize: 16,
                                       fontWeight: FontWeight.bold),
                                   // Cambiar apariencia si está deshabilitado
                                   disabledBackgroundColor: Colors.grey.shade300,

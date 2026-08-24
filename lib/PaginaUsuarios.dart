@@ -6,6 +6,7 @@ import 'package:acbmin_site/services/usuarios/ObtenerUsuarios.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pluto_grid/pluto_grid.dart';
+import 'package:acbmin_site/ui/responsive.dart';
 
 late List<Usuario> datosExportacion;
 late Future<List<Usuario>> listaUsuarios;
@@ -28,23 +29,21 @@ class _PaginausuariosState extends State<Paginausuarios> {
 
   @override
   Widget build(BuildContext context) {
-    // La llamada a obtenerUsuarios() fue movida a initState
-    var landscape =
-        ScreenUtil().orientation == Orientation.landscape ? true : false;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "ACBMIN-USUARIOS",
+          context.isMobile ? "Usuarios" : "ACBMIN: USUARIOS",
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
               color: Colors.red,
               fontWeight: FontWeight.bold,
-              fontSize: 35.0.dg),
+              fontSize: context.isMobile ? 20 : 28),
         ),
         backgroundColor: Color(0xfff6c500),
         actions: [
           IconButton(
-              padding: EdgeInsets.only(right: 20.0.dg),
+              tooltip: 'Actualizar usuarios',
               onPressed: () {
                 // Se refresca la lista llamando a setState
                 setState(() {
@@ -56,14 +55,14 @@ class _PaginausuariosState extends State<Paginausuarios> {
                 size: 30.0,
                 color: Colors.black,
               )),
-          landscape
+          !context.isMobile
               ? InkWell(
                   child: Text(
                     "Nuevo Usuario",
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
-                        fontSize: 20.0.dg),
+                        fontSize: 18),
                   ),
                   onTap: () {
                     Navigator.push(
@@ -73,6 +72,7 @@ class _PaginausuariosState extends State<Paginausuarios> {
                   },
                 )
               : IconButton(
+                  tooltip: 'Nuevo usuario',
                   onPressed: () {
                     Navigator.push(
                         context,
@@ -83,15 +83,15 @@ class _PaginausuariosState extends State<Paginausuarios> {
                     Icons.add,
                     color: Colors.black,
                   )),
-          Padding(padding: EdgeInsets.symmetric(horizontal: 10.dg)),
-          landscape
+          const SizedBox(width: 4),
+          !context.isMobile
               ? InkWell(
                   child: Text(
                     "Editar Usuario",
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
-                        fontSize: 20.0.dg),
+                        fontSize: 18),
                   ),
                   onTap: () {
                     if (UsuarioSeleccionado!.isEmpty ||
@@ -107,6 +107,7 @@ class _PaginausuariosState extends State<Paginausuarios> {
                   },
                 )
               : IconButton(
+                  tooltip: 'Editar usuario seleccionado',
                   onPressed: () {
                     if (UsuarioSeleccionado!.isEmpty ||
                         UsuarioSeleccionado == null) {
@@ -123,15 +124,17 @@ class _PaginausuariosState extends State<Paginausuarios> {
                     Icons.edit,
                     color: Colors.black,
                   )),
-          Padding(padding: EdgeInsets.symmetric(horizontal: 10.dg)),
-          Text(
-            usuarioGlobal!.nombre!,
-            style: TextStyle(
-                fontSize: 20.dg,
-                fontWeight: FontWeight.bold,
-                fontStyle: FontStyle.italic),
-          ),
-          Padding(padding: EdgeInsets.only(right: 20.dg)),
+          if (context.isDesktop) ...[
+            const SizedBox(width: 12),
+            Text(
+              usuarioGlobal!.nombre!,
+              style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  fontStyle: FontStyle.italic),
+            ),
+            const SizedBox(width: 20),
+          ],
         ],
       ),
       body: FutureBuilder(
@@ -148,9 +151,7 @@ class _PaginausuariosState extends State<Paginausuarios> {
                 );
               }
               datosExportacion = snapshot.data!;
-              return Container(
-                height: 0.9.sh,
-                width: 1.sw,
+              return SizedBox.expand(
                 child: PlutoGrid(
                     mode: PlutoGridMode.selectWithOneTap,
                     configuration: PlutoGridConfiguration(
@@ -159,7 +160,9 @@ class _PaginausuariosState extends State<Paginausuarios> {
                           enableRowColorAnimation: true),
                     ),
                     onSelected: (event) {
-                      UsuarioSeleccionado = event.row!.cells['email']?.value;
+                      setState(() {
+                        UsuarioSeleccionado = event.row!.cells['email']?.value;
+                      });
                     },
                     columns: [
                       // PlutoColumn(
@@ -174,7 +177,7 @@ class _PaginausuariosState extends State<Paginausuarios> {
                           field: "nombre",
                           type: PlutoColumnType.text(),
                           readOnly: true,
-                          width: .25.sw,
+                          width: context.isMobile ? 150 : .25.sw,
                           enableColumnDrag: false),
 
                       PlutoColumn(
@@ -182,7 +185,7 @@ class _PaginausuariosState extends State<Paginausuarios> {
                           field: "email",
                           type: PlutoColumnType.text(),
                           readOnly: true,
-                          width: .25.sw,
+                          width: context.isMobile ? 200 : .25.sw,
                           enableColumnDrag: false),
 
                       PlutoColumn(
@@ -190,14 +193,14 @@ class _PaginausuariosState extends State<Paginausuarios> {
                           field: "roles",
                           type: PlutoColumnType.text(),
                           readOnly: true,
-                          width: .25.sw,
+                          width: context.isMobile ? 190 : .25.sw,
                           enableColumnDrag: false),
                       PlutoColumn(
                           title: "Estatus",
                           field: "status",
                           type: PlutoColumnType.text(),
                           readOnly: true,
-                          width: .25.sw,
+                          width: context.isMobile ? 120 : .25.sw,
                           enableColumnDrag: false),
                     ],
                     rows: snapshot.data!.map((usuario) {

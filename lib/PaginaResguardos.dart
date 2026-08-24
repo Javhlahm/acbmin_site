@@ -1,12 +1,11 @@
-import 'dart:convert'; // Necesario para utf8.decode
 import 'package:acbmin_site/entity/UsuarioGlobal.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart'; // Para listEquals
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:intl/intl.dart';
 import 'package:excel/excel.dart';
+import 'package:acbmin_site/ui/responsive.dart';
 
 // Importar la entidad y las páginas relacionadas
 import 'entity/Resguardo.dart';
@@ -349,7 +348,7 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
               status,
               style: TextStyle(
                 color: Colors.black87,
-                fontSize: 14.sp,
+                fontSize: 14,
               ),
               overflow: TextOverflow.ellipsis,
             ),
@@ -458,11 +457,13 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
         backgroundColor: Color(0xfff6c500),
         centerTitle: true,
         title: Text(
-          "ACBMIN: RESGUARDOS INTERNOS",
+          context.isMobile ? "Resguardos" : "ACBMIN: RESGUARDOS INTERNOS",
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: Colors.red,
             fontWeight: FontWeight.bold,
-            fontSize: 25.0.dg,
+            fontSize: context.isMobile ? 20 : 25,
           ),
         ),
         leading: IconButton(
@@ -480,15 +481,15 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
             tooltip: 'Exportar a Excel',
             onPressed: _exportarAExcel,
           ),
-          SizedBox(width: 10.w),
-          if (_nombreUsuarioActual != null)
+          const SizedBox(width: 4),
+          if (_nombreUsuarioActual != null && context.isDesktop)
             Center(
               child: Padding(
-                padding: EdgeInsets.only(right: 15.w),
+                padding: const EdgeInsets.only(right: 15),
                 child: Text(
                   _nombreUsuarioActual!,
                   style: TextStyle(
-                      fontSize: 20.dg,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       fontStyle: FontStyle.italic,
                       color: Colors.black),
@@ -498,41 +499,29 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.w),
+        padding: EdgeInsets.all(context.pagePadding),
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.only(bottom: 16.h),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                          labelText: 'Buscar...',
-                          hintText: 'Folio, nombre, inventario...',
-                          prefixIcon: Icon(Icons.search),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.r),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                              vertical: 10.h, horizontal: 10.w)),
-                    ),
+              padding: const EdgeInsets.only(bottom: 16),
+              child: ResponsiveToolbar(
+                search: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                      labelText: 'Buscar...',
+                      hintText: 'Folio, nombre, inventario...',
+                      prefixIcon: Icon(Icons.search),
+                      border: const OutlineInputBorder()),
+                ),
+                primaryAction: ElevatedButton.icon(
+                  icon: Icon(Icons.add),
+                  label: Text('Nuevo Resguardo'),
+                  onPressed: _navegarANuevoResguardo,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.amber,
+                    foregroundColor: Colors.black,
                   ),
-                  SizedBox(width: 16.w),
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.add),
-                    label: Text('Nuevo Resguardo'),
-                    onPressed: _navegarANuevoResguardo,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
-                          vertical: 15.h, horizontal: 20.w),
-                      backgroundColor: Colors.amber,
-                      foregroundColor: Colors.black,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
             // Usa FutureBuilder o indicador de carga
@@ -542,32 +531,56 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
                   : _filteredResguardos
                           .isEmpty // Muestra mensaje si no hay datos después de cargar
                       ? Center(child: Text('No se encontraron resguardos.'))
-                      : PlutoGrid(
-                          // Muestra la tabla si hay datos
-                          columns: _columns,
-                          rows:
-                              _rows, // Las filas se actualizan en _updatePlutoRows
-                          onLoaded: (PlutoGridOnLoadedEvent event) {
-                            _stateManager = event.stateManager;
-                            _stateManager!.setShowColumnFilter(false);
-                          },
-                          onRowDoubleTap: (PlutoGridOnRowDoubleTapEvent event) {
-                            if (event.row != null) {
-                              _navegarADetalleResguardo(
-                                  event.row!); // Llama a la versión modificada
-                            }
-                          },
-                          configuration: PlutoGridConfiguration(
-                            style: PlutoGridStyleConfig(
-                              enableGridBorderShadow: true,
-                              enableRowColorAnimation: true,
-                              rowHeight: 45.h,
-                              cellTextStyle: TextStyle(fontSize: 14.sp),
-                              columnTextStyle: TextStyle(
-                                  fontSize: 15.sp, fontWeight: FontWeight.bold),
+                      : context.isMobile
+                          ? ListView.builder(
+                              itemCount: _filteredResguardos.length,
+                              itemBuilder: (context, index) {
+                                final resguardo = _filteredResguardos[index];
+                                return MobileRecordCard(
+                                  title: resguardo.folioFormateado,
+                                  status: resguardo.estatus ?? 'Pendiente',
+                                  fields: {
+                                    'Tipo': resguardo.tipoResguardo,
+                                    'Inventario': resguardo.numeroInventario,
+                                    'Descripción': resguardo.descripcion,
+                                  },
+                                  onTap: () {
+                                    final row = _rows.firstWhere((row) =>
+                                        row.cells['folio']?.value ==
+                                        resguardo.folioFormateado);
+                                    _navegarADetalleResguardo(row);
+                                  },
+                                );
+                              },
+                            )
+                          : PlutoGrid(
+                              // Muestra la tabla si hay datos
+                              columns: _columns,
+                              rows:
+                                  _rows, // Las filas se actualizan en _updatePlutoRows
+                              onLoaded: (PlutoGridOnLoadedEvent event) {
+                                _stateManager = event.stateManager;
+                                _stateManager!.setShowColumnFilter(false);
+                              },
+                              onRowDoubleTap:
+                                  (PlutoGridOnRowDoubleTapEvent event) {
+                                if (event.row != null) {
+                                  _navegarADetalleResguardo(event
+                                      .row!); // Llama a la versión modificada
+                                }
+                              },
+                              configuration: PlutoGridConfiguration(
+                                style: PlutoGridStyleConfig(
+                                  enableGridBorderShadow: true,
+                                  enableRowColorAnimation: true,
+                                  rowHeight: 48,
+                                  cellTextStyle: TextStyle(fontSize: 14),
+                                  columnTextStyle: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
             ),
           ],
         ),

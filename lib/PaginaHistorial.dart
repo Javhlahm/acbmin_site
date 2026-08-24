@@ -4,6 +4,7 @@ import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pluto_grid/pluto_grid.dart';
+import 'package:acbmin_site/ui/responsive.dart';
 
 late List<Transaccion> datosExportacion;
 
@@ -41,8 +42,8 @@ class _PaginahistorialState extends State<Paginahistorial> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Container(
-            padding: EdgeInsets.fromLTRB(15.0, 7.0, 25.0, 7.0).w,
-            height: 0.10.sh,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            height: 64,
             color: Color(0xfff6c500),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -60,16 +61,18 @@ class _PaginahistorialState extends State<Paginahistorial> {
                   child: Icon(
                     Icons.arrow_back,
                     color: colorHoverRegresar,
-                    size: landscape ? 0.07.sh : 0.03.sh,
+                    size: 28,
                   ),
                 ),
                 Expanded(child: Container()),
                 Text(
-                  "HISTORIAL DE MOVIMIENTOS",
+                  context.isMobile ? "HISTORIAL" : "HISTORIAL DE MOVIMIENTOS",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                       color: Colors.red,
                       fontWeight: FontWeight.bold,
-                      fontSize: 25.0.dg),
+                      fontSize: context.isMobile ? 18 : 25),
                 ),
                 Expanded(child: Container()),
                 InkWell(
@@ -87,7 +90,7 @@ class _PaginahistorialState extends State<Paginahistorial> {
                   child: Icon(
                     Icons.refresh_sharp,
                     color: colorHoverActualizar,
-                    size: landscape ? 0.07.sh : 0.03.sh,
+                    size: 28,
                   ),
                 ),
                 Padding(padding: EdgeInsets.only(left: 15.0.w)),
@@ -107,7 +110,7 @@ class _PaginahistorialState extends State<Paginahistorial> {
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: colorHoverExportar,
-                                fontSize: 15.0.dg),
+                                fontSize: 15),
                           )
                         : Icon(Icons.download)),
               ],
@@ -128,7 +131,7 @@ class _PaginahistorialState extends State<Paginahistorial> {
                   }
                   datosExportacion = snapshot.data!;
                   return Container(
-                    height: 0.9.sh,
+                    height: MediaQuery.sizeOf(context).height - 64,
                     width: double.infinity,
                     child: PlutoGrid(
                         mode: PlutoGridMode.selectWithOneTap,

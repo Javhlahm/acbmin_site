@@ -6,6 +6,7 @@ import 'package:acbmin_site/services/usuarios/Login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:acbmin_site/services/usuarios/ObtenerUsuarioEmail.dart';
+import 'package:acbmin_site/ui/responsive.dart';
 
 class Paginaprincipal extends StatelessWidget {
   const Paginaprincipal({super.key});
@@ -32,124 +33,139 @@ class _PaginaprincipalEscritorioState extends State<PaginaPrincipalHorizontal> {
 
   @override
   Widget build(BuildContext context) {
-    var landscape =
-        ScreenUtil().orientation == Orientation.landscape ? true : false;
-
     return Scaffold(
-        body: Column(
-      children: [
-        Container(
-          height: 0.10.sh,
-          width: 1.sw,
-          color: Color(0xfff6c500),
-          child: Padding(
-            padding: EdgeInsets.all(0.01.sh),
-            child: Row(
-              children: [
-                InkWell(
-                  child: Icon(
-                    size: 0.07.sh,
-                    Icons.home,
-                    color: colorHoverHome,
-                  ),
-                  onTap: () {
-                    setState(() {});
-                  },
-                  onHover: (value) {
-                    setState(() {
-                      colorHoverHome = value ? Colors.red : Colors.black;
-                    });
-                  },
-                ),
-                SizedBox(
-                  width: 0.02.sw,
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: 0.005.sh),
-                  child: landscape
-                      ? InkWell(
-                          child: Text(
-                            "Inicio",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: colorHoverHome,
-                                fontSize: 30.dg),
-                          ),
-                          onTap: () {
-                            setState(() {});
-                          },
-                          onHover: (value) {
-                            setState(() {
-                              colorHoverHome =
-                                  value ? Colors.red : Colors.black;
-                            });
-                          },
-                        )
-                      : null,
-                ),
-                Expanded(child: Container()),
-                InkWell(
-                  onTap: () {
-                    // Pasamos el context del Scaffold
-                    mostrarDialogoIngreso(context);
-                  },
-                  onHover: (value) {
-                    setState(() {
-                      colorHoverIngreso = value ? Colors.red : Colors.black;
-                    });
-                  },
-                  child: Icon(
-                    Icons.login,
-                    size: 0.07.sh,
-                    color: colorHoverIngreso,
-                  ),
-                ),
-                SizedBox(
-                  width: 0.02.sw,
-                ),
-                landscape
-                    ? InkWell(
-                        onTap: () {
-                          // Pasamos el context del Scaffold
-                          mostrarDialogoIngreso(context);
-                        },
-                        onHover: (value) {
-                          setState(() {
-                            colorHoverIngreso =
-                                value ? Colors.red : Colors.black;
-                          });
-                        },
-                        child: Text(
-                          "Iniciar Sesión",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: colorHoverIngreso,
-                            fontSize: 30.dg,
-                          ),
-                        ),
-                      )
-                    : Container(),
-                SizedBox(
-                  width: 0.05.sw,
-                )
-              ],
+      appBar: AppBar(
+        centerTitle: false,
+        leading: IconButton(
+          tooltip: 'Inicio',
+          onPressed: () {},
+          icon: const Icon(Icons.home),
+        ),
+        title: const Text(
+          'Inicio',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          TextButton.icon(
+            onPressed: () => mostrarDialogoIngreso(context),
+            icon: const Icon(Icons.login),
+            label: Text(context.isMobile ? 'Ingresar' : 'Iniciar sesión'),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.black,
+              textStyle:
+                  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
+          const SizedBox(width: 12),
+        ],
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final titleSize =
+              (constraints.maxWidth * 0.032).clamp(24.0, 48.0).toDouble();
+          final topSpacing =
+              (constraints.maxHeight * 0.08).clamp(20.0, 64.0).toDouble();
+
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.asset(
+                'lib/assets/class_classroom.jpg',
+                fit: BoxFit.cover,
+                alignment: Alignment.center,
+                semanticLabel: 'Salón de clases',
+              ),
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.center,
+                    colors: [Color(0x66000000), Colors.transparent],
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.topCenter,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    context.isMobile ? 16 : 32,
+                    topSpacing,
+                    context.isMobile ? 16 : 32,
+                    16,
+                  ),
+                  child: Semantics(
+                    header: true,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _LandingTitleLine(
+                          text: 'ACBMIN',
+                          fontSize: titleSize * 0.78,
+                        ),
+                        const SizedBox(height: 4),
+                        _LandingTitleLine(
+                          text: 'Área de Control de Bienes',
+                          fontSize: titleSize,
+                        ),
+                        _LandingTitleLine(
+                          text: 'Muebles e Inmuebles',
+                          fontSize: titleSize,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _LandingTitleLine extends StatelessWidget {
+  const _LandingTitleLine({required this.text, required this.fontSize});
+
+  final String text;
+  final double fontSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          text,
+          maxLines: 1,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: const Color(0xffef3f0f),
+            fontSize: fontSize,
+            height: 1.05,
+            fontWeight: FontWeight.w900,
+            shadows: const [
+              Shadow(
+                color: Color(0xff641900),
+                offset: Offset(2, 2),
+                blurRadius: 0,
+              ),
+              Shadow(
+                color: Colors.black54,
+                offset: Offset.zero,
+                blurRadius: 3,
+              ),
+            ],
+          ),
         ),
-        Container(
-            height: 0.90.sh,
-            width: 1.sw,
-            child: Image.asset("lib/assets/landing.png",
-                fit: ScreenUtil().orientation == Orientation.landscape
-                    ? BoxFit.fill
-                    : BoxFit.fitHeight))
-      ],
-    ));
+      ),
+    );
   }
 }
 
 // --- LÓGICA DE INGRESO MODIFICADA ---
-mostrarDialogoIngreso(context) {
+void mostrarDialogoIngreso(BuildContext context) {
   TextEditingController correoController = TextEditingController();
   TextEditingController contrasenaController = TextEditingController();
   showDialog(
@@ -157,45 +173,38 @@ mostrarDialogoIngreso(context) {
       builder: (dialogContext) => AlertDialog(
             // Usamos dialogContext para el diálogo
             scrollable: true,
-            insetPadding:
-                EdgeInsets.symmetric(horizontal: 0.1.sw, vertical: 0.1.sh),
+            insetPadding: EdgeInsets.all(context.isMobile ? 16 : 40),
             title: Text("Ingresar",
                 textAlign: TextAlign.center,
                 style:
-                    TextStyle(fontSize: 0.03.sh, fontWeight: FontWeight.bold)),
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             content: Form(
                 child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  height: 0.09.sh,
-                  width: 0.3.sw,
+                SizedBox(
+                  width: context.isMobile ? double.maxFinite : 420,
                   child: TextFormField(
                     controller: correoController,
-                    style: TextStyle(fontSize: 0.04.sh),
-                    decoration: InputDecoration(
-                        contentPadding: EdgeInsets.all(10.h),
-                        hintText: "Usuario",
-                        hintStyle: TextStyle(fontSize: 0.02.sh)),
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    decoration: const InputDecoration(
+                        labelText: "Usuario", prefixIcon: Icon(Icons.person)),
                   ),
                 ),
-                Container(
-                  height: 0.09.sh,
-                  width: 0.3.sw,
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: context.isMobile ? double.maxFinite : 420,
                   child: TextFormField(
                     controller: contrasenaController,
-                    style: TextStyle(fontSize: 0.04.sh),
                     obscureText: true,
-                    decoration: InputDecoration(
-                        contentPadding: EdgeInsets.all(10.h),
-                        hintText: "Contraseña",
-                        hintStyle: TextStyle(fontSize: 0.02.sh)),
+                    onFieldSubmitted: (_) {},
+                    decoration: const InputDecoration(
+                        labelText: "Contraseña", prefixIcon: Icon(Icons.lock)),
                   ),
                 ),
-                SizedBox(
-                  height: 0.02.sh,
-                ),
+                const SizedBox(height: 20),
                 ElevatedButton(
                     onPressed: () async {
                       // 1. Obtenemos el token.

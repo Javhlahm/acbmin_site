@@ -6,10 +6,10 @@ import 'package:acbmin_site/PaginaDetalleBaja.dart';
 import 'package:acbmin_site/services/bajas/obtener_bajas.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:intl/intl.dart';
 import 'package:excel/excel.dart';
+import 'package:acbmin_site/ui/responsive.dart';
 import 'package:collection/collection.dart';
 
 class PaginaBajas extends StatefulWidget {
@@ -295,7 +295,7 @@ class _PaginaBajasState extends State<PaginaBajas> {
               status,
               style: TextStyle(
                 color: Colors.black87,
-                fontSize: 14.sp,
+                fontSize: 14,
               ),
               overflow: TextOverflow.ellipsis,
             ),
@@ -389,11 +389,13 @@ class _PaginaBajasState extends State<PaginaBajas> {
         backgroundColor: Color(0xfff6c500),
         centerTitle: true,
         title: Text(
-          "ACBMIN: BAJAS DE BIENES",
+          context.isMobile ? "Bajas de bienes" : "ACBMIN: BAJAS DE BIENES",
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: Colors.red,
             fontWeight: FontWeight.bold,
-            fontSize: 25.0.dg,
+            fontSize: context.isMobile ? 20 : 25,
           ),
         ),
         leading: IconButton(
@@ -411,15 +413,15 @@ class _PaginaBajasState extends State<PaginaBajas> {
             tooltip: 'Exportar a Excel',
             onPressed: _exportarAExcel,
           ),
-          SizedBox(width: 10.w),
-          if (_nombreUsuarioActual != null)
+          const SizedBox(width: 4),
+          if (_nombreUsuarioActual != null && context.isDesktop)
             Center(
               child: Padding(
-                padding: EdgeInsets.only(right: 15.w),
+                padding: const EdgeInsets.only(right: 15),
                 child: Text(
                   _nombreUsuarioActual,
                   style: TextStyle(
-                      fontSize: 20.dg,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       fontStyle: FontStyle.italic,
                       color: Colors.black),
@@ -429,42 +431,30 @@ class _PaginaBajasState extends State<PaginaBajas> {
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.w),
+        padding: EdgeInsets.all(context.pagePadding),
         child: Column(
           children: [
             Padding(
               /* ... Barra de búsqueda y botón Nuevo sin cambios ... */
-              padding: EdgeInsets.only(bottom: 16.h),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                          labelText: 'Buscar...',
-                          hintText: 'Folio, inventario, área...',
-                          prefixIcon: Icon(Icons.search),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.r),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                              vertical: 10.h, horizontal: 10.w)),
-                    ),
+              padding: const EdgeInsets.only(bottom: 16),
+              child: ResponsiveToolbar(
+                search: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                      labelText: 'Buscar...',
+                      hintText: 'Folio, inventario, área...',
+                      prefixIcon: Icon(Icons.search),
+                      border: const OutlineInputBorder()),
+                ),
+                primaryAction: ElevatedButton.icon(
+                  icon: Icon(Icons.add),
+                  label: Text('Nueva Baja'),
+                  onPressed: _navegarANuevaBaja,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.amber,
+                    foregroundColor: Colors.black,
                   ),
-                  SizedBox(width: 16.w),
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.add),
-                    label: Text('Nueva Baja'),
-                    onPressed: _navegarANuevaBaja,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
-                          vertical: 15.h, horizontal: 20.w),
-                      backgroundColor: Colors.amber,
-                      foregroundColor: Colors.black,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
             Expanded(
@@ -478,33 +468,55 @@ class _PaginaBajasState extends State<PaginaBajas> {
                           ? Center(
                               child: Text(
                                   'No hay bajas que coincidan con la búsqueda.'))
-                          : PlutoGrid(
-                              columns:
-                                  _columns, // Usa las columnas actualizadas
-                              rows: _rows, // Usa las filas actualizadas
-                              onLoaded: (PlutoGridOnLoadedEvent event) {
-                                /* ... sin cambios ... */
-                                _stateManager = event.stateManager;
-                                _stateManager!.setShowColumnFilter(false);
-                              },
-                              onRowDoubleTap:
-                                  (PlutoGridOnRowDoubleTapEvent event) {
-                                /* ... sin cambios ... */
-                                _navegarADetalleBaja(event.row);
-                              },
-                              configuration: PlutoGridConfiguration(
-                                /* ... sin cambios ... */
-                                style: PlutoGridStyleConfig(
-                                  enableGridBorderShadow: true,
-                                  enableRowColorAnimation: true,
-                                  rowHeight: 45.h,
-                                  cellTextStyle: TextStyle(fontSize: 14.sp),
-                                  columnTextStyle: TextStyle(
-                                      fontSize: 15.sp,
-                                      fontWeight: FontWeight.bold),
+                          : context.isMobile
+                              ? ListView.builder(
+                                  itemCount: _filteredBajas.length,
+                                  itemBuilder: (context, index) {
+                                    final baja = _filteredBajas[index];
+                                    return MobileRecordCard(
+                                      title: baja.folioFormateado,
+                                      status: baja.estatus ?? 'Pendiente',
+                                      fields: {
+                                        'Inventario': baja.numeroInventario,
+                                        'Área': baja.areaBaja,
+                                        'Descripción': baja.descripcion,
+                                      },
+                                      onTap: () {
+                                        final row = _rows.firstWhere((row) =>
+                                            row.cells['folio']?.value ==
+                                            baja.folioFormateado);
+                                        _navegarADetalleBaja(row);
+                                      },
+                                    );
+                                  },
+                                )
+                              : PlutoGrid(
+                                  columns:
+                                      _columns, // Usa las columnas actualizadas
+                                  rows: _rows, // Usa las filas actualizadas
+                                  onLoaded: (PlutoGridOnLoadedEvent event) {
+                                    /* ... sin cambios ... */
+                                    _stateManager = event.stateManager;
+                                    _stateManager!.setShowColumnFilter(false);
+                                  },
+                                  onRowDoubleTap:
+                                      (PlutoGridOnRowDoubleTapEvent event) {
+                                    /* ... sin cambios ... */
+                                    _navegarADetalleBaja(event.row);
+                                  },
+                                  configuration: PlutoGridConfiguration(
+                                    /* ... sin cambios ... */
+                                    style: PlutoGridStyleConfig(
+                                      enableGridBorderShadow: true,
+                                      enableRowColorAnimation: true,
+                                      rowHeight: 48,
+                                      cellTextStyle: TextStyle(fontSize: 14),
+                                      columnTextStyle: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
             ),
           ],
         ),

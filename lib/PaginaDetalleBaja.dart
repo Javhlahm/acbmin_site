@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:acbmin_site/ui/responsive.dart';
 
 // Enum y clase Result adaptados para Bajas
 enum DetalleBajaResultAction { updated, deleted, none }
@@ -334,7 +335,7 @@ class _PaginaDetalleBajaState extends State<PaginaDetalleBaja> {
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Text(title,
           style: TextStyle(
-              fontSize: 18.sp,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Colors.black54)),
     );
@@ -413,7 +414,7 @@ class _PaginaDetalleBajaState extends State<PaginaDetalleBaja> {
           style: TextStyle(
               color: Colors.red,
               fontWeight: FontWeight.bold,
-              fontSize: 25.0.dg),
+              fontSize: context.isMobile ? 20 : 25),
         ),
         backgroundColor: Color(0xfff6c500),
         leading: IconButton(
@@ -427,15 +428,15 @@ class _PaginaDetalleBajaState extends State<PaginaDetalleBaja> {
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 10.w),
+            padding: EdgeInsets.all(context.pagePadding),
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 800.w),
+              constraints: const BoxConstraints(maxWidth: 800),
               child: Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15.r)),
                 child: Padding(
-                  padding: EdgeInsets.all(25.w),
+                  padding: EdgeInsets.all(context.isMobile ? 16 : 25),
                   child: Form(
                     key: _formKey,
                     child: Column(
