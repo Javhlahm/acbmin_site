@@ -1,4 +1,5 @@
 import 'package:acbmin_site/entity/Usuario.dart';
+import 'package:acbmin_site/security/app_roles.dart';
 import 'package:acbmin_site/services/usuarios/EditarUsuario.dart';
 import 'package:acbmin_site/services/usuarios/ObtenerUsuarioEmail.dart';
 import 'package:acbmin_site/ui/responsive.dart';
@@ -23,6 +24,7 @@ class _PaginaeditarusuarioState extends State<Paginaeditarusuario> {
   bool tallerAutos = false;
   bool resguardosInternos = false;
   bool bajasBienes = false;
+  bool entregaEquipo = false;
   bool _datosCargados = false;
   bool _guardando = false;
 
@@ -45,20 +47,24 @@ class _PaginaeditarusuarioState extends State<Paginaeditarusuario> {
     nombreController.text = usuario.nombre ?? '';
     correoController.text = usuario.email ?? '';
     final roles = usuario.roles ?? const <String>[];
-    admin = roles.contains('admin');
-    tallerAutos = roles.contains('taller_autos');
-    resguardosInternos = roles.contains('resguardos_internos');
-    bajasBienes = roles.contains('bajas_bienes');
+    // Se traducen los permisos recibidos del backend a los controles del
+    // formulario para conservarlos correctamente durante la edición.
+    admin = roles.contains(AppRoles.admin);
+    tallerAutos = roles.contains(AppRoles.tallerAutos);
+    resguardosInternos = roles.contains(AppRoles.resguardosInternos);
+    bajasBienes = roles.contains(AppRoles.bajasBienes);
+    entregaEquipo = roles.contains(AppRoles.entregaEquipo);
     _datosCargados = true;
   }
 
   Future<void> _actualizar(Usuario usuario) async {
     if (!_formKey.currentState!.validate() || _guardando) return;
     final roles = <String>[
-      if (admin) 'admin',
-      if (tallerAutos) 'taller_autos',
-      if (resguardosInternos) 'resguardos_internos',
-      if (bajasBienes) 'bajas_bienes',
+      if (admin) AppRoles.admin,
+      if (tallerAutos) AppRoles.tallerAutos,
+      if (resguardosInternos) AppRoles.resguardosInternos,
+      if (bajasBienes) AppRoles.bajasBienes,
+      if (entregaEquipo) AppRoles.entregaEquipo,
     ];
     if (roles.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -145,6 +151,8 @@ class _PaginaeditarusuarioState extends State<Paginaeditarusuario> {
                       (value) => setState(() => resguardosInternos = value)),
                   _roleTile('Bajas de bienes', bajasBienes,
                       (value) => setState(() => bajasBienes = value)),
+                  _roleTile('Entrega de Equipo', entregaEquipo,
+                      (value) => setState(() => entregaEquipo = value)),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
                     onPressed: _guardando ? null : () => _actualizar(usuario),

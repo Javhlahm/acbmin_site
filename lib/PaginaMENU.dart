@@ -4,6 +4,8 @@ import 'package:acbmin_site/PaginaResguardos.dart'; // Importar la página de Re
 import 'package:acbmin_site/PaginaBajas.dart'; // Importar la nueva página de Bajas
 import 'package:acbmin_site/PaginaUsuarios.dart';
 import 'package:acbmin_site/entity/UsuarioGlobal.dart';
+import 'package:acbmin_site/features/entregas_equipo/presentation/entrega_equipo_list_page.dart';
+import 'package:acbmin_site/security/app_roles.dart';
 import 'package:acbmin_site/security/auth_service.dart';
 import 'package:acbmin_site/ui/responsive.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +34,7 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
   Color colorCardUsuarios = Colors.amber;
   Color colorCardResguardos = Colors.amber;
   Color colorCardBajas = Colors.amber; // Color para la nueva tarjeta de Bajas
+  Color colorCardEntregaEquipo = Colors.amber;
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +95,7 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
           builder: (context, constraints) {
             final cards = <Widget>[
               // Tarjeta Almacén Taller (si tiene rol)
-              if (usuarioGlobal?.roles?.contains("taller_autos") ?? false)
+              if (usuarioGlobal?.roles?.contains(AppRoles.tallerAutos) ?? false)
                 _buildMenuCard(
                   context: context,
                   icon: Icons.garage,
@@ -111,7 +114,7 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
                 ),
 
               // Tarjeta Resguardos (si tiene rol 'admin', ajustar si es otro rol)
-              if (usuarioGlobal?.roles?.contains("resguardos_internos") ??
+              if (usuarioGlobal?.roles?.contains(AppRoles.resguardosInternos) ??
                   false)
                 _buildMenuCard(
                   context: context,
@@ -130,9 +133,32 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
                       setState(() => colorCardResguardos = Colors.orange),
                 ),
 
+              // La tarjeta no se construye si la sesión no incluye el permiso;
+              // esto también funciona en móvil, sin depender de hover.
+              if (usuarioGlobal?.roles?.contains(AppRoles.entregaEquipo) ??
+                  false)
+                _buildMenuCard(
+                  context: context,
+                  icon: Icons.computer,
+                  title: "Entrega de Equipo",
+                  color: colorCardEntregaEquipo,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const EntregaEquipoListPage(),
+                    ),
+                  ),
+                  onHover: (hovering) => setState(() => colorCardEntregaEquipo =
+                      hovering ? Colors.orange : Colors.amber),
+                  onTapDown: () => setState(() => colorCardEntregaEquipo =
+                      const Color.fromARGB(255, 198, 121, 4)),
+                  onTapUp: () =>
+                      setState(() => colorCardEntregaEquipo = Colors.orange),
+                ),
+
               // *** NUEVA TARJETA PARA BAJAS DE BIENES ***
               // Asumiendo que solo los admins pueden verla
-              if (usuarioGlobal?.roles?.contains("bajas_bienes") ?? false)
+              if (usuarioGlobal?.roles?.contains(AppRoles.bajasBienes) ?? false)
                 _buildMenuCard(
                   context: context,
                   icon: Icons.archive, // Icono sugerido para bajas
@@ -152,7 +178,7 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
               // *** FIN NUEVA TARJETA ***
 
               // Tarjeta Control de Acceso (si tiene rol 'admin')
-              if (usuarioGlobal?.roles?.contains("admin") ?? false)
+              if (usuarioGlobal?.roles?.contains(AppRoles.admin) ?? false)
                 _buildMenuCard(
                   context: context,
                   icon: Icons.supervised_user_circle,

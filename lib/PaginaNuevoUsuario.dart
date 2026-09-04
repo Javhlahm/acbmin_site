@@ -1,4 +1,5 @@
 import 'package:acbmin_site/entity/Usuario.dart';
+import 'package:acbmin_site/security/app_roles.dart';
 import 'package:acbmin_site/services/NuevoUsuario.dart';
 import 'package:acbmin_site/ui/responsive.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ class _PaginanuevousuarioState extends State<Paginanuevousuario> {
   bool tallerAutos = false;
   bool resguardosInternos = false;
   bool bajasBienes = false;
+  bool entregaEquipo = false;
   bool _guardando = false;
 
   @override
@@ -31,11 +33,14 @@ class _PaginanuevousuarioState extends State<Paginanuevousuario> {
 
   Future<void> _guardar() async {
     if (!_formKey.currentState!.validate() || _guardando) return;
+    // Los valores enviados deben coincidir exactamente con los permisos del
+    // backend y con los que consulta el menú principal.
     final roles = <String>[
-      if (admin) 'admin',
-      if (tallerAutos) 'taller_autos',
-      if (resguardosInternos) 'resguardos_internos',
-      if (bajasBienes) 'bajas_bienes',
+      if (admin) AppRoles.admin,
+      if (tallerAutos) AppRoles.tallerAutos,
+      if (resguardosInternos) AppRoles.resguardosInternos,
+      if (bajasBienes) AppRoles.bajasBienes,
+      if (entregaEquipo) AppRoles.entregaEquipo,
     ];
     if (roles.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -115,6 +120,8 @@ class _PaginanuevousuarioState extends State<Paginanuevousuario> {
                   (value) => setState(() => resguardosInternos = value)),
               _roleTile('Bajas de bienes', bajasBienes,
                   (value) => setState(() => bajasBienes = value)),
+              _roleTile('Entrega de Equipo', entregaEquipo,
+                  (value) => setState(() => entregaEquipo = value)),
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: _guardando ? null : _guardar,
