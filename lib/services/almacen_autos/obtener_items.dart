@@ -1,3 +1,4 @@
+import 'package:acbmin_site/config/api_config.dart';
 import 'dart:convert';
 import 'package:acbmin_site/entity/Item.dart';
 import 'package:acbmin_site/security/auth_service.dart';
@@ -12,7 +13,7 @@ Future<List<Item>> obtenerItems() async {
   // var url =
   //    Uri.parse("http://89.117.149.126/acbmin/api/tallerautomotriz/almacen");
   var url =
-      Uri.parse("https://acbmin.lamasoft.org/api/tallerautomotriz/almacen");
+      ApiConfig.endpoint("tallerautomotriz/almacen");
   //var url = Uri.parse("http://localhost:8050/tallerautomotriz/almacen");
   var response = await http.get(url, headers: headers);
 

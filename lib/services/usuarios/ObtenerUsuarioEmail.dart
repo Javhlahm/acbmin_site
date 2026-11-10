@@ -1,3 +1,4 @@
+import 'package:acbmin_site/config/api_config.dart';
 import 'dart:convert';
 
 import 'package:acbmin_site/entity/Usuario.dart';
@@ -12,7 +13,7 @@ Future<Usuario> obtenerUsuarioEmail(String email) async {
   };
   //var url =
   //   Uri.parse("http://89.117.149.126/acbmin/api/users/usuarios/" + email);
-  var url = Uri.parse("https://acbmin.lamasoft.org/api/usuarios/" + email);
+  var url = ApiConfig.endpoint("usuarios/" + email);
   //var url = Uri.parse("http://localhost:8050/usuarios/" + email);
 
   var response = await http.get(url, headers: headers);

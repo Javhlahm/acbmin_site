@@ -1,3 +1,4 @@
+import 'package:acbmin_site/config/api_config.dart';
 import 'package:acbmin_site/security/auth_service.dart';
 import 'package:http/http.dart' as http;
 
@@ -6,7 +7,7 @@ Future<bool> eliminarResguardo(int folio) async {
   final headers = {
     'Authorization': 'Bearer $token', // Solo necesita autorización
   };
-  var url = Uri.parse("https://acbmin.lamasoft.org/api/resguardos/$folio");
+  var url = ApiConfig.endpoint("resguardos/$folio");
   //var url = Uri.parse("http://localhost:8050/api/resguardos/$folio"); // Local
 
   try {

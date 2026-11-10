@@ -4,6 +4,7 @@ import 'package:acbmin_site/PaginaResguardos.dart'; // Importar la página de Re
 import 'package:acbmin_site/PaginaBajas.dart'; // Importar la nueva página de Bajas
 import 'package:acbmin_site/PaginaUsuarios.dart';
 import 'package:acbmin_site/entity/UsuarioGlobal.dart';
+import 'package:acbmin_site/features/almacen_general/presentation/almacen_general_page.dart';
 import 'package:acbmin_site/features/entregas_equipo/presentation/entrega_equipo_list_page.dart';
 import 'package:acbmin_site/security/app_roles.dart';
 import 'package:acbmin_site/security/auth_service.dart';
@@ -35,6 +36,7 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
   Color colorCardResguardos = Colors.amber;
   Color colorCardBajas = Colors.amber; // Color para la nueva tarjeta de Bajas
   Color colorCardEntregaEquipo = Colors.amber;
+  Color colorCardAlmacenGeneral = Colors.amber;
 
   @override
   Widget build(BuildContext context) {
@@ -154,6 +156,28 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
                       const Color.fromARGB(255, 198, 121, 4)),
                   onTapUp: () =>
                       setState(() => colorCardEntregaEquipo = Colors.orange),
+                ),
+
+              // Almacén General: compras por factura, existencias y salidas.
+              if (usuarioGlobal?.roles?.contains(AppRoles.almacenGeneral) ??
+                  false)
+                _buildMenuCard(
+                  context: context,
+                  icon: Icons.warehouse,
+                  title: "Almacén General",
+                  color: colorCardAlmacenGeneral,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AlmacenGeneralPage(),
+                    ),
+                  ),
+                  onHover: (hovering) => setState(() => colorCardAlmacenGeneral =
+                      hovering ? Colors.orange : Colors.amber),
+                  onTapDown: () => setState(() => colorCardAlmacenGeneral =
+                      const Color.fromARGB(255, 198, 121, 4)),
+                  onTapUp: () =>
+                      setState(() => colorCardAlmacenGeneral = Colors.orange),
                 ),
 
               // *** NUEVA TARJETA PARA BAJAS DE BIENES ***

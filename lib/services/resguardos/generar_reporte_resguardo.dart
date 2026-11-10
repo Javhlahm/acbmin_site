@@ -1,3 +1,4 @@
+import 'package:acbmin_site/config/api_config.dart';
 import 'dart:typed_data'; // Para manejar los bytes del PDF
 import 'package:acbmin_site/security/auth_service.dart';
 import 'package:http/http.dart' as http;
@@ -26,7 +27,7 @@ Future<bool> generarYMostrarReporteResguardo(int folio) async {
     'Authorization': 'Bearer $token',
   };
 
-  final url = Uri.parse("https://acbmin.lamasoft.org/api/resguardos/" +
+  final url = ApiConfig.endpoint("resguardos/" +
       folio.toString() +
       "/pdf");
   //final url = Uri.parse("http://localhost:8050/api/resguardos/" +

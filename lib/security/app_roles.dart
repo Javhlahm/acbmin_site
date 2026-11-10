@@ -8,4 +8,5 @@ abstract final class AppRoles {
   static const String resguardosInternos = 'resguardos_internos';
   static const String bajasBienes = 'bajas_bienes';
   static const String entregaEquipo = 'entrega_equipo';
+  static const String almacenGeneral = 'almacen_general';
 }

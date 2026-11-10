@@ -1,3 +1,4 @@
+import 'package:acbmin_site/config/api_config.dart';
 import 'package:acbmin_site/security/auth_service.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert'; // para utf8.decode
@@ -11,7 +12,7 @@ Future<bool> eliminarBaja(int folio) async {
   final headers = {
     'Authorization': 'Bearer $token',
   };
-  var url = Uri.parse("https://acbmin.lamasoft.org/api/bajas/$folio");
+  var url = ApiConfig.endpoint("bajas/$folio");
   // var url = Uri.parse("http://localhost:8050/api/bajas/$folio"); // Local
 
   try {

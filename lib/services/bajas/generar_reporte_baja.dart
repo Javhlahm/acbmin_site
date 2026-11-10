@@ -1,3 +1,4 @@
+import 'package:acbmin_site/config/api_config.dart';
 import 'dart:typed_data';
 import 'package:acbmin_site/security/auth_service.dart';
 import 'package:http/http.dart' as http;
@@ -19,8 +20,7 @@ Future<bool> generarYMostrarReporteBaja(int folio) async {
   }
 
   final headers = {'Authorization': 'Bearer $token'};
-  final url = Uri.parse(
-      "https://acbmin.lamasoft.org/api/bajas/" + folio.toString() + "/pdf");
+  final url = ApiConfig.endpoint("bajas/" + folio.toString() + "/pdf");
   //final url = Uri.parse(
   //  "http://localhost:8050/bajas/" + folio.toString() + "/pdf"); // Local
 

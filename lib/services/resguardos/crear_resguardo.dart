@@ -1,3 +1,4 @@
+import 'package:acbmin_site/config/api_config.dart';
 import 'dart:convert';
 import 'package:acbmin_site/entity/Resguardo.dart';
 import 'package:acbmin_site/security/auth_service.dart';
@@ -9,7 +10,7 @@ Future<Resguardo?> crearResguardo(Resguardo resguardo) async {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer $token',
   };
-  var url = Uri.parse("https://acbmin.lamasoft.org/api/resguardos");
+  var url = ApiConfig.endpoint("resguardos");
   //var url = Uri.parse("http://localhost:8050/api/resguardos"); // Local
 
   // Convertir el objeto Resguardo a JSON

@@ -25,6 +25,7 @@ class _PaginaeditarusuarioState extends State<Paginaeditarusuario> {
   bool resguardosInternos = false;
   bool bajasBienes = false;
   bool entregaEquipo = false;
+  bool almacenGeneral = false;
   bool _datosCargados = false;
   bool _guardando = false;
 
@@ -54,6 +55,7 @@ class _PaginaeditarusuarioState extends State<Paginaeditarusuario> {
     resguardosInternos = roles.contains(AppRoles.resguardosInternos);
     bajasBienes = roles.contains(AppRoles.bajasBienes);
     entregaEquipo = roles.contains(AppRoles.entregaEquipo);
+    almacenGeneral = roles.contains(AppRoles.almacenGeneral);
     _datosCargados = true;
   }
 
@@ -65,6 +67,7 @@ class _PaginaeditarusuarioState extends State<Paginaeditarusuario> {
       if (resguardosInternos) AppRoles.resguardosInternos,
       if (bajasBienes) AppRoles.bajasBienes,
       if (entregaEquipo) AppRoles.entregaEquipo,
+      if (almacenGeneral) AppRoles.almacenGeneral,
     ];
     if (roles.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -153,6 +156,8 @@ class _PaginaeditarusuarioState extends State<Paginaeditarusuario> {
                       (value) => setState(() => bajasBienes = value)),
                   _roleTile('Entrega de Equipo', entregaEquipo,
                       (value) => setState(() => entregaEquipo = value)),
+                  _roleTile('Almacén General', almacenGeneral,
+                      (value) => setState(() => almacenGeneral = value)),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
                     onPressed: _guardando ? null : () => _actualizar(usuario),

@@ -1,3 +1,4 @@
+import 'package:acbmin_site/config/api_config.dart';
 import 'dart:convert';
 import 'package:acbmin_site/entity/Item.dart';
 import 'package:acbmin_site/security/auth_service.dart';
@@ -11,8 +12,7 @@ buscarItem(String serie) async {
   };
   // var url = Uri.parse(
   //  "http://89.117.149.126/acbmin/api/tallerautomotriz/almacen/" + serie);
-  var url = Uri.parse(
-      "https://acbmin.lamasoft.org/api/tallerautomotriz/almacen/" + serie);
+  var url = ApiConfig.endpoint("tallerautomotriz/almacen/" + serie);
 //  var url = Uri.parse("http://localhost:8050/tallerautomotriz/almacen");
   var response = await http.get(url, headers: headers);
 

@@ -21,6 +21,7 @@ class _PaginanuevousuarioState extends State<Paginanuevousuario> {
   bool resguardosInternos = false;
   bool bajasBienes = false;
   bool entregaEquipo = false;
+  bool almacenGeneral = false;
   bool _guardando = false;
 
   @override
@@ -41,6 +42,7 @@ class _PaginanuevousuarioState extends State<Paginanuevousuario> {
       if (resguardosInternos) AppRoles.resguardosInternos,
       if (bajasBienes) AppRoles.bajasBienes,
       if (entregaEquipo) AppRoles.entregaEquipo,
+      if (almacenGeneral) AppRoles.almacenGeneral,
     ];
     if (roles.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -122,6 +124,8 @@ class _PaginanuevousuarioState extends State<Paginanuevousuario> {
                   (value) => setState(() => bajasBienes = value)),
               _roleTile('Entrega de Equipo', entregaEquipo,
                   (value) => setState(() => entregaEquipo = value)),
+              _roleTile('Almacén General', almacenGeneral,
+                  (value) => setState(() => almacenGeneral = value)),
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: _guardando ? null : _guardar,
