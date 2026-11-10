@@ -34,7 +34,8 @@ class _SalidaFormPageState extends State<SalidaFormPage> {
   final List<_Material> _materiales = [];
 
   List<ArticuloDisponible> _disponibles = [];
-  DateTime _fecha = DateTime.now(); // la fecha de hoy por defecto
+  // La salida siempre lleva la fecha de hoy; no se puede cambiar (la API también la pone).
+  final DateTime _fecha = DateTime.now();
   bool _cargando = true;
   String? _error;
   bool _guardando = false;
@@ -87,21 +88,6 @@ class _SalidaFormPageState extends State<SalidaFormPage> {
             : 'No fue posible consultar los artículos disponibles.';
       });
     }
-  }
-
-  Future<void> _elegirFecha() async {
-    final elegida = await showDatePicker(
-      context: context,
-      initialDate: _fecha,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-      helpText: 'Fecha de salida',
-    );
-    if (elegida == null || !mounted) return;
-    setState(() {
-      _fecha = elegida;
-      _fechaController.text = formatoFecha.format(elegida);
-    });
   }
 
   Future<void> _agregarMaterial() async {
@@ -286,12 +272,11 @@ class _SalidaFormPageState extends State<SalidaFormPage> {
             width: ancho,
             child: TextFormField(
               controller: _fechaController,
-              readOnly: true,
-              onTap: _elegirFecha,
+              enabled: false, // solo se muestra, no se puede elegir
               decoration: const InputDecoration(
                 labelText: 'Fecha de salida',
                 prefixIcon: Icon(Icons.calendar_month),
-                helperText: 'El folio es consecutivo dentro del año de la fecha',
+                helperText: 'Se registra con la fecha de hoy',
               ),
             ),
           ),
