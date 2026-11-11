@@ -2,6 +2,7 @@ import 'package:acbmin_site/PaginaInventarioTaller.dart';
 import 'package:acbmin_site/PaginaPrincipal.dart';
 import 'package:acbmin_site/PaginaResguardos.dart'; // Importar la página de Resguardos
 import 'package:acbmin_site/PaginaBajas.dart'; // Importar la nueva página de Bajas
+import 'package:acbmin_site/PaginaHistorialIngresos.dart';
 import 'package:acbmin_site/PaginaMiContrasena.dart';
 import 'package:acbmin_site/PaginaUsuarios.dart';
 import 'package:acbmin_site/entity/UsuarioGlobal.dart';
@@ -9,6 +10,7 @@ import 'package:acbmin_site/features/almacen_general/presentation/almacen_genera
 import 'package:acbmin_site/features/entregas_equipo/presentation/entrega_equipo_list_page.dart';
 import 'package:acbmin_site/security/app_roles.dart';
 import 'package:acbmin_site/security/auth_service.dart';
+import 'package:acbmin_site/services/historial/historial_ingresos.dart';
 import 'package:acbmin_site/ui/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -38,6 +40,7 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
   Color colorCardBajas = Colors.amber; // Color para la nueva tarjeta de Bajas
   Color colorCardEntregaEquipo = Colors.amber;
   Color colorCardAlmacenGeneral = Colors.amber;
+  Color colorCardHistorial = Colors.amber;
 
   bool _tieneRol(String rol) => usuarioGlobal?.roles?.contains(rol) ?? false;
 
@@ -58,6 +61,8 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
         ),
         leading: IconButton(
           onPressed: () async {
+            // Guarda la hora de salida en el historial de ingresos
+            await avisarSalida();
             await authService.deleteToken();
             usuarioGlobal = null;
             Navigator.pushReplacement(
@@ -230,6 +235,26 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
                       const Color.fromARGB(255, 198, 121, 4)),
                   onTapUp: () =>
                       setState(() => colorCardUsuarios = Colors.orange),
+                ),
+
+              // Historial de Ingresos: quién entra y sale (solo admin)
+              if (_tieneRol(AppRoles.admin))
+                _buildMenuCard(
+                  context: context,
+                  icon: Icons.history,
+                  title: "Historial de Ingresos",
+                  color: colorCardHistorial,
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const PaginaHistorialIngresos())),
+                  onHover: (hovering) => setState(() => colorCardHistorial =
+                      hovering ? Colors.orange : Colors.amber),
+                  onTapDown: () => setState(() => colorCardHistorial =
+                      const Color.fromARGB(255, 198, 121, 4)),
+                  onTapUp: () =>
+                      setState(() => colorCardHistorial = Colors.orange),
                 ),
             ];
 
