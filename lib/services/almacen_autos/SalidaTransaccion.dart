@@ -11,7 +11,6 @@ SalidaTransaccion(Transaccion transaccion) async {
     'Authorization': 'Bearer $token', // El backend espera este formato.
   };
   // var url = Uri.parse(
-  //   "http://89.117.149.126/acbmin/api/tallerautomotriz/almacen/transact/salida");
   var url = ApiConfig.endpoint("tallerautomotriz/almacen/transact/salida");
 //  var url = Uri.parse("http://localhost:8050/tallerautomotriz/almacen");
   Map<String, dynamic> transaccionJson = transaccion.toJson();

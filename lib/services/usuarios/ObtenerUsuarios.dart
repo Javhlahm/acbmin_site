@@ -11,7 +11,6 @@ Future<List<Usuario>> obtenerUsuarios() async {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer $token', // El backend espera este formato.
   };
-  // var url = Uri.parse("http://89.117.149.126/acbmin/api/users/usuarios");
   var url = ApiConfig.endpoint("usuarios");
 //  var url = Uri.parse("http://localhost:8050/tallerautomotriz/almacen");
 

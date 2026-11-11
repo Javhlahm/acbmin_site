@@ -1,3 +1,4 @@
+import 'package:acbmin_site/network/api_exception.dart';
 import 'package:acbmin_site/PaginaMENU.dart';
 import 'package:acbmin_site/entity/Usuario.dart';
 import 'package:acbmin_site/entity/UsuarioGlobal.dart';
@@ -208,13 +209,28 @@ void mostrarDialogoIngreso(BuildContext context) {
                 ElevatedButton(
                     onPressed: () async {
                       // 1. Obtenemos el token.
-                      String? token = await Login(
-                          correoController.text, contrasenaController.text);
+                      String? token;
+                      try {
+                        token = await Login(
+                            correoController.text, contrasenaController.text);
+                      } on ApiException catch (error) {
+                        // Demasiados intentos seguidos (429). Se quita el aviso
+                        // anterior para que se vea este de inmediato.
+                        ScaffoldMessenger.of(context)
+                          ..hideCurrentSnackBar()
+                          ..showSnackBar(SnackBar(
+                              content: Text(error.message),
+                              backgroundColor: Colors.red));
+                        return;
+                      }
 
                       // 2. Verificamos si el token es nulo (credenciales incorrectas)
                       if (token == null) {
                         // Usamos el 'context' del build principal para mostrar el SnackBar
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        // (quitando el anterior, para no acumular avisos)
+                        ScaffoldMessenger.of(context)
+                          ..hideCurrentSnackBar()
+                          ..showSnackBar(
                           SnackBar(
                             content: Text('Usuario o contraseña incorrectos.'),
                             backgroundColor: Colors.red,

@@ -2,6 +2,7 @@ import 'package:acbmin_site/entity/Usuario.dart';
 import 'package:acbmin_site/security/app_roles.dart';
 import 'package:acbmin_site/services/usuarios/EditarUsuario.dart';
 import 'package:acbmin_site/services/usuarios/ObtenerUsuarioEmail.dart';
+import 'package:acbmin_site/services/usuarios/mensaje_error.dart';
 import 'package:acbmin_site/ui/responsive.dart';
 import 'package:flutter/material.dart';
 
@@ -21,11 +22,13 @@ class _PaginaeditarusuarioState extends State<Paginaeditarusuario> {
   final contrasenaController = TextEditingController();
   late final Future<Usuario> _usuario;
   bool admin = false;
+  bool jefe = false;
   bool tallerAutos = false;
   bool resguardosInternos = false;
   bool bajasBienes = false;
   bool entregaEquipo = false;
   bool almacenGeneral = false;
+  bool activo = true; // un usuario inactivo no puede iniciar sesión
   bool _datosCargados = false;
   bool _guardando = false;
 
@@ -51,11 +54,13 @@ class _PaginaeditarusuarioState extends State<Paginaeditarusuario> {
     // Se traducen los permisos recibidos del backend a los controles del
     // formulario para conservarlos correctamente durante la edición.
     admin = roles.contains(AppRoles.admin);
+    jefe = roles.contains(AppRoles.jefe);
     tallerAutos = roles.contains(AppRoles.tallerAutos);
     resguardosInternos = roles.contains(AppRoles.resguardosInternos);
     bajasBienes = roles.contains(AppRoles.bajasBienes);
     entregaEquipo = roles.contains(AppRoles.entregaEquipo);
     almacenGeneral = roles.contains(AppRoles.almacenGeneral);
+    activo = (usuario.status ?? 'ACTIVO').trim().toUpperCase() == 'ACTIVO';
     _datosCargados = true;
   }
 
@@ -63,6 +68,7 @@ class _PaginaeditarusuarioState extends State<Paginaeditarusuario> {
     if (!_formKey.currentState!.validate() || _guardando) return;
     final roles = <String>[
       if (admin) AppRoles.admin,
+      if (jefe) AppRoles.jefe,
       if (tallerAutos) AppRoles.tallerAutos,
       if (resguardosInternos) AppRoles.resguardosInternos,
       if (bajasBienes) AppRoles.bajasBienes,
@@ -81,9 +87,16 @@ class _PaginaeditarusuarioState extends State<Paginaeditarusuario> {
       ..email = correoController.text.trim()
       ..contrasena = contrasenaController.text
       ..roles = roles
-      ..status = 'ACTIVO';
-    await EditarUsuario(usuario);
+      ..status = activo ? 'ACTIVO' : 'INACTIVO';
+    final resultado = await EditarUsuario(usuario);
     if (!mounted) return;
+    if (resultado != 'OK') {
+      // No se guardó: se queda en el formulario y explica por qué.
+      setState(() => _guardando = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(resultado.toString()), backgroundColor: Colors.red));
+      return;
+    }
     Navigator.pop(context, true);
   }
 
@@ -142,12 +155,30 @@ class _PaginaeditarusuarioState extends State<Paginaeditarusuario> {
                     controller: contrasenaController,
                     obscureText: true,
                     decoration: const InputDecoration(
-                        labelText: 'Nueva contraseña (opcional)'),
+                        labelText: 'Nueva contraseña (opcional)',
+                        helperText:
+                            'Al menos $largoMinimoContrasena caracteres. Al cambiarla se cierran sus sesiones abiertas.'),
+                    validator: (value) =>
+                        validarContrasena(value, obligatoria: false),
+                  ),
+                  const SizedBox(height: 8),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Usuario activo'),
+                    subtitle: Text(activo
+                        ? 'Puede iniciar sesión'
+                        : 'No puede iniciar sesión y sus sesiones abiertas se cierran'),
+                    value: activo,
+                    onChanged: _guardando
+                        ? null
+                        : (valor) => setState(() => activo = valor),
                   ),
                   const SizedBox(height: 24),
                   Text('Roles', style: Theme.of(context).textTheme.titleMedium),
                   _roleTile('Administrador', admin,
                       (value) => setState(() => admin = value)),
+                  _roleTile('Jefe (todos los módulos y aprueba; sin usuarios)', jefe,
+                      (value) => setState(() => jefe = value)),
                   _roleTile('Taller de autos', tallerAutos,
                       (value) => setState(() => tallerAutos = value)),
                   _roleTile('Resguardos internos', resguardosInternos,

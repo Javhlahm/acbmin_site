@@ -11,7 +11,6 @@ buscarItem(String serie) async {
     'Authorization': 'Bearer $token', // El backend espera este formato.
   };
   // var url = Uri.parse(
-  //  "http://89.117.149.126/acbmin/api/tallerautomotriz/almacen/" + serie);
   var url = ApiConfig.endpoint("tallerautomotriz/almacen/" + serie);
 //  var url = Uri.parse("http://localhost:8050/tallerautomotriz/almacen");
   var response = await http.get(url, headers: headers);

@@ -11,7 +11,6 @@ Future<List<Transaccion>> obtenerTransacciones() async {
     'Authorization': 'Bearer $token', // El backend espera este formato.
   };
   // var url = Uri.parse(
-  //   "http://89.117.149.126/acbmin/api/tallerautomotriz/almacen/transact");
   var url = ApiConfig.endpoint("tallerautomotriz/almacen/transact");
 //  var url = Uri.parse("http://localhost:8050/tallerautomotriz/almacen");
 

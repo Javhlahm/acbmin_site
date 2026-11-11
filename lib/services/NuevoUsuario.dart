@@ -2,6 +2,7 @@ import 'package:acbmin_site/config/api_config.dart';
 import 'dart:convert';
 import 'package:acbmin_site/entity/Usuario.dart';
 import 'package:acbmin_site/security/auth_service.dart';
+import 'package:acbmin_site/services/usuarios/mensaje_error.dart';
 import 'package:http/http.dart' as http;
 
 NuevoUsuario(Usuario usuario) async {
@@ -10,7 +11,6 @@ NuevoUsuario(Usuario usuario) async {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer $token', // El backend espera este formato.
   };
-  // var url = Uri.parse("http://89.117.149.126/acbmin/api/users/usuarios");
   var url = ApiConfig.endpoint("usuarios");
   // var url = Uri.parse(
   // "http://localhost:8050/tallerautomotriz/almacen/transact/entrada");
@@ -23,12 +23,8 @@ NuevoUsuario(Usuario usuario) async {
   );
 
   if (response.statusCode == 200) {
-    //   Map<String, dynamic> jsonData = json.decode(response.body);
-    // List<Map<String, dynamic>> jsonData = json.decode(response.body);
-    //var jsonData = json.decode(response.body);
     return "OK";
-  } else {
-    //throw Exception('Error al obtener productos: ${response.statusCode}');
-    return "ERROR";
   }
+  // Si la API rechaza los datos (contraseña corta, correo repetido...) explica por qué.
+  return mensajeDeErrorUsuario(response, 'crear');
 }

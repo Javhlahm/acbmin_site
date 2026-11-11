@@ -9,4 +9,6 @@ abstract final class AppRoles {
   static const String bajasBienes = 'bajas_bienes';
   static const String entregaEquipo = 'entrega_equipo';
   static const String almacenGeneral = 'almacen_general';
+  // Entra a todos los módulos y aprueba resguardos y bajas, sin administrar usuarios.
+  static const String jefe = 'jefe';
 }

@@ -5,6 +5,7 @@ import 'package:acbmin_site/services/bajas/actualizar_baja.dart';
 import 'package:acbmin_site/services/bajas/eliminar_baja.dart';
 import 'package:acbmin_site/services/bajas/generar_reporte_baja.dart';
 import 'package:flutter/foundation.dart';
+import 'package:acbmin_site/security/app_roles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -28,10 +29,10 @@ class PaginaDetalleBaja extends StatefulWidget {
 }
 
 class _PaginaDetalleBajaState extends State<PaginaDetalleBaja> {
-  // ... (Variables _formKey, _isEditing, _isAdmin, _puedeAccionar, _isSaving sin cambios) ...
+  // ... (Variables _formKey, _isEditing, _puedeAprobar, _puedeAccionar, _isSaving sin cambios) ...
   final _formKey = GlobalKey<FormState>();
   bool _isEditing = false;
-  bool _isAdmin = false;
+  bool _puedeAprobar = false;
   bool _puedeAccionarPorEstatus = true;
   bool _isSaving = false;
 
@@ -56,7 +57,10 @@ class _PaginaDetalleBajaState extends State<PaginaDetalleBaja> {
   void initState() {
     super.initState();
     _bajaActual = widget.bajaInicial.copyWith();
-    _isAdmin = usuarioGlobal?.roles?.contains('admin') ?? false;
+    // Aprueban el jefe y el admin (la API revisa lo mismo).
+    final roles = usuarioGlobal?.roles ?? const <String>[];
+    _puedeAprobar =
+        roles.contains(AppRoles.admin) || roles.contains(AppRoles.jefe);
     _puedeAccionarPorEstatus =
         (_bajaActual.estatus?.toLowerCase() != 'aprobado');
 
@@ -254,7 +258,7 @@ class _PaginaDetalleBajaState extends State<PaginaDetalleBaja> {
   }
 
   void _cambiarEstatus(String nuevoEstatus) async {
-    if (!_isAdmin || _isSaving) return;
+    if (!_puedeAprobar || _isSaving) return;
     if (!mounted) return;
     setState(() {
       _isSaving = true;
@@ -595,7 +599,7 @@ class _PaginaDetalleBajaState extends State<PaginaDetalleBaja> {
 
                         // --- Botones de Admin ---
                         // (Sin cambios, ya manejan _isSaving)
-                        if (_isAdmin && !_isEditing)
+                        if (_puedeAprobar && !_isEditing)
                           Padding(
                             padding: EdgeInsets.only(top: 20.h),
                             child: Row(

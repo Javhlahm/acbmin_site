@@ -27,6 +27,16 @@ class _PaginausuariosState extends State<Paginausuarios> {
   }
   // --- FIN DE CÓDIGO MODIFICADO ---
 
+  /// Abre el formulario de alta o edición y, si se guardó, recarga la lista
+  /// para que se vean los cambios (roles, estatus...).
+  Future<void> _abrir(Widget pagina) async {
+    final guardado = await Navigator.push<bool>(
+        context, MaterialPageRoute(builder: (context) => pagina));
+    if (guardado == true && mounted) {
+      setState(() => listaUsuarios = obtenerUsuarios());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,19 +75,13 @@ class _PaginausuariosState extends State<Paginausuarios> {
                         fontSize: 18),
                   ),
                   onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Paginanuevousuario()));
+                    _abrir(Paginanuevousuario());
                   },
                 )
               : IconButton(
                   tooltip: 'Nuevo usuario',
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Paginanuevousuario()));
+                    _abrir(Paginanuevousuario());
                   },
                   icon: Icon(
                     Icons.add,
@@ -98,12 +102,9 @@ class _PaginausuariosState extends State<Paginausuarios> {
                         UsuarioSeleccionado == null) {
                       return;
                     }
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Paginaeditarusuario(
-                                  usuarioSeleccionado: UsuarioSeleccionado!,
-                                )));
+                    _abrir(Paginaeditarusuario(
+                      usuarioSeleccionado: UsuarioSeleccionado!,
+                    ));
                   },
                 )
               : IconButton(
@@ -113,12 +114,9 @@ class _PaginausuariosState extends State<Paginausuarios> {
                         UsuarioSeleccionado == null) {
                       return;
                     }
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Paginaeditarusuario(
-                                  usuarioSeleccionado: UsuarioSeleccionado!,
-                                )));
+                    _abrir(Paginaeditarusuario(
+                      usuarioSeleccionado: UsuarioSeleccionado!,
+                    ));
                   },
                   icon: Icon(
                     Icons.edit,

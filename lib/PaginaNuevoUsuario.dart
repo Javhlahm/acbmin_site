@@ -1,6 +1,7 @@
 import 'package:acbmin_site/entity/Usuario.dart';
 import 'package:acbmin_site/security/app_roles.dart';
 import 'package:acbmin_site/services/NuevoUsuario.dart';
+import 'package:acbmin_site/services/usuarios/mensaje_error.dart';
 import 'package:acbmin_site/ui/responsive.dart';
 import 'package:flutter/material.dart';
 
@@ -17,6 +18,7 @@ class _PaginanuevousuarioState extends State<Paginanuevousuario> {
   final correoController = TextEditingController();
   final contrasenaController = TextEditingController();
   bool admin = false;
+  bool jefe = false;
   bool tallerAutos = false;
   bool resguardosInternos = false;
   bool bajasBienes = false;
@@ -38,6 +40,7 @@ class _PaginanuevousuarioState extends State<Paginanuevousuario> {
     // backend y con los que consulta el menú principal.
     final roles = <String>[
       if (admin) AppRoles.admin,
+      if (jefe) AppRoles.jefe,
       if (tallerAutos) AppRoles.tallerAutos,
       if (resguardosInternos) AppRoles.resguardosInternos,
       if (bajasBienes) AppRoles.bajasBienes,
@@ -57,8 +60,15 @@ class _PaginanuevousuarioState extends State<Paginanuevousuario> {
       ..contrasena = contrasenaController.text
       ..roles = roles
       ..status = 'ACTIVO';
-    await NuevoUsuario(usuario);
+    final resultado = await NuevoUsuario(usuario);
     if (!mounted) return;
+    if (resultado != 'OK') {
+      // No se guardó: se queda en el formulario y explica por qué.
+      setState(() => _guardando = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(resultado.toString()), backgroundColor: Colors.red));
+      return;
+    }
     Navigator.pop(context, true);
   }
 
@@ -108,14 +118,18 @@ class _PaginanuevousuarioState extends State<Paginanuevousuario> {
               TextFormField(
                 controller: contrasenaController,
                 obscureText: true,
-                decoration: const InputDecoration(labelText: 'Contraseña'),
+                decoration: const InputDecoration(
+                    labelText: 'Contraseña',
+                    helperText: 'Al menos $largoMinimoContrasena caracteres'),
                 validator: (value) =>
-                    (value?.isEmpty ?? true) ? 'Campo requerido' : null,
+                    validarContrasena(value, obligatoria: true),
               ),
               const SizedBox(height: 24),
               Text('Roles', style: Theme.of(context).textTheme.titleMedium),
               _roleTile('Administrador', admin,
                   (value) => setState(() => admin = value)),
+              _roleTile('Jefe (todos los módulos y aprueba; sin usuarios)', jefe,
+                  (value) => setState(() => jefe = value)),
               _roleTile('Taller de autos', tallerAutos,
                   (value) => setState(() => tallerAutos = value)),
               _roleTile('Resguardos internos', resguardosInternos,

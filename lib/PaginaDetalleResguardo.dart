@@ -1,3 +1,4 @@
+import 'package:acbmin_site/security/app_roles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -34,7 +35,7 @@ class PaginaDetalleResguardo extends StatefulWidget {
 class _PaginaDetalleResguardoState extends State<PaginaDetalleResguardo> {
   final _formKey = GlobalKey<FormState>();
   bool _isEditing = false;
-  bool _isAdmin = false;
+  bool _puedeAprobar = false;
   bool _puedeAccionarPorEstatus = true;
   bool _isSaving = false; // Para deshabilitar botones durante operaciones async
 
@@ -61,7 +62,10 @@ class _PaginaDetalleResguardoState extends State<PaginaDetalleResguardo> {
   void initState() {
     super.initState();
     _resguardoActual = widget.resguardoInicial.copyWith();
-    _isAdmin = usuarioGlobal?.roles?.contains('admin') ?? false;
+    // Aprueban el jefe y el admin (la API revisa lo mismo).
+    final roles = usuarioGlobal?.roles ?? const <String>[];
+    _puedeAprobar =
+        roles.contains(AppRoles.admin) || roles.contains(AppRoles.jefe);
     _puedeAccionarPorEstatus =
         (_resguardoActual.estatus?.toLowerCase() != 'aprobado');
 
@@ -271,7 +275,7 @@ class _PaginaDetalleResguardoState extends State<PaginaDetalleResguardo> {
   }
 
   void _cambiarEstatus(String nuevoEstatus) async {
-    if (!_isAdmin || _isSaving) return;
+    if (!_puedeAprobar || _isSaving) return;
     if (!mounted) return;
     setState(() {
       _isSaving = true;
@@ -641,7 +645,7 @@ class _PaginaDetalleResguardoState extends State<PaginaDetalleResguardo> {
                           ),
 
                         // Botones de Admin
-                        if (_isAdmin && !_isEditing)
+                        if (_puedeAprobar && !_isEditing)
                           Padding(
                             padding: EdgeInsets.only(top: 20.h),
                             child: Row(

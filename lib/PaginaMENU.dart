@@ -2,6 +2,7 @@ import 'package:acbmin_site/PaginaInventarioTaller.dart';
 import 'package:acbmin_site/PaginaPrincipal.dart';
 import 'package:acbmin_site/PaginaResguardos.dart'; // Importar la página de Resguardos
 import 'package:acbmin_site/PaginaBajas.dart'; // Importar la nueva página de Bajas
+import 'package:acbmin_site/PaginaMiContrasena.dart';
 import 'package:acbmin_site/PaginaUsuarios.dart';
 import 'package:acbmin_site/entity/UsuarioGlobal.dart';
 import 'package:acbmin_site/features/almacen_general/presentation/almacen_general_page.dart';
@@ -38,6 +39,11 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
   Color colorCardEntregaEquipo = Colors.amber;
   Color colorCardAlmacenGeneral = Colors.amber;
 
+  bool _tieneRol(String rol) => usuarioGlobal?.roles?.contains(rol) ?? false;
+
+  // El jefe entra a todos los módulos; Control de Acceso sigue siendo solo de admin.
+  bool _puedeEntrar(String rol) => _tieneRol(rol) || _tieneRol(AppRoles.jefe);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,6 +69,16 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
           tooltip: 'Cerrar sesión',
         ),
         actions: [
+          // Cualquier usuario puede cambiar su propia contraseña.
+          IconButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const PaginaMiContrasena()),
+            ),
+            icon: const Icon(Icons.lock_reset, size: 28),
+            tooltip: 'Cambiar mi contraseña',
+          ),
           if (usuarioGlobal?.nombre != null && !context.isMobile)
             Center(
               child: Padding(
@@ -97,7 +113,7 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
           builder: (context, constraints) {
             final cards = <Widget>[
               // Tarjeta Almacén Taller (si tiene rol)
-              if (usuarioGlobal?.roles?.contains(AppRoles.tallerAutos) ?? false)
+              if (_puedeEntrar(AppRoles.tallerAutos))
                 _buildMenuCard(
                   context: context,
                   icon: Icons.garage,
@@ -115,9 +131,8 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
                       setState(() => colorCardTaller = Colors.orange),
                 ),
 
-              // Tarjeta Resguardos (si tiene rol 'admin', ajustar si es otro rol)
-              if (usuarioGlobal?.roles?.contains(AppRoles.resguardosInternos) ??
-                  false)
+              // Tarjeta Resguardos
+              if (_puedeEntrar(AppRoles.resguardosInternos))
                 _buildMenuCard(
                   context: context,
                   icon: Icons.assignment, // Icono para resguardos
@@ -137,8 +152,7 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
 
               // La tarjeta no se construye si la sesión no incluye el permiso;
               // esto también funciona en móvil, sin depender de hover.
-              if (usuarioGlobal?.roles?.contains(AppRoles.entregaEquipo) ??
-                  false)
+              if (_puedeEntrar(AppRoles.entregaEquipo))
                 _buildMenuCard(
                   context: context,
                   icon: Icons.computer,
@@ -159,8 +173,7 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
                 ),
 
               // Almacén General: compras por factura, existencias y salidas.
-              if (usuarioGlobal?.roles?.contains(AppRoles.almacenGeneral) ??
-                  false)
+              if (_puedeEntrar(AppRoles.almacenGeneral))
                 _buildMenuCard(
                   context: context,
                   icon: Icons.warehouse,
@@ -180,9 +193,8 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
                       setState(() => colorCardAlmacenGeneral = Colors.orange),
                 ),
 
-              // *** NUEVA TARJETA PARA BAJAS DE BIENES ***
-              // Asumiendo que solo los admins pueden verla
-              if (usuarioGlobal?.roles?.contains(AppRoles.bajasBienes) ?? false)
+              // Tarjeta Bajas de Bienes
+              if (_puedeEntrar(AppRoles.bajasBienes))
                 _buildMenuCard(
                   context: context,
                   icon: Icons.archive, // Icono sugerido para bajas
