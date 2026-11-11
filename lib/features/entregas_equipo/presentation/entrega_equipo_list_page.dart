@@ -211,7 +211,7 @@ class _EntregaEquipoListPageState extends State<EntregaEquipoListPage> {
                 controller: _searchController,
                 decoration: const InputDecoration(
                   labelText: 'Buscar entregas',
-                  hintText: 'Folio, nombre, serie, PESA o descripción',
+                  hintText: 'Folio, nombre, cargo, área, serie, PESA, marca, modelo…',
                   prefixIcon: Icon(Icons.search),
                 ),
               ),

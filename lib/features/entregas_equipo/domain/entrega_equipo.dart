@@ -126,18 +126,22 @@ class EntregaEquipo {
         'equipos': equipos.map((equipo) => equipo.toPayload()).toList(),
       };
 
-  /// Búsqueda local por los campos solicitados en el listado.
+  /// Búsqueda local: folio, receptor, cargo, área y los datos de cada equipo.
   bool matchesSearch(String query) {
     final normalized = query.trim().toLowerCase();
     if (normalized.isEmpty) return true;
 
     return folioFormateado.toLowerCase().contains(normalized) ||
         nombreUsuario.toLowerCase().contains(normalized) ||
+        cargo.toLowerCase().contains(normalized) ||
+        direccionArea.toLowerCase().contains(normalized) ||
         equipos.any(
           (equipo) =>
               equipo.serie.toLowerCase().contains(normalized) ||
               equipo.pesa.toLowerCase().contains(normalized) ||
-              equipo.descripcion.toLowerCase().contains(normalized),
+              equipo.descripcion.toLowerCase().contains(normalized) ||
+              equipo.marca.toLowerCase().contains(normalized) ||
+              equipo.modelo.toLowerCase().contains(normalized),
         );
   }
 }

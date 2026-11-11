@@ -55,6 +55,15 @@ void main() {
       expect(entrega.matchesSearch('portátil'), isTrue);
       expect(entrega.matchesSearch('sin coincidencia'), isFalse);
     });
+
+    test('la búsqueda incluye marca, modelo, cargo y área', () {
+      final entrega = EntregaEquipo.fromJson(_responseJson());
+
+      expect(entrega.matchesSearch('lenovo'), isTrue);
+      expect(entrega.matchesSearch('thinkpad e14'), isTrue);
+      expect(entrega.matchesSearch('jefa de departamento'), isTrue);
+      expect(entrega.matchesSearch('control de bienes'), isTrue);
+    });
   });
 
   group('EntregaEquipoValidator', () {
