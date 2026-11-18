@@ -117,9 +117,57 @@ class _PaginaprincipalEscritorioState extends State<PaginaPrincipalHorizontal> {
                   ),
                 ),
               ),
+              // Marca discreta del desarrollador en la esquina inferior derecha
+              const Positioned(
+                right: 12,
+                bottom: 10,
+                child: _MarcaLamasoft(),
+              ),
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+// Logo pequeño y semitransparente de Lamasoft (solo en la portada)
+class _MarcaLamasoft extends StatelessWidget {
+  const _MarcaLamasoft();
+
+  @override
+  Widget build(BuildContext context) {
+    // Sombra suave para que se lea sobre cualquier parte de la foto
+    const sombra = [Shadow(color: Color(0x8C000000), blurRadius: 2)];
+    return Opacity(
+      opacity: 0.6,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          DecoratedBox(
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [BoxShadow(color: Color(0x59000000), blurRadius: 2)],
+            ),
+            child: Image.asset(
+              'lib/assets/lamasoft_esfera.png',
+              width: 13,
+              height: 13,
+              semanticLabel: 'Lamasoft',
+            ),
+          ),
+          const SizedBox(width: 5),
+          const Text(
+            'Lamasoft',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.3,
+              shadows: sombra,
+            ),
+          ),
+        ],
       ),
     );
   }
