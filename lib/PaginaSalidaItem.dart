@@ -2,7 +2,7 @@ import 'package:acbmin_site/entity/Item.dart';
 import 'package:acbmin_site/entity/Transaccion.dart';
 import 'package:acbmin_site/services/almacen_autos/SalidaTransaccion.dart';
 import 'package:acbmin_site/services/almacen_autos/buscar_item.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:acbmin_site/ui/responsive.dart';

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart'; // Para diseño adaptable
 import 'package:acbmin_site/ui/responsive.dart';
 
@@ -174,23 +174,28 @@ class _PaginaNuevoResguardoState extends State<PaginaNuevoResguardo> {
                       children: [
                         _buildSectionTitle('Tipo de Resguardo'),
                         // Radio buttons para seleccionar el tipo
-                        RadioListTile<String>(
-                          title: const Text('Traspaso de resguardo'),
-                          value: 'Traspaso de resguardo',
+                        // RadioGroup guarda la opción elegida de los dos botones
+                        RadioGroup<String>(
                           groupValue: _tipoResguardoSeleccionado,
-                          onChanged: _isSaving
-                              ? null
-                              : _cambiarTipoResguardo, // Deshabilitar si está guardando
-                          visualDensity: VisualDensity.compact,
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                        RadioListTile<String>(
-                          title: const Text('Nueva adquisición'),
-                          value: 'Nueva adquisición',
-                          groupValue: _tipoResguardoSeleccionado,
-                          onChanged: _isSaving ? null : _cambiarTipoResguardo,
-                          visualDensity: VisualDensity.compact,
-                          contentPadding: EdgeInsets.zero,
+                          onChanged: _cambiarTipoResguardo,
+                          child: Column(
+                            children: [
+                              RadioListTile<String>(
+                                title: const Text('Traspaso de resguardo'),
+                                value: 'Traspaso de resguardo',
+                                enabled: !_isSaving, // Deshabilitar si está guardando
+                                visualDensity: VisualDensity.compact,
+                                contentPadding: EdgeInsets.zero,
+                              ),
+                              RadioListTile<String>(
+                                title: const Text('Nueva adquisición'),
+                                value: 'Nueva adquisición',
+                                enabled: !_isSaving,
+                                visualDensity: VisualDensity.compact,
+                                contentPadding: EdgeInsets.zero,
+                              ),
+                            ],
+                          ),
                         ),
                         Divider(height: 20.h, thickness: 1),
 

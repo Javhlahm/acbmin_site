@@ -3,7 +3,7 @@ import 'package:acbmin_site/security/app_roles.dart';
 import 'package:acbmin_site/services/NuevoUsuario.dart';
 import 'package:acbmin_site/services/usuarios/mensaje_error.dart';
 import 'package:acbmin_site/ui/responsive.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class Paginanuevousuario extends StatefulWidget {
   const Paginanuevousuario({super.key});

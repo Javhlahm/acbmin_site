@@ -1,8 +1,8 @@
 import 'package:acbmin_site/entity/UsuarioGlobal.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart'; // Para listEquals
-import 'package:flutter/material.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:acbmin_site/ui/tabla_datos.dart';
 import 'package:intl/intl.dart';
 import 'package:excel/excel.dart';
 import 'package:acbmin_site/ui/responsive.dart';
@@ -22,7 +22,6 @@ class PaginaResguardos extends StatefulWidget {
 }
 
 class _PaginaResguardosState extends State<PaginaResguardos> {
-  PlutoGridStateManager? _stateManager;
   final TextEditingController _searchController = TextEditingController();
   final String? _nombreUsuarioActual = usuarioGlobal?.nombre;
 
@@ -30,7 +29,7 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
   late Future<List<Resguardo>> _futureResguardos;
   List<Resguardo> _allResguardos = []; // Almacena los datos una vez cargados
   List<Resguardo> _filteredResguardos = [];
-  List<PlutoRow> _rows = [];
+  List<FilaTabla> _rows = [];
   bool _isLoading = true; // Indicador de carga
 
   @override
@@ -55,7 +54,7 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
       _allResguardos = resguardosDesdeApi;
       _filteredResguardos =
           List.from(_allResguardos); // Copia inicial para filtrado
-      _updatePlutoRows(); // Actualiza las filas de la tabla
+      _actualizarFilas(); // Actualiza las filas de la tabla
       setState(() {
         _isLoading = false; // Ocultar indicador de carga
       });
@@ -84,7 +83,6 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
       _applyFilter(); // Asegura que se muestren todos los datos
     }
     // Refresca la tabla visualmente (importante después de cargar nuevos datos)
-    _refreshPlutoGrid();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Tabla actualizada desde el servidor.'),
@@ -110,25 +108,11 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
       if (!mounted) return;
       setState(() {
         _filteredResguardos = tempFiltered;
-        _updatePlutoRows(); // Actualiza las filas con los datos filtrados
+        _actualizarFilas(); // Actualiza las filas con los datos filtrados
       });
-      _refreshPlutoGrid(); // Refresca la tabla visualmente
     }
   }
 
-  // Refresca visualmente el PlutoGrid
-  void _refreshPlutoGrid() {
-    // Usar addPostFrameCallback para asegurar que el build haya terminado
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _stateManager != null) {
-        // Limpiar y añadir filas de nuevo es una forma segura de refrescar
-        _stateManager!.removeAllRows(notify: false); // No notificar aún
-        _stateManager!.appendRows(_rows); // Notifica al final
-        // Alternativamente, si solo cambian datos y no la estructura:
-        // _stateManager.notifyListeners();
-      }
-    });
-  }
 
   // _exportarAExcel usa _filteredResguardos
   void _exportarAExcel() {
@@ -220,114 +204,94 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
   //   return true;
   // } // listEquals ya está en foundation.dart
 
-  // _updatePlutoRows usa _filteredResguardos
-  void _updatePlutoRows() {
+  // _actualizarFilas usa _filteredResguardos
+  void _actualizarFilas() {
     _rows = _filteredResguardos.map((resguardo) {
-      return PlutoRow(
-        cells: {
-          'folio': PlutoCell(value: resguardo.folioFormateado), // Usa el getter
-          'tipo_resguardo': PlutoCell(value: resguardo.tipoResguardo),
-          'numero_inventario': PlutoCell(value: resguardo.numeroInventario),
-          'descripcion': PlutoCell(value: resguardo.descripcion),
-          'area_entrega': PlutoCell(value: resguardo.areaEntrega),
-          'nombre_entrega': PlutoCell(value: resguardo.nombreEntrega),
-          'rfc_entrega': PlutoCell(value: resguardo.rfcEntrega),
-          'area_recibe': PlutoCell(value: resguardo.areaRecibe),
-          'nombre_recibe': PlutoCell(value: resguardo.nombreRecibe),
-          'rfc_recibe': PlutoCell(value: resguardo.rfcRecibe),
-          'observaciones': PlutoCell(value: resguardo.observaciones ?? ''),
-          'capturado_por': PlutoCell(value: resguardo.capturadoPor ?? ''),
-          'fecha_autorizado': PlutoCell(value: resguardo.fechaAutorizado ?? ''),
-          'estatus': PlutoCell(value: resguardo.estatus ?? 'Pendiente'),
-        },
-      );
+      return <String, Object?>{
+          'folio': (resguardo.folioFormateado), // Usa el getter
+          'tipo_resguardo': (resguardo.tipoResguardo),
+          'numero_inventario': (resguardo.numeroInventario),
+          'descripcion': (resguardo.descripcion),
+          'area_entrega': (resguardo.areaEntrega),
+          'nombre_entrega': (resguardo.nombreEntrega),
+          'rfc_entrega': (resguardo.rfcEntrega),
+          'area_recibe': (resguardo.areaRecibe),
+          'nombre_recibe': (resguardo.nombreRecibe),
+          'rfc_recibe': (resguardo.rfcRecibe),
+          'observaciones': (resguardo.observaciones ?? ''),
+          'capturado_por': (resguardo.capturadoPor ?? ''),
+          'fecha_autorizado': (resguardo.fechaAutorizado ?? ''),
+          'estatus': (resguardo.estatus ?? 'Pendiente'),
+        };
     }).toList();
   }
 
   // Definición de columnas (sin cambios respecto a la versión anterior)
-  final List<PlutoColumn> _columns = [
-    PlutoColumn(
-      title: 'Folio',
-      field: 'folio',
-      type: PlutoColumnType.text(),
-      width: 110,
-      readOnly: true,
-      textAlign: PlutoColumnTextAlign.center,
-      frozen: PlutoColumnFrozen.start,
+  final List<ColumnaTabla> _columns = [
+    ColumnaTabla(
+      titulo: 'Folio',
+      campo: 'folio',
+      ancho: 110,
+      alineacion: TextAlign.center,
+      fija: true,
     ),
-    PlutoColumn(
-        title: 'Tipo',
-        field: 'tipo_resguardo',
-        type: PlutoColumnType.text(),
-        readOnly: true),
-    PlutoColumn(
-        title: 'No. Inventario',
-        field: 'numero_inventario',
-        type: PlutoColumnType.text(),
-        readOnly: true),
-    PlutoColumn(
-        title: 'Descripción',
-        field: 'descripcion',
-        type: PlutoColumnType.text(),
-        readOnly: true,
-        width: 350), // Ancho mayor
-    PlutoColumn(
-        title: 'Área Entrega',
-        field: 'area_entrega',
-        type: PlutoColumnType.text(),
-        readOnly: true),
-    PlutoColumn(
-        title: 'Nombre Entrega',
-        field: 'nombre_entrega',
-        type: PlutoColumnType.text(),
-        readOnly: true),
-    PlutoColumn(
-        title: 'RFC Entrega',
-        field: 'rfc_entrega',
-        type: PlutoColumnType.text(),
-        readOnly: true),
-    PlutoColumn(
-        title: 'Área Recibe',
-        field: 'area_recibe',
-        type: PlutoColumnType.text(),
-        readOnly: true),
-    PlutoColumn(
-        title: 'Nombre Recibe',
-        field: 'nombre_recibe',
-        type: PlutoColumnType.text(),
-        readOnly: true),
-    PlutoColumn(
-        title: 'RFC Recibe',
-        field: 'rfc_recibe',
-        type: PlutoColumnType.text(),
-        readOnly: true),
-    PlutoColumn(
-        title: 'Observaciones',
-        field: 'observaciones',
-        type: PlutoColumnType.text(),
-        readOnly: true,
-        width: 350), // Ancho mayor
-    PlutoColumn(
-        title: 'Capturado Por',
-        field: 'capturado_por',
-        type: PlutoColumnType.text(),
-        readOnly: true),
-    PlutoColumn(
-        title: 'Fecha Autorizado',
-        field: 'fecha_autorizado',
-        type: PlutoColumnType.text(),
-        readOnly: true),
-    PlutoColumn(
-      title: 'Estatus',
-      field: 'estatus',
-      type: PlutoColumnType.text(),
-      width: 120,
-      readOnly: true,
-      textAlign: PlutoColumnTextAlign.center,
-      renderer: (rendererContext) {
+    ColumnaTabla(
+        titulo: 'Tipo',
+        campo: 'tipo_resguardo',
+        ),
+    ColumnaTabla(
+        titulo: 'No. Inventario',
+        campo: 'numero_inventario',
+        ),
+    ColumnaTabla(
+        titulo: 'Descripción',
+        campo: 'descripcion',
+        ancho: 350), // Ancho mayor
+    ColumnaTabla(
+        titulo: 'Área Entrega',
+        campo: 'area_entrega',
+        ),
+    ColumnaTabla(
+        titulo: 'Nombre Entrega',
+        campo: 'nombre_entrega',
+        ),
+    ColumnaTabla(
+        titulo: 'RFC Entrega',
+        campo: 'rfc_entrega',
+        ),
+    ColumnaTabla(
+        titulo: 'Área Recibe',
+        campo: 'area_recibe',
+        ),
+    ColumnaTabla(
+        titulo: 'Nombre Recibe',
+        campo: 'nombre_recibe',
+        ),
+    ColumnaTabla(
+        titulo: 'RFC Recibe',
+        campo: 'rfc_recibe',
+        ),
+    ColumnaTabla(
+        titulo: 'Observaciones',
+        campo: 'observaciones',
+        ancho: 350), // Ancho mayor
+    ColumnaTabla(
+        titulo: 'Capturado Por',
+        campo: 'capturado_por',
+        ),
+    ColumnaTabla(
+        titulo: 'Fecha Autorizado',
+        campo: 'fecha_autorizado',
+        ),
+    ColumnaTabla(
+      titulo: 'Estatus',
+      campo: 'estatus',
+      ancho: 120,
+      alineacion: TextAlign.center,
+      celda: (valor, fila) {
         // Renderer para color de fondo según estatus
         Color backgroundColor;
-        final String status = rendererContext.cell.value.toString();
+        final String status = valor.toString();
         switch (status.toLowerCase()) {
           case 'aprobado':
             backgroundColor = Colors.green.shade100;
@@ -392,8 +356,8 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
   }
 
   // _navegarADetalleResguardo llama a _actualizarDatos si hubo cambios (update/delete)
-  void _navegarADetalleResguardo(PlutoRow row) async {
-    final String folioFormateado = row.cells['folio']!.value;
+  void _navegarADetalleResguardo(FilaTabla row) async {
+    final String folioFormateado = row['folio'] as String;
     final int folioOriginal;
     try {
       folioOriginal = int.parse(folioFormateado.split('-')[1]);
@@ -546,40 +510,24 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
                                   },
                                   onTap: () {
                                     final row = _rows.firstWhere((row) =>
-                                        row.cells['folio']?.value ==
+                                        row['folio'] ==
                                         resguardo.folioFormateado);
                                     _navegarADetalleResguardo(row);
                                   },
                                 );
                               },
                             )
-                          : PlutoGrid(
-                              // Muestra la tabla si hay datos
-                              columns: _columns,
-                              rows:
-                                  _rows, // Las filas se actualizan en _updatePlutoRows
-                              onLoaded: (PlutoGridOnLoadedEvent event) {
-                                _stateManager = event.stateManager;
-                                _stateManager!.setShowColumnFilter(false);
-                              },
-                              onRowDoubleTap:
-                                  (PlutoGridOnRowDoubleTapEvent event) {
-                                if (event.row != null) {
-                                  _navegarADetalleResguardo(event
-                                      .row!); // Llama a la versión modificada
-                                }
-                              },
-                              configuration: PlutoGridConfiguration(
-                                style: PlutoGridStyleConfig(
-                                  enableGridBorderShadow: true,
-                                  enableRowColorAnimation: true,
-                                  rowHeight: 48,
-                                  cellTextStyle: TextStyle(fontSize: 14),
-                                  columnTextStyle: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
+                          : TablaDatos(
+                              columnas: _columns,
+                              filas: _rows,
+                              alDobleToque: (fila) => _navegarADetalleResguardo(fila),
+                              altoFila: 48,
+                              estiloCelda: const TextStyle(
+                                  color: Colors.black, fontSize: 14),
+                              estiloEncabezado: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold),
                             ),
             ),
           ],

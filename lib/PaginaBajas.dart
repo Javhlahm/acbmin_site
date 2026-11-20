@@ -5,8 +5,8 @@ import 'package:acbmin_site/PaginaNuevaBaja.dart';
 import 'package:acbmin_site/PaginaDetalleBaja.dart';
 import 'package:acbmin_site/services/bajas/obtener_bajas.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:acbmin_site/ui/tabla_datos.dart';
 import 'package:intl/intl.dart';
 import 'package:excel/excel.dart';
 import 'package:acbmin_site/ui/responsive.dart';
@@ -20,15 +20,14 @@ class PaginaBajas extends StatefulWidget {
 }
 
 class _PaginaBajasState extends State<PaginaBajas> {
-  // ... (Variables _stateManager, _searchController, _nombreUsuarioActual, _futureBajas, listas, _isLoading sin cambios) ...
-  PlutoGridStateManager? _stateManager;
+  // ... (Variables _searchController, _nombreUsuarioActual, _futureBajas, listas, _isLoading sin cambios) ...
   final TextEditingController _searchController = TextEditingController();
   final String? _nombreUsuarioActual = usuarioGlobal?.nombre;
 
   late Future<List<BajaBien>> _futureBajas;
   List<BajaBien> _allBajas = [];
   List<BajaBien> _filteredBajas = [];
-  List<PlutoRow> _rows = [];
+  List<FilaTabla> _rows = [];
   bool _isLoading = true;
 
   @override
@@ -38,7 +37,7 @@ class _PaginaBajasState extends State<PaginaBajas> {
     _searchController.addListener(_applyFilter);
   }
 
-  // ... (_cargarDatosIniciales, _actualizarDatos, _applyFilter, _refreshPlutoGrid sin cambios) ...
+  // ... (_cargarDatosIniciales, _actualizarDatos, _applyFilter sin cambios) ...
   Future<List<BajaBien>> _cargarDatosIniciales() async {
     if (!mounted) return [];
     setState(() {
@@ -49,7 +48,7 @@ class _PaginaBajasState extends State<PaginaBajas> {
       if (!mounted) return bajasDesdeApi;
       _allBajas = bajasDesdeApi;
       _filteredBajas = List.from(_allBajas);
-      _updatePlutoRows();
+      _actualizarFilas();
       setState(() {
         _isLoading = false;
       });
@@ -72,7 +71,6 @@ class _PaginaBajasState extends State<PaginaBajas> {
     if (_searchController.text.isEmpty) {
       _applyFilter();
     }
-    _refreshPlutoGrid();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Tabla de Bajas actualizada desde el servidor.'),
@@ -95,20 +93,11 @@ class _PaginaBajasState extends State<PaginaBajas> {
       if (!mounted) return;
       setState(() {
         _filteredBajas = tempFiltered;
-        _updatePlutoRows();
+        _actualizarFilas();
       });
-      _refreshPlutoGrid();
     }
   }
 
-  void _refreshPlutoGrid() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _stateManager != null) {
-        _stateManager!.removeAllRows(notify: false);
-        _stateManager!.appendRows(_rows);
-      }
-    });
-  }
 
   // Modificar _exportarAExcel para incluir Observaciones
   void _exportarAExcel() {
@@ -177,104 +166,82 @@ class _PaginaBajasState extends State<PaginaBajas> {
     }
   }
 
-  // Modificar _updatePlutoRows para incluir Observaciones
-  void _updatePlutoRows() {
+  // Modificar _actualizarFilas para incluir Observaciones
+  void _actualizarFilas() {
     _rows = _filteredBajas.map((baja) {
-      return PlutoRow(
-        cells: {
-          'folio': PlutoCell(value: baja.folioFormateado),
-          'area_baja': PlutoCell(value: baja.areaBaja),
-          'persona_baja': PlutoCell(value: baja.personaBaja),
-          'rfc_baja': PlutoCell(value: baja.rfcBaja),
-          'numero_inventario': PlutoCell(value: baja.numeroInventario),
-          'descripcion': PlutoCell(value: baja.descripcion),
+      return <String, Object?>{
+          'folio': (baja.folioFormateado),
+          'area_baja': (baja.areaBaja),
+          'persona_baja': (baja.personaBaja),
+          'rfc_baja': (baja.rfcBaja),
+          'numero_inventario': (baja.numeroInventario),
+          'descripcion': (baja.descripcion),
           'fecha_entrega_activos':
-              PlutoCell(value: baja.fechaEntregaActivos?.toString() ?? ''),
-          'capturado_por': PlutoCell(value: baja.capturadoPor ?? ''),
+              (baja.fechaEntregaActivos?.toString() ?? ''),
+          'capturado_por': (baja.capturadoPor ?? ''),
           'fecha_autorizado':
-              PlutoCell(value: baja.fechaAutorizado?.toString() ?? ''),
-          'estatus': PlutoCell(value: baja.estatus ?? 'Pendiente'),
+              (baja.fechaAutorizado?.toString() ?? ''),
+          'estatus': (baja.estatus ?? 'Pendiente'),
           'observaciones':
-              PlutoCell(value: baja.observaciones ?? ''), // <-- Añadido
-        },
-      );
+              (baja.observaciones ?? ''), // <-- Añadido
+        };
     }).toList();
   }
 
   // Modificar _columns para añadir la columna Observaciones
-  final List<PlutoColumn> _columns = [
-    PlutoColumn(
-      title: 'Folio',
-      field: 'folio',
-      type: PlutoColumnType.text(),
-      width: 110,
-      readOnly: true,
-      textAlign: PlutoColumnTextAlign.center,
-      frozen: PlutoColumnFrozen.start,
+  final List<ColumnaTabla> _columns = [
+    ColumnaTabla(
+      titulo: 'Folio',
+      campo: 'folio',
+      ancho: 110,
+      alineacion: TextAlign.center,
+      fija: true,
     ),
-    PlutoColumn(
-        title: 'Área Baja',
-        field: 'area_baja',
-        type: PlutoColumnType.text(),
-        readOnly: true),
-
-    PlutoColumn(
-        title: 'Persona Baja',
-        field: 'persona_baja',
-        type: PlutoColumnType.text(),
-        readOnly: true,
-        width: 250),
-    PlutoColumn(
-        title: 'RFC Baja',
-        field: 'rfc_baja',
-        type: PlutoColumnType.text(),
-        readOnly: true,
-        width: 150),
-    PlutoColumn(
-        title: 'No. Inventario',
-        field: 'numero_inventario',
-        type: PlutoColumnType.text(),
-        readOnly: true,
-        width: 150),
-    PlutoColumn(
-        title: 'Descripción',
-        field: 'descripcion',
-        type: PlutoColumnType.text(),
-        readOnly: true,
-        width: 350),
-    PlutoColumn(
-        title: 'Fecha Entrega Act.',
-        field: 'fecha_entrega_activos',
-        type: PlutoColumnType.text(),
-        readOnly: true,
-        width: 150),
-    PlutoColumn(
-        title: 'Capturado Por',
-        field: 'capturado_por',
-        type: PlutoColumnType.text(),
-        readOnly: true,
-        width: 180),
-    PlutoColumn(
-        title: 'Fecha Autorizado',
-        field: 'fecha_autorizado',
-        type: PlutoColumnType.text(),
-        readOnly: true,
-        width: 180),
-    PlutoColumn(
-        title: 'Observaciones',
-        field: 'observaciones',
-        type: PlutoColumnType.text(),
-        readOnly: true,
-        width: 350 // Ancho similar a descripción
+    ColumnaTabla(
+        titulo: 'Área Baja',
+        campo: 'area_baja',
         ),
-    PlutoColumn(
+
+    ColumnaTabla(
+        titulo: 'Persona Baja',
+        campo: 'persona_baja',
+        ancho: 250),
+    ColumnaTabla(
+        titulo: 'RFC Baja',
+        campo: 'rfc_baja',
+        ancho: 150),
+    ColumnaTabla(
+        titulo: 'No. Inventario',
+        campo: 'numero_inventario',
+        ancho: 150),
+    ColumnaTabla(
+        titulo: 'Descripción',
+        campo: 'descripcion',
+        ancho: 350),
+    ColumnaTabla(
+        titulo: 'Fecha Entrega Act.',
+        campo: 'fecha_entrega_activos',
+        ancho: 150),
+    ColumnaTabla(
+        titulo: 'Capturado Por',
+        campo: 'capturado_por',
+        ancho: 180),
+    ColumnaTabla(
+        titulo: 'Fecha Autorizado',
+        campo: 'fecha_autorizado',
+        ancho: 180),
+    ColumnaTabla(
+        titulo: 'Observaciones',
+        campo: 'observaciones',
+        ancho: 350 // Ancho similar a descripción
+        ),
+    ColumnaTabla(
       // Columna de estatus con renderer (sin cambios)
-      title: 'Estatus', field: 'estatus', type: PlutoColumnType.text(),
-      width: 120, readOnly: true, textAlign: PlutoColumnTextAlign.center,
-      renderer: (rendererContext) {
+      titulo: 'Estatus', campo: 'estatus', ancho: 120, alineacion: TextAlign.center,
+      celda: (valor, fila) {
         /* ... renderer sin cambios ... */
         Color backgroundColor;
-        final String status = rendererContext.cell.value.toString();
+        final String status = valor.toString();
         switch (status.toLowerCase()) {
           case 'aprobado':
             backgroundColor = Colors.green.shade100;
@@ -335,8 +302,8 @@ class _PaginaBajasState extends State<PaginaBajas> {
     }
   }
 
-  void _navegarADetalleBaja(PlutoRow row) async {
-    final String folioFormateado = row.cells['folio']!.value;
+  void _navegarADetalleBaja(FilaTabla row) async {
+    final String folioFormateado = row['folio'] as String;
     final int folioOriginal;
     try {
       folioOriginal = int.parse(folioFormateado.split('-')[1]);
@@ -483,40 +450,25 @@ class _PaginaBajasState extends State<PaginaBajas> {
                                       },
                                       onTap: () {
                                         final row = _rows.firstWhere((row) =>
-                                            row.cells['folio']?.value ==
+                                            row['folio'] ==
                                             baja.folioFormateado);
                                         _navegarADetalleBaja(row);
                                       },
                                     );
                                   },
                                 )
-                              : PlutoGrid(
-                                  columns:
-                                      _columns, // Usa las columnas actualizadas
-                                  rows: _rows, // Usa las filas actualizadas
-                                  onLoaded: (PlutoGridOnLoadedEvent event) {
-                                    /* ... sin cambios ... */
-                                    _stateManager = event.stateManager;
-                                    _stateManager!.setShowColumnFilter(false);
-                                  },
-                                  onRowDoubleTap:
-                                      (PlutoGridOnRowDoubleTapEvent event) {
-                                    /* ... sin cambios ... */
-                                    _navegarADetalleBaja(event.row);
-                                  },
-                                  configuration: PlutoGridConfiguration(
-                                    /* ... sin cambios ... */
-                                    style: PlutoGridStyleConfig(
-                                      enableGridBorderShadow: true,
-                                      enableRowColorAnimation: true,
-                                      rowHeight: 48,
-                                      cellTextStyle: TextStyle(fontSize: 14),
-                                      columnTextStyle: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                ),
+                              : TablaDatos(
+                              columnas: _columns,
+                              filas: _rows,
+                              alDobleToque: (fila) => _navegarADetalleBaja(fila),
+                              altoFila: 48,
+                              estiloCelda: const TextStyle(
+                                  color: Colors.black, fontSize: 14),
+                              estiloEncabezado: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold),
+                            ),
             ),
           ],
         ),

@@ -2,7 +2,7 @@ import 'package:acbmin_site/features/almacen_general/data/almacen_general_servic
 import 'package:acbmin_site/features/almacen_general/domain/almacen_general.dart';
 import 'package:acbmin_site/network/api_exception.dart';
 import 'package:acbmin_site/ui/responsive.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
 /// Formulario para crear o editar una compra del Almacén General.

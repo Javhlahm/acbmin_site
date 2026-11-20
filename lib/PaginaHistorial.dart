@@ -1,9 +1,9 @@
 import 'package:acbmin_site/entity/Transaccion.dart';
 import 'package:acbmin_site/services/almacen_autos/obtener_transacciones.dart';
 import 'package:excel/excel.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:acbmin_site/ui/tabla_datos.dart';
 import 'package:acbmin_site/ui/responsive.dart';
 
 late List<Transaccion> datosExportacion;
@@ -133,124 +133,39 @@ class _PaginahistorialState extends State<Paginahistorial> {
                   return Container(
                     height: MediaQuery.sizeOf(context).height - 64,
                     width: double.infinity,
-                    child: PlutoGrid(
-                        mode: PlutoGridMode.selectWithOneTap,
-                        configuration: PlutoGridConfiguration(
-                          style: PlutoGridStyleConfig(
-                              enableGridBorderShadow: true,
-                              enableRowColorAnimation: true),
-                        ),
-                        columns: [
-                          // PlutoColumn(
-                          //   title: "#",
-                          //   field: "id_trans",
-                          //   type: PlutoColumnType.number(),
-                          //   readOnly: true,
-                          //   enableColumnDrag: false,
-                          // ),
-                          PlutoColumn(
-                            title: "Tipo",
-                            field: "tipo",
-                            type: PlutoColumnType.text(),
-                            readOnly: true,
-                            enableColumnDrag: false,
-                          ),
-                          PlutoColumn(
-                              title: "Vale de Almacén",
-                              field: "vale",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Requerimiento",
-                              field: "requerimiento",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                            title: "Nombre",
-                            field: "nombre",
-                            type: PlutoColumnType.text(),
-                            readOnly: true,
-                            enableColumnDrag: false,
-                          ),
-                          PlutoColumn(
-                              title: "Descripción",
-                              field: "descripcion",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Marca",
-                              field: "marca",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Modelo",
-                              field: "modelo",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Serie",
-                              field: "serie",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Categoria",
-                              field: "categoria",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Cantidad",
-                              field: "cantidad",
-                              type: PlutoColumnType.number(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Vehículo",
-                              field: "modeloAuto",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Placa",
-                              field: "placa",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-
-                          PlutoColumn(
-                              title: "Fecha",
-                              field: "fecha",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
+                    child: TablaDatos(
+                        columnas: [
+                          ColumnaTabla(titulo: "Tipo", campo: "tipo"),
+                          ColumnaTabla(titulo: "Vale de Almacén", campo: "vale"),
+                          ColumnaTabla(titulo: "Requerimiento", campo: "requerimiento"),
+                          ColumnaTabla(titulo: "Nombre", campo: "nombre"),
+                          ColumnaTabla(titulo: "Descripción", campo: "descripcion"),
+                          ColumnaTabla(titulo: "Marca", campo: "marca"),
+                          ColumnaTabla(titulo: "Modelo", campo: "modelo"),
+                          ColumnaTabla(titulo: "Serie", campo: "serie"),
+                          ColumnaTabla(titulo: "Categoria", campo: "categoria"),
+                          ColumnaTabla(titulo: "Cantidad", campo: "cantidad", numerica: true),
+                          ColumnaTabla(titulo: "Vehículo", campo: "modeloAuto"),
+                          ColumnaTabla(titulo: "Placa", campo: "placa"),
+                          ColumnaTabla(titulo: "Fecha", campo: "fecha"),
                         ],
-                        rows: snapshot.data!.map((trans) {
-                          return PlutoRow(
-                            cells: {
-                              "id_trans": PlutoCell(value: trans.idTrans),
-                              "tipo": PlutoCell(value: trans.tipo),
-                              "requerimiento":
-                                  PlutoCell(value: trans.requerimiento),
-                              "vale": PlutoCell(value: trans.valeAlmacen),
-                              "nombre": PlutoCell(value: trans.nombre),
-                              "descripcion":
-                                  PlutoCell(value: trans.descripcion),
-                              "marca": PlutoCell(value: trans.marca),
-                              "modelo": PlutoCell(value: trans.modelo),
-                              "serie": PlutoCell(value: trans.serie),
-                              "categoria": PlutoCell(value: trans.categoria),
-                              "cantidad": PlutoCell(value: trans.cantidad),
-                              "modeloAuto": PlutoCell(value: trans.modeloAuto),
-                              "placa": PlutoCell(value: trans.placa),
-                              "fecha": PlutoCell(value: trans.fecha)
-                            },
-                          );
+                        filas: snapshot.data!.map((trans) {
+                          return <String, Object?>{
+                            "id_trans": trans.idTrans,
+                            "tipo": trans.tipo,
+                            "requerimiento": trans.requerimiento,
+                            "vale": trans.valeAlmacen,
+                            "nombre": trans.nombre,
+                            "descripcion": trans.descripcion,
+                            "marca": trans.marca,
+                            "modelo": trans.modelo,
+                            "serie": trans.serie,
+                            "categoria": trans.categoria,
+                            "cantidad": trans.cantidad,
+                            "modeloAuto": trans.modeloAuto,
+                            "placa": trans.placa,
+                            "fecha": trans.fecha,
+                          };
                         }).toList()),
                   );
                 }

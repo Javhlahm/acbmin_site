@@ -4,9 +4,9 @@ import 'package:acbmin_site/PaginaSalidaItem.dart';
 import 'package:acbmin_site/entity/Item.dart';
 import 'package:acbmin_site/services/almacen_autos/obtener_items.dart';
 import 'package:excel/excel.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:acbmin_site/ui/tabla_datos.dart';
 import 'package:acbmin_site/ui/responsive.dart';
 
 late List<Item> datosExportacion;
@@ -231,116 +231,40 @@ class _PaginState extends State<PaginaInventarioTallerEscritorio> {
                   return Container(
                     height: MediaQuery.sizeOf(context).height - 64,
                     width: double.infinity,
-                    child: PlutoGrid(
-                        mode: PlutoGridMode.selectWithOneTap,
-                        configuration: PlutoGridConfiguration(
-                          style: PlutoGridStyleConfig(
-                              enableGridBorderShadow: true,
-                              enableRowColorAnimation: true),
-                        ),
-                        onSelected: (event) {
-                          serieSeleccionada = event.row!.cells['serie']?.value;
+                    child: TablaDatos(
+                        alSeleccionar: (fila) {
+                          serieSeleccionada = fila['serie'] as String?;
                         },
-                        columns: [
-                          // PlutoColumn(
-                          //   title: "#",
-                          //   field: "id_prod",
-                          //   type: PlutoColumnType.number(),
-                          //   readOnly: true,
-                          //   enableColumnDrag: false,
-                          // ),
-                          PlutoColumn(
-                              title: "Artículo",
-                              field: "nombre",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Categoria",
-                              field: "categoria",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Marca",
-                              field: "marca",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Modelo",
-                              field: "modelo",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Serie",
-                              field: "serie",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Descripcion",
-                              field: "descripcion",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Cantidad",
-                              field: "cantidad",
-                              type: PlutoColumnType.number(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Vehículo",
-                              field: "modeloAuto",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Último Movimiento",
-                              field: "ultMovimiento",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Notas",
-                              field: "notas",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Localidad",
-                              field: "localidad",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
-                          PlutoColumn(
-                              title: "Antiguedad",
-                              field: "aging",
-                              type: PlutoColumnType.text(),
-                              readOnly: true,
-                              enableColumnDrag: false),
+                        columnas: [
+                          ColumnaTabla(titulo: "Artículo", campo: "nombre"),
+                          ColumnaTabla(titulo: "Categoria", campo: "categoria"),
+                          ColumnaTabla(titulo: "Marca", campo: "marca"),
+                          ColumnaTabla(titulo: "Modelo", campo: "modelo"),
+                          ColumnaTabla(titulo: "Serie", campo: "serie"),
+                          ColumnaTabla(titulo: "Descripcion", campo: "descripcion"),
+                          ColumnaTabla(titulo: "Cantidad", campo: "cantidad", numerica: true),
+                          ColumnaTabla(titulo: "Vehículo", campo: "modeloAuto"),
+                          ColumnaTabla(titulo: "Último Movimiento", campo: "ultMovimiento"),
+                          ColumnaTabla(titulo: "Notas", campo: "notas"),
+                          ColumnaTabla(titulo: "Localidad", campo: "localidad"),
+                          ColumnaTabla(titulo: "Antiguedad", campo: "aging"),
                         ],
-                        rows: snapshot.data!.map((item) {
-                          return PlutoRow(
-                            cells: {
-                              "id_prod": PlutoCell(value: item.idProd),
-                              "nombre": PlutoCell(value: item.nombre),
-                              "categoria": PlutoCell(value: item.categoria),
-                              "marca": PlutoCell(value: item.marca),
-                              "modelo": PlutoCell(value: item.modelo),
-                              "serie": PlutoCell(value: item.serie),
-                              "descripcion": PlutoCell(value: item.descripcion),
-                              "cantidad": PlutoCell(value: item.cantidad),
-                              "modeloAuto": PlutoCell(value: item.modeloAuto),
-                              "ultMovimiento":
-                                  PlutoCell(value: item.ultMovimiento),
-                              "notas": PlutoCell(value: item.notas),
-                              "localidad": PlutoCell(value: item.localidad),
-                              "aging": PlutoCell(value: item.aging)
-                            },
-                          );
+                        filas: snapshot.data!.map((item) {
+                          return <String, Object?>{
+                            "id_prod": item.idProd,
+                            "nombre": item.nombre,
+                            "categoria": item.categoria,
+                            "marca": item.marca,
+                            "modelo": item.modelo,
+                            "serie": item.serie,
+                            "descripcion": item.descripcion,
+                            "cantidad": item.cantidad,
+                            "modeloAuto": item.modeloAuto,
+                            "ultMovimiento": item.ultMovimiento,
+                            "notas": item.notas,
+                            "localidad": item.localidad,
+                            "aging": item.aging,
+                          };
                         }).toList()),
                   );
                 }

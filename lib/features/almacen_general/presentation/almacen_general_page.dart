@@ -8,7 +8,7 @@ import 'package:acbmin_site/features/almacen_general/presentation/salida_form_pa
 import 'package:acbmin_site/network/api_exception.dart';
 import 'package:acbmin_site/platform/file_downloader.dart';
 import 'package:acbmin_site/ui/responsive.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Pantalla del Almacén General: una pestaña por año (2024, 2025, 2026 y los
 /// que se vayan agregando). Cada año tiene su vista de compras y de salidas.

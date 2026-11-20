@@ -3,9 +3,9 @@ import 'package:acbmin_site/PaginaNuevoUsuario.dart';
 import 'package:acbmin_site/entity/Usuario.dart';
 import 'package:acbmin_site/entity/UsuarioGlobal.dart';
 import 'package:acbmin_site/services/usuarios/ObtenerUsuarios.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:acbmin_site/ui/tabla_datos.dart';
 import 'package:acbmin_site/ui/responsive.dart';
 
 late List<Usuario> datosExportacion;
@@ -150,66 +150,37 @@ class _PaginausuariosState extends State<Paginausuarios> {
               }
               datosExportacion = snapshot.data!;
               return SizedBox.expand(
-                child: PlutoGrid(
-                    mode: PlutoGridMode.selectWithOneTap,
-                    configuration: PlutoGridConfiguration(
-                      style: PlutoGridStyleConfig(
-                          enableGridBorderShadow: true,
-                          enableRowColorAnimation: true),
-                    ),
-                    onSelected: (event) {
+                child: TablaDatos(
+                    alSeleccionar: (fila) {
                       setState(() {
-                        UsuarioSeleccionado = event.row!.cells['email']?.value;
+                        UsuarioSeleccionado = fila['email'] as String?;
                       });
                     },
-                    columns: [
-                      // PlutoColumn(
-                      //   title: "#",
-                      //   field: "id_prod",
-                      //   type: PlutoColumnType.number(),
-                      //   readOnly: true,
-                      //   enableColumnDrag: false,
-                      // ),
-                      PlutoColumn(
-                          title: "Nombre",
-                          field: "nombre",
-                          type: PlutoColumnType.text(),
-                          readOnly: true,
-                          width: context.isMobile ? 150 : .25.sw,
-                          enableColumnDrag: false),
-
-                      PlutoColumn(
-                          title: "Correo",
-                          field: "email",
-                          type: PlutoColumnType.text(),
-                          readOnly: true,
-                          width: context.isMobile ? 200 : .25.sw,
-                          enableColumnDrag: false),
-
-                      PlutoColumn(
-                          title: "Roles",
-                          field: "roles",
-                          type: PlutoColumnType.text(),
-                          readOnly: true,
-                          width: context.isMobile ? 190 : .25.sw,
-                          enableColumnDrag: false),
-                      PlutoColumn(
-                          title: "Estatus",
-                          field: "status",
-                          type: PlutoColumnType.text(),
-                          readOnly: true,
-                          width: context.isMobile ? 120 : .25.sw,
-                          enableColumnDrag: false),
+                    columnas: [
+                      ColumnaTabla(
+                          titulo: "Nombre",
+                          campo: "nombre",
+                          ancho: context.isMobile ? 150 : .25.sw),
+                      ColumnaTabla(
+                          titulo: "Correo",
+                          campo: "email",
+                          ancho: context.isMobile ? 200 : .25.sw),
+                      ColumnaTabla(
+                          titulo: "Roles",
+                          campo: "roles",
+                          ancho: context.isMobile ? 190 : .25.sw),
+                      ColumnaTabla(
+                          titulo: "Estatus",
+                          campo: "status",
+                          ancho: context.isMobile ? 120 : .25.sw),
                     ],
-                    rows: snapshot.data!.map((usuario) {
-                      return PlutoRow(
-                        cells: {
-                          "nombre": PlutoCell(value: usuario.nombre),
-                          "email": PlutoCell(value: usuario.email),
-                          "roles": PlutoCell(value: usuario.roles),
-                          "status": PlutoCell(value: usuario.status),
-                        },
-                      );
+                    filas: snapshot.data!.map((usuario) {
+                      return <String, Object?>{
+                        "nombre": usuario.nombre,
+                        "email": usuario.email,
+                        "roles": usuario.roles,
+                        "status": usuario.status,
+                      };
                     }).toList()),
               );
             }

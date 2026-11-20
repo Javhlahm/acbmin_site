@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:acbmin_site/features/entregas_equipo/data/entrega_equipo_service.dart';
 import 'package:acbmin_site/features/entregas_equipo/domain/entrega_equipo.dart';
 import 'package:acbmin_site/features/entregas_equipo/presentation/entrega_equipo_list_page.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

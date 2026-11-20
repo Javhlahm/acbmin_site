@@ -6,7 +6,7 @@ import 'package:acbmin_site/features/entregas_equipo/presentation/entrega_equipo
 import 'package:acbmin_site/network/api_exception.dart';
 import 'package:acbmin_site/platform/file_downloader.dart';
 import 'package:acbmin_site/ui/responsive.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:intl/intl.dart';
 
 /// Listado autenticado del módulo Entrega de Equipo.

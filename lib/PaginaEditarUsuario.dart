@@ -4,7 +4,7 @@ import 'package:acbmin_site/services/usuarios/EditarUsuario.dart';
 import 'package:acbmin_site/services/usuarios/ObtenerUsuarioEmail.dart';
 import 'package:acbmin_site/services/usuarios/mensaje_error.dart';
 import 'package:acbmin_site/ui/responsive.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class Paginaeditarusuario extends StatefulWidget {
   const Paginaeditarusuario({super.key, required this.usuarioSeleccionado});

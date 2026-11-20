@@ -2,7 +2,7 @@
 import 'package:acbmin_site/entity/BajaBien.dart';
 import 'package:acbmin_site/entity/UsuarioGlobal.dart';
 import 'package:acbmin_site/services/bajas/crear_baja.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:acbmin_site/ui/responsive.dart';

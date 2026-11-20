@@ -1,5 +1,5 @@
 import 'package:acbmin_site/security/app_roles.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:acbmin_site/ui/responsive.dart';
@@ -464,25 +464,26 @@ class _PaginaDetalleResguardoState extends State<PaginaDetalleResguardo> {
                             opacity: (_isEditing && _puedeAccionarPorEstatus)
                                 ? 1.0
                                 : 0.6,
-                            child: Column(
-                              children: [
-                                RadioListTile<String>(
-                                  title: const Text('Traspaso de resguardo'),
-                                  value: 'Traspaso de resguardo',
-                                  groupValue: _tipoResguardoSeleccionado,
-                                  onChanged: _cambiarTipoResguardo,
-                                  visualDensity: VisualDensity.compact,
-                                  contentPadding: EdgeInsets.zero,
-                                ),
-                                RadioListTile<String>(
-                                  title: const Text('Nueva adquisición'),
-                                  value: 'Nueva adquisición',
-                                  groupValue: _tipoResguardoSeleccionado,
-                                  onChanged: _cambiarTipoResguardo,
-                                  visualDensity: VisualDensity.compact,
-                                  contentPadding: EdgeInsets.zero,
-                                ),
-                              ],
+                            // RadioGroup guarda la opción elegida de los dos botones
+                            child: RadioGroup<String>(
+                              groupValue: _tipoResguardoSeleccionado,
+                              onChanged: _cambiarTipoResguardo,
+                              child: Column(
+                                children: [
+                                  RadioListTile<String>(
+                                    title: const Text('Traspaso de resguardo'),
+                                    value: 'Traspaso de resguardo',
+                                    visualDensity: VisualDensity.compact,
+                                    contentPadding: EdgeInsets.zero,
+                                  ),
+                                  RadioListTile<String>(
+                                    title: const Text('Nueva adquisición'),
+                                    value: 'Nueva adquisición',
+                                    visualDensity: VisualDensity.compact,
+                                    contentPadding: EdgeInsets.zero,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
