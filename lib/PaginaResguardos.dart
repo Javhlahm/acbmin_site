@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart'; // Para listEquals
 import 'package:material_ui/material_ui.dart';
 import 'package:acbmin_site/ui/tabla_datos.dart';
 import 'package:intl/intl.dart';
-import 'package:excel/excel.dart';
+import 'package:excel_community/excel_community.dart';
 import 'package:acbmin_site/ui/responsive.dart';
 
 // Importar la entidad y las páginas relacionadas

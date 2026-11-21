@@ -37,7 +37,9 @@ dependencies:
   two_dimensional_scrollables: ^0.5.6
   http: ^1.2.2
   flutter_screenutil: ^5.9.3
-  excel: ^4.0.6
+  # excel_community: bifurcación mantenida de "excel". La original (4.0.6, sin cambios desde 2024)
+  # usa archive 3, que no funciona compilada a Wasm: las exportaciones a Excel no hacían nada.
+  excel_community: ^2.6.2
   shared_preferences: ^2.5.3
   intl: ^0.20.2
   collection: ^1.19.1

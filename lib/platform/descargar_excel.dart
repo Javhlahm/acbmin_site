@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:excel/excel.dart';
+import 'package:excel_community/excel_community.dart';
 
 import 'file_downloader.dart';
 
