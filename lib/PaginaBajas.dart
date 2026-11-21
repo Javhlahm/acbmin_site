@@ -1,4 +1,5 @@
 // ... (imports) ...
+import 'package:acbmin_site/platform/descargar_excel.dart';
 import 'package:acbmin_site/entity/BajaBien.dart';
 import 'package:acbmin_site/entity/UsuarioGlobal.dart';
 import 'package:acbmin_site/PaginaNuevaBaja.dart';
@@ -145,7 +146,7 @@ class _PaginaBajasState extends State<PaginaBajas> {
 
       final String fileName =
           "Bajas_Bienes_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.xlsx";
-      excel.save(fileName: fileName);
+      descargarExcel(excel, fileName); // excel.save() no descarga en Wasm
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

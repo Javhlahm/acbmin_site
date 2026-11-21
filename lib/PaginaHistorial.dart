@@ -1,3 +1,4 @@
+import 'package:acbmin_site/platform/descargar_excel.dart';
 import 'package:acbmin_site/entity/Transaccion.dart';
 import 'package:acbmin_site/services/almacen_autos/obtener_transacciones.dart';
 import 'package:excel/excel.dart';
@@ -216,5 +217,5 @@ void exportarExcel() {
       TextCellValue(celda.fecha.toString()),
     ]);
   }
-  reporte.save(fileName: "Reporte_almacen_automoviles_Movimientos.xlsx");
+  descargarExcel(reporte, "Reporte_almacen_automoviles_Movimientos.xlsx"); // excel.save() no descarga en Wasm
 }

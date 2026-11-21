@@ -1,14 +1,11 @@
 import 'package:acbmin_site/config/api_config.dart';
+import 'package:acbmin_site/platform/file_downloader.dart';
 import 'dart:typed_data'; // Para manejar los bytes del PDF
 import 'package:acbmin_site/security/auth_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart' show kIsWeb; // Para detectar si es web
 import 'dart:convert'; // Para utf8.decode en el error
 
-// Importa package:web para la lógica web
-import 'package:web/web.dart' as web;
-// Necesitamos js_interop para convertir Uint8List
-import 'dart:js_interop';
 
 // Para no-web (opcional, si implementas la descarga/apertura móvil/desktop)
 // import 'dart:io';
@@ -46,33 +43,8 @@ Future<bool> generarYMostrarReporteResguardo(int folio) async {
       if (kIsWeb) {
         // --- LÓGICA SOLO PARA WEB (usa package:web y js_interop) ---
         try {
-          // 1. Convertir Uint8List a JSTypedArray (que es un BlobPart)
-          final jsBytes = pdfBytes.toJS;
-
-          // 2. Crear un Blob directamente con una lista que contiene el JSTypedArray
-          //    El constructor de Blob acepta JSArray<BlobPart>.
-          //    Creamos un JSArray que contiene nuestro jsBytes.
-          final blobParts = [jsBytes].toJS; // Convierte la lista Dart a JSArray
-          final blob =
-              web.Blob(blobParts, web.BlobPropertyBag(type: 'application/pdf'));
-
-          // 3. Crear una URL para el Blob
-          final url = web.URL.createObjectURL(blob);
-
-          // 4. Crear un elemento 'a' (HTMLAnchorElement)
-          final anchor =
-              web.document.createElement('a') as web.HTMLAnchorElement
-                ..href = url
-                ..style.display = 'none' // Ocultarlo
-                ..download = fileName; // Establecer el nombre de descarga
-
-          // 5. Añadir el ancla al body, simular clic y removerla
-          web.document.body!.appendChild(anchor);
-          anchor.click();
-          web.document.body!.removeChild(anchor);
-
-          // 6. Revocar la URL del objeto para liberar memoria
-          web.URL.revokeObjectURL(url);
+          // Descarga común: funciona igual compilada a JavaScript o a Wasm.
+          await downloadFile(pdfBytes, fileName);
 
           print('Descarga iniciada en web para $fileName usando package:web');
           return true; // Éxito en web

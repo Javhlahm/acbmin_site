@@ -1,3 +1,4 @@
+import 'package:acbmin_site/platform/descargar_excel.dart';
 import 'package:acbmin_site/PaginaHistorial.dart';
 import 'package:acbmin_site/PaginaIngresoItem.dart';
 import 'package:acbmin_site/PaginaSalidaItem.dart';
@@ -329,5 +330,5 @@ void exportarExcel() {
       TextCellValue(celda.notas.toString()),
     ]);
   }
-  reporte.save(fileName: "Reporte_almacen_automoviles.xlsx");
+  descargarExcel(reporte, "Reporte_almacen_automoviles.xlsx"); // excel.save() no descarga en Wasm
 }

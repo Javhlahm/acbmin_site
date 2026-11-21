@@ -34,14 +34,6 @@ class PaginaMenuHorizontal extends StatefulWidget {
 
 class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
   Color colorHoverSalir = Colors.black;
-  Color colorCardTaller = Colors.amber;
-  Color colorCardUsuarios = Colors.amber;
-  Color colorCardResguardos = Colors.amber;
-  Color colorCardBajas = Colors.amber; // Color para la nueva tarjeta de Bajas
-  Color colorCardEntregaEquipo = Colors.amber;
-  Color colorCardAlmacenGeneral = Colors.amber;
-  Color colorCardHistorial = Colors.amber;
-
   bool _tieneRol(String rol) => usuarioGlobal?.roles?.contains(rol) ?? false;
 
   // El jefe entra a todos los módulos; Control de Acceso sigue siendo solo de admin.
@@ -116,146 +108,48 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
         ),
         child: LayoutBuilder(
           builder: (context, constraints) {
+            // Cada tarjeta abre su sección con la página que se le pasa.
             final cards = <Widget>[
-              // Tarjeta Almacén Taller (si tiene rol)
               if (_puedeEntrar(AppRoles.tallerAutos))
-                _buildMenuCard(
-                  context: context,
-                  icon: Icons.garage,
-                  title: "Almacén Taller Vehículos",
-                  color: colorCardTaller,
-                  onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => Paginainventariotaller())),
-                  onHover: (hovering) => setState(() => colorCardTaller =
-                      hovering ? Colors.orange : Colors.amber),
-                  onTapDown: () => setState(() =>
-                      colorCardTaller = const Color.fromARGB(255, 198, 121, 4)),
-                  onTapUp: () =>
-                      setState(() => colorCardTaller = Colors.orange),
-                ),
-
-              // Tarjeta Resguardos
+                _TarjetaMenu(
+                    icon: Icons.garage,
+                    title: "Almacén Taller Vehículos",
+                    pagina: () => Paginainventariotaller()),
               if (_puedeEntrar(AppRoles.resguardosInternos))
-                _buildMenuCard(
-                  context: context,
-                  icon: Icons.assignment, // Icono para resguardos
-                  title: "Resguardos Bienes",
-                  color: colorCardResguardos,
-                  onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => PaginaResguardos())),
-                  onHover: (hovering) => setState(() => colorCardResguardos =
-                      hovering ? Colors.orange : Colors.amber),
-                  onTapDown: () => setState(() => colorCardResguardos =
-                      const Color.fromARGB(255, 198, 121, 4)),
-                  onTapUp: () =>
-                      setState(() => colorCardResguardos = Colors.orange),
-                ),
-
+                _TarjetaMenu(
+                    icon: Icons.assignment,
+                    title: "Resguardos Bienes",
+                    pagina: () => PaginaResguardos()),
               // La tarjeta no se construye si la sesión no incluye el permiso;
               // esto también funciona en móvil, sin depender de hover.
               if (_puedeEntrar(AppRoles.entregaEquipo))
-                _buildMenuCard(
-                  context: context,
-                  icon: Icons.computer,
-                  title: "Entrega de Equipo",
-                  color: colorCardEntregaEquipo,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const EntregaEquipoListPage(),
-                    ),
-                  ),
-                  onHover: (hovering) => setState(() => colorCardEntregaEquipo =
-                      hovering ? Colors.orange : Colors.amber),
-                  onTapDown: () => setState(() => colorCardEntregaEquipo =
-                      const Color.fromARGB(255, 198, 121, 4)),
-                  onTapUp: () =>
-                      setState(() => colorCardEntregaEquipo = Colors.orange),
-                ),
-
+                _TarjetaMenu(
+                    icon: Icons.computer,
+                    title: "Entrega de Equipo",
+                    pagina: () => const EntregaEquipoListPage()),
               // Almacén General: compras por factura, existencias y salidas.
               if (_puedeEntrar(AppRoles.almacenGeneral))
-                _buildMenuCard(
-                  context: context,
-                  icon: Icons.warehouse,
-                  title: "Almacén General",
-                  color: colorCardAlmacenGeneral,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AlmacenGeneralPage(),
-                    ),
-                  ),
-                  onHover: (hovering) => setState(() => colorCardAlmacenGeneral =
-                      hovering ? Colors.orange : Colors.amber),
-                  onTapDown: () => setState(() => colorCardAlmacenGeneral =
-                      const Color.fromARGB(255, 198, 121, 4)),
-                  onTapUp: () =>
-                      setState(() => colorCardAlmacenGeneral = Colors.orange),
-                ),
-
-              // Tarjeta Bajas de Bienes
+                _TarjetaMenu(
+                    icon: Icons.warehouse,
+                    title: "Almacén General",
+                    pagina: () => const AlmacenGeneralPage()),
               if (_puedeEntrar(AppRoles.bajasBienes))
-                _buildMenuCard(
-                  context: context,
-                  icon: Icons.archive, // Icono sugerido para bajas
-                  title: "Bajas de Bienes", // Título del módulo
-                  color: colorCardBajas, // Usa el nuevo color
-                  onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              PaginaBajas())), // Navega a PaginaBajas
-                  onHover: (hovering) => setState(() =>
-                      colorCardBajas = hovering ? Colors.orange : Colors.amber),
-                  onTapDown: () => setState(() =>
-                      colorCardBajas = const Color.fromARGB(255, 198, 121, 4)),
-                  onTapUp: () => setState(() => colorCardBajas = Colors.orange),
-                ),
-              // *** FIN NUEVA TARJETA ***
-
-              // Tarjeta Control de Acceso (si tiene rol 'admin')
-              if (usuarioGlobal?.roles?.contains(AppRoles.admin) ?? false)
-                _buildMenuCard(
-                  context: context,
-                  icon: Icons.supervised_user_circle,
-                  title: "Control de Acceso",
-                  color: colorCardUsuarios,
-                  onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => Paginausuarios())),
-                  onHover: (hovering) => setState(() => colorCardUsuarios =
-                      hovering ? Colors.orange : Colors.amber),
-                  onTapDown: () => setState(() => colorCardUsuarios =
-                      const Color.fromARGB(255, 198, 121, 4)),
-                  onTapUp: () =>
-                      setState(() => colorCardUsuarios = Colors.orange),
-                ),
-
+                _TarjetaMenu(
+                    icon: Icons.archive,
+                    title: "Bajas de Bienes",
+                    pagina: () => PaginaBajas()),
+              // Control de Acceso (solo admin)
+              if (_tieneRol(AppRoles.admin))
+                _TarjetaMenu(
+                    icon: Icons.supervised_user_circle,
+                    title: "Control de Acceso",
+                    pagina: () => Paginausuarios()),
               // Historial de Ingresos: quién entra y sale (solo admin)
               if (_tieneRol(AppRoles.admin))
-                _buildMenuCard(
-                  context: context,
-                  icon: Icons.history,
-                  title: "Historial de Ingresos",
-                  color: colorCardHistorial,
-                  onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              const PaginaHistorialIngresos())),
-                  onHover: (hovering) => setState(() => colorCardHistorial =
-                      hovering ? Colors.orange : Colors.amber),
-                  onTapDown: () => setState(() => colorCardHistorial =
-                      const Color.fromARGB(255, 198, 121, 4)),
-                  onTapUp: () =>
-                      setState(() => colorCardHistorial = Colors.orange),
-                ),
+                _TarjetaMenu(
+                    icon: Icons.history,
+                    title: "Historial de Ingresos",
+                    pagina: () => const PaginaHistorialIngresos()),
             ];
 
             final columns = context.isShort && constraints.maxWidth >= 700
@@ -296,48 +190,83 @@ class _PaginacrudEscritorioState extends State<PaginaMenuHorizontal> {
       ),
     );
   }
+}
 
-  // Widget helper para crear las tarjetas del menú y evitar repetición
-  Widget _buildMenuCard({
-    required BuildContext context,
-    required IconData icon,
-    required String title,
-    required Color color,
-    required VoidCallback onTap,
-    required ValueChanged<bool> onHover,
-    required VoidCallback onTapDown,
-    required VoidCallback onTapUp,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      onHover: onHover,
-      onTapDown: (_) =>
-          onTapDown(), // Usar (_) para ignorar details si no se necesita
-      onTapUp: (_) =>
-          onTapUp(), // Usar (_) para ignorar details si no se necesita
-      child: Card(
-        color: color,
-        elevation: 5,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 14),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: context.isShort ? 54 : 78),
-              const SizedBox(height: 14),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: Colors.black,
-                ),
-              )
-            ],
+/// Tarjeta del menú. Su color depende solo de lo que pasa en este momento:
+/// - café oscuro mientras el dedo o el clic la están presionando,
+/// - naranja mientras el mouse está encima (en celular no hay mouse, así que no aplica),
+/// - amarilla en cualquier otro caso.
+/// Antes cada tarjeta guardaba su color a mano y en celular se quedaba pintada,
+/// porque al tocar nunca llega el aviso de "el mouse salió".
+class _TarjetaMenu extends StatefulWidget {
+  const _TarjetaMenu({required this.icon, required this.title, required this.pagina});
+
+  final IconData icon;
+  final String title;
+  final Widget Function() pagina;
+
+  @override
+  State<_TarjetaMenu> createState() => _TarjetaMenuState();
+}
+
+class _TarjetaMenuState extends State<_TarjetaMenu> {
+  bool _presionada = false;
+  bool _mouseEncima = false;
+
+  Future<void> _abrir() async {
+    await Navigator.push(
+        context, MaterialPageRoute(builder: (context) => widget.pagina()));
+    // Al regresar de la sección, la tarjeta vuelve a su color normal.
+    if (mounted) {
+      setState(() {
+        _presionada = false;
+        _mouseEncima = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _presionada
+        ? const Color.fromARGB(255, 198, 121, 4)
+        : _mouseEncima
+            ? Colors.orange
+            : Colors.amber;
+    return MouseRegion(
+      // Solo el mouse genera estos avisos; un toque en el celular no.
+      onEnter: (_) => setState(() => _mouseEncima = true),
+      onExit: (_) => setState(() => _mouseEncima = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _presionada = true),
+        onTapUp: (_) => setState(() => _presionada = false),
+        // Si el toque se vuelve desplazamiento, también se suelta.
+        onTapCancel: () => setState(() => _presionada = false),
+        onTap: _abrir,
+        child: Card(
+          color: color,
+          elevation: 5,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 14),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(widget.icon, size: context.isShort ? 54 : 78),
+                const SizedBox(height: 14),
+                Text(
+                  widget.title,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Colors.black,
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),

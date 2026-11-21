@@ -1,3 +1,4 @@
+import 'package:acbmin_site/platform/descargar_excel.dart';
 import 'package:acbmin_site/entity/UsuarioGlobal.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart'; // Para listEquals
@@ -172,7 +173,7 @@ class _PaginaResguardosState extends State<PaginaResguardos> {
 
       final String fileName =
           "Resguardos_Internos_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.xlsx";
-      excel.save(fileName: fileName); // Guardar el archivo
+      descargarExcel(excel, fileName); // Guardar el archivo (excel.save() no descarga en Wasm)
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

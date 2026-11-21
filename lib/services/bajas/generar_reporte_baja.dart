@@ -1,10 +1,9 @@
 import 'package:acbmin_site/config/api_config.dart';
+import 'package:acbmin_site/platform/file_downloader.dart';
 import 'dart:typed_data';
 import 'package:acbmin_site/security/auth_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:web/web.dart' as web; // Usar package:web
-import 'dart:js_interop'; // Para extension .toJS
 import 'dart:convert'; // Para utf8.decode en error
 
 // Para no-web (opcional)
@@ -36,20 +35,8 @@ Future<bool> generarYMostrarReporteBaja(int folio) async {
       if (kIsWeb) {
         // --- Lógica Web con package:web ---
         try {
-          final jsBytes = pdfBytes.toJS;
-          final blobParts = [jsBytes].toJS;
-          final blob =
-              web.Blob(blobParts, web.BlobPropertyBag(type: 'application/pdf'));
-          final url = web.URL.createObjectURL(blob);
-          final anchor =
-              web.document.createElement('a') as web.HTMLAnchorElement
-                ..href = url
-                ..style.display = 'none'
-                ..download = fileName;
-          web.document.body!.appendChild(anchor);
-          anchor.click();
-          web.document.body!.removeChild(anchor);
-          web.URL.revokeObjectURL(url);
+          // Descarga común: funciona igual compilada a JavaScript o a Wasm.
+          await downloadFile(pdfBytes, fileName);
           print('Descarga iniciada en web para $fileName');
           return true;
         } catch (e) {
